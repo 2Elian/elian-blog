@@ -1,0 +1,30 @@
+server:
+  port: 8080
+  mode: debug  # debug / release / test
+
+database:
+  host: 127.0.0.1
+  port: 3306
+  username: root
+  password: root
+  dbname: elian_blog
+  charset: utf8mb4
+  max_idle_conns: 10
+  max_open_conns: 100
+
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: ""
+  db: 0
+
+jwt:
+  secret: "elian-blog-jwt-secret-key-change-in-production"
+  expire_hours: 72
+
+log:
+  level: debug  # debug / info / warn / error
+
+upload:
+  path: "./uploads"
+  max_size: 10485760  # 10MB
