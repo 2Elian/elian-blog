@@ -24,6 +24,11 @@ func (d *SiteConfigDao) Upsert(cfg *model.SiteConfig) error {
 	return d.db.Save(cfg).Error
 }
 
+func (d *SiteConfigDao) Set(key, value string) error {
+	cfg := &model.SiteConfig{Key: key, Value: value}
+	return d.db.Save(cfg).Error
+}
+
 func (d *SiteConfigDao) List() ([]model.SiteConfig, error) {
 	var configs []model.SiteConfig
 	err := d.db.Find(&configs).Error
