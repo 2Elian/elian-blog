@@ -7,54 +7,31 @@
 ```
 elian-blog/
 ├── cmd/
-│   └── server/main.go          # Go-Zero 服务入口
-│   └── api/main.go             # (旧版 Gin 入口，保留参考)
-├── configs/config.yaml         # Go-Zero 配置文件
+│   └── server/main.go          # 服务入口
+├── configs/config.yaml         # 配置文件
 ├── internal/
 │   ├── config/                 # 配置结构体
-│   ├── model/                  # 数据模型 (GORM Model)
+│   ├── model/                  # 数据模型 (GORM)
 │   ├── dao/                    # 数据访问层
 │   ├── svc/                    # ServiceContext 依赖注入
 │   ├── handler/                # HTTP 处理器
-│   ├── logic/                  # 业务逻辑层
+│   ├── logic/
 │   │   ├── blog/               # 前台业务逻辑
 │   │   └── admin/              # 后台管理逻辑
-│   ├── types/                  # 请求/响应类型定义
-│   ├── middleware/             # 中间件 (JWT/RBAC/CORS)
+│   ├── types/                  # 请求/响应类型
+│   ├── middleware/             # JWT / RBAC / CORS
 │   ├── routes/                 # 路由注册
-│   └── utils/                  # 工具函数 (JWT/密码加密)
-│   ├── controller/             # (旧版 Gin Controller，保留参考)
-│   ├── service/                # (旧版 Gin Service，保留参考)
-│   └── router/                 # (旧版 Gin Router，保留参考)
+│   └── utils/                  # JWT / 密码加密
 ├── pkg/
-│   ├── config/                 # 配置加载
 │   ├── logger/                 # Zap 日志
-│   └── response/               # 统一响应格式
+│   └── response/               # 旧版响应格式（blog API 用）
 ├── web-blog/                   # 博客前台 (Vue3 + Naive UI)
-│   └── src/
-│       ├── api/                # API 请求封装
-│       ├── components/         # 公共组件
-│       ├── layouts/            # 布局组件
-│       ├── views/              # 页面视图
-│       ├── router/             # 路由配置
-│       ├── stores/             # Pinia 状态管理
-│       └── styles/             # 全局样式
-├── web-admin/                  # 后台管理 (Vue3 + Element Plus)
-│   └── src/
-│       ├── api/                # API 请求封装
-│       ├── layouts/            # 布局组件
-│       ├── views/              # 管理页面
-│       ├── router/             # 路由配置
-│       ├── stores/             # Pinia 状态管理
-│       └── styles/             # 全局样式
-└── web/                        # (旧版前端，保留参考)
+└── web-admin/                  # 后台管理 (Vue3 + Element Plus + ve-admin-element)
 ```
 
 ## 架构说明
 
-### 后端架构 (Go-Zero)
-
-采用 **Go-Zero rest** 框架，Handler-Logic-DAO 分层模式：
+### 后端 (Go-Zero)
 
 ```
 HTTP Request → Router → Middleware → Handler → Logic → DAO → Database
@@ -62,21 +39,19 @@ HTTP Request → Router → Middleware → Handler → Logic → DAO → Databas
 
 | 层级 | 目录 | 职责 |
 |------|------|------|
-| Handler | `internal/handler/` | 解析请求参数，调用 Logic，返回响应 |
-| Logic | `internal/logic/` | 业务逻辑处理，调用 DAO |
-| DAO | `internal/dao/` | 数据库 CRUD 操作 |
-| Model | `internal/model/` | GORM 数据模型定义 |
-| Types | `internal/types/` | 请求/响应结构体定义 |
-| Middleware | `internal/middleware/` | JWT 认证、RBAC 鉴权、CORS |
-| Routes | `internal/routes/` | 路由注册与中间件绑定 |
-| ServiceContext | `internal/svc/` | 依赖注入容器 |
+| Handler | `internal/handler/` | 解析请求，调用 Logic，返回响应 |
+| Logic | `internal/logic/` | 业务逻辑，调用 DAO |
+| DAO | `internal/dao/` | 数据库 CRUD |
+| Model | `internal/model/` | GORM 模型定义 |
+| Types | `internal/types/` | 请求/响应结构体 |
+| Middleware | `internal/middleware/` | JWT 认证、RBAC 鉴权 |
 
-### 前端架构
+### 前端
 
-| 项目 | 目录 | 技术栈 | 说明 |
-|------|------|--------|------|
-| 博客前台 | `web-blog/` | Vue3 + Naive UI + Pinia + TypeScript | 面向访客的博客展示 |
-| 后台管理 | `web-admin/` | Vue3 + Element Plus + Pinia + TypeScript | 面向管理员的内容管理 |
+| 项目 | 目录 | 技术栈 |
+|------|------|--------|
+| 博客前台 | `web-blog/` | Vue3 + Naive UI + Pinia + TypeScript |
+| 后台管理 | `web-admin/` | Vue3 + Element Plus + Pinia + TypeScript (基于 ve-admin-element) |
 
 ---
 
@@ -91,86 +66,72 @@ HTTP Request → Router → Middleware → Handler → Logic → DAO → Databas
 
 ### 1. 准备数据库
 
-创建 MySQL 数据库：
-
 ```sql
 CREATE DATABASE elian_blog CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 ```
 
-项目启动时会通过 GORM `AutoMigrate` 自动创建所有表。
+启动时 GORM `AutoMigrate` 自动建表，`SeedMenus` 自动插入默认菜单。
 
-### 2. 修改配置
+### 2. 配置
 
-编辑 `configs/config.yaml`：
-
-```yaml
-Name: elian-blog-api
-Host: 0.0.0.0
-Port: 8080
-Database:
-  Host: 127.0.0.1
-  Port: 3306
-  Username: root
-  Password: your_password    # 改为你的 MySQL 密码
-  DBName: elian_blog
-Redis:
-  Host: 127.0.0.1
-  Port: 6379
-  Password: ""
-JWT:
-  Secret: "change-this-in-production"  # 生产环境务必修改
-  ExpireHours: 72
-```
+编辑 `configs/config.yaml`，修改数据库密码和 JWT 密钥。
 
 ### 3. 启动后端
 
 ```bash
-cd elian-blog
 go mod tidy
 go run cmd/server/main.go
 ```
 
 后端运行在 `http://localhost:8080`。
 
-### 4. 启动博客前台
-
-```bash
-cd web-blog
-npm install
-npm run dev
-```
-
-前台运行在 `http://localhost:3000`。
-
-### 5. 启动后台管理
-
-```bash
-cd web-admin
-npm install
-npm run dev
-```
-
-后台运行在 `http://localhost:3001` (或其他端口，见控制台输出)。
-
-### 6. 构建前端
+### 4. 启动前端
 
 ```bash
 # 博客前台
-cd web-blog && npm run build
+cd web-blog && pnpm install && pnpm dev    # localhost:3000
 
 # 后台管理
-cd web-admin && npm run build
+cd web-admin && pnpm install && pnpm dev   # localhost:3001
 ```
 
-构建产物在各自项目的 `dist/` 目录。
+### 5. 创建管理员账号
+
+```bash
+go run cmd/test/main.go
+```
+
+默认管理员：`admin / admin123`。
 
 ---
 
-## 后端开发指南
+## API 响应格式
 
-### 统一响应格式
+### Admin API（ve-admin-element 格式）
 
-所有接口返回统一 JSON 结构：
+```json
+{
+  "flag": 0,
+  "code": 200,
+  "data": {},
+  "msg": "success",
+  "trace_id": ""
+}
+```
+
+错误响应：
+
+```json
+{
+  "flag": 0,
+  "code": 401,
+  "data": null,
+  "msg": "未登录",
+  "trace_id": ""
+}
+```
+
+### Blog API（旧格式）
 
 ```json
 {
@@ -178,224 +139,6 @@ cd web-admin && npm run build
   "message": "success",
   "data": {}
 }
-```
-
-分页响应：
-
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": {
-    "list": [],
-    "total": 100,
-    "page": 1,
-    "page_size": 10
-  }
-}
-```
-
-### 路由结构
-
-| 分组 | 前缀 | 中间件 | 说明 |
-|------|------|--------|------|
-| 博客前台 | `/blog-api/v1/` | 无（部分需 JWT） | 面向访客 |
-| 后台管理 | `/admin-api/v1/` | JWT + RBAC | 面向管理员 |
-
-### 如何新增功能模块
-
-以新增"公告（Announcement）"模块为例：
-
-#### 第 1 步：定义 Model
-
-创建 `internal/model/announcement.go`：
-
-```go
-package model
-
-type Announcement struct {
-    Model
-    Title   string `json:"title" gorm:"size:200;not null"`
-    Content string `json:"content" gorm:"type:text;not null"`
-    Status  int    `json:"status" gorm:"default:1;comment:0-隐藏 1-显示"`
-}
-```
-
-在 `internal/model/migrate.go` 的 `AutoMigrate` 中注册：
-
-```go
-db.AutoMigrate(&Announcement{})
-```
-
-#### 第 2 步：编写 DAO
-
-创建 `internal/dao/announcement.go`：
-
-```go
-package dao
-
-type AnnouncementDao struct { db *gorm.DB }
-
-func NewAnnouncementDao(db *gorm.DB) *AnnouncementDao {
-    return &AnnouncementDao{db: db}
-}
-
-func (d *AnnouncementDao) Create(item *model.Announcement) error {
-    return d.db.Create(item).Error
-}
-
-func (d *AnnouncementDao) List() ([]model.Announcement, error) {
-    var items []model.Announcement
-    return items, d.db.Order("created_at DESC").Find(&items).Error
-}
-```
-
-#### 第 3 步：编写 Logic
-
-创建 `internal/logic/blog/announcement_logic.go`：
-
-```go
-package blog
-
-type AnnouncementLogic struct { svc *svc.ServiceContext }
-
-func NewAnnouncementLogic(svc *svc.ServiceContext) *AnnouncementLogic {
-    return &AnnouncementLogic{svc}
-}
-
-func (l *AnnouncementLogic) List() ([]model.Announcement, error) {
-    return l.svc.AnnouncementDao.List()
-}
-```
-
-#### 第 4 步：编写 Handler
-
-创建 `internal/handler/blog_handler.go` 中添加：
-
-```go
-func ListAnnouncements(svc *svc.ServiceContext) http.HandlerFunc {
-    return func(w http.ResponseWriter, r *http.Request) {
-        logic := blog.NewAnnouncementLogic(svc)
-        items, err := logic.List()
-        if err != nil {
-            fail(w, "获取失败")
-            return
-        }
-        ok(w, items)
-    }
-}
-```
-
-#### 第 5 步：注册路由
-
-在 `internal/routes/routes.go` 中添加：
-
-```go
-// 博客路由
-blogRoutes := []rest.Route{
-    // ... 已有路由
-    {Method: http.MethodGet, Path: "/announcements", Handler: handler.ListAnnouncements(svc)},
-}
-server.AddRoutes(blogRoutes, rest.WithPrefix("/blog-api/v1"))
-```
-
-#### 第 6 步：注册依赖注入
-
-在 `internal/svc/service_context.go` 中添加：
-
-```go
-type ServiceContext struct {
-    // ... 已有 DAO
-    AnnouncementDao *dao.AnnouncementDao
-}
-
-func NewServiceContext(c config.Config) *ServiceContext {
-    return &ServiceContext{
-        // ... 已有初始化
-        AnnouncementDao: dao.NewAnnouncementDao(db),
-    }
-}
-```
-
-### 中间件说明
-
-| 中间件 | 文件 | 作用 |
-|--------|------|------|
-| `JWTAuthMiddleware` | `middleware/auth_gozero.go` | JWT Token 解析，写入 Context |
-| `RBACAuthMiddleware` | `middleware/auth_gozero.go` | 角色校验（admin/editor） |
-| `CORSMiddleware` | `middleware/cors_gozero.go` | 跨域处理 |
-
----
-
-## 前端开发指南
-
-### 博客前台 (web-blog)
-
-#### 设计特点
-
-- **Shoka 风格**：温暖的粉橙渐变色系
-- **Hero 区域**：全屏渐变背景 + 打字动画
-- **两栏布局**：主内容区 + 粘性侧边栏
-- **文章卡片**：悬停动画 + 斜切效果
-
-#### 主要页面
-
-| 页面 | 文件 | 路径 |
-|------|------|------|
-| 首页 | `views/Home.vue` | `/` |
-| 博客列表 | `views/Blog.vue` | `/blog` |
-| 文章详情 | `views/Article.vue` | `/article/:id` |
-| 归档 | `views/Archive.vue` | `/archive` |
-| 标签 | `views/Tags.vue` | `/tags` |
-| 友链 | `views/Friends.vue` | `/friends` |
-| 留言 | `views/Messages.vue` | `/messages` |
-| 关于 | `views/About.vue` | `/about` |
-
-#### 如何新增页面
-
-1. 在 `src/views/` 创建 Vue 组件
-2. 在 `src/router/index.ts` 注册路由
-3. 在 `src/components/AppHeader.vue` 添加导航链接（可选）
-
-### 后台管理 (web-admin)
-
-#### 设计特点
-
-- **左侧边栏布局**：可折叠导航菜单
-- **CRUD 模式**：列表 + 搜索 + 新增/编辑弹窗
-- **主题切换**：亮色/暗色模式
-
-#### 主要页面
-
-| 页面 | 文件 | 功能 |
-|------|------|------|
-| Dashboard | `views/Dashboard.vue` | 统计仪表盘 |
-| 文章管理 | `views/article/ArticleList.vue` | 文章 CRUD |
-| 分类管理 | `views/category/CategoryList.vue` | 分类 CRUD |
-| 标签管理 | `views/tag/TagList.vue` | 标签 CRUD |
-| 用户管理 | `views/user/UserList.vue` | 用户管理 |
-| 评论管理 | `views/comment/CommentList.vue` | 评论审核 |
-| 友链管理 | `views/friendlink/FriendLinkList.vue` | 友链 CRUD |
-| 页面管理 | `views/page/PageList.vue` | 自定义页面 |
-| 角色管理 | `views/role/RoleList.vue` | 角色 CRUD |
-| 菜单管理 | `views/menu/MenuList.vue` | 菜单 CRUD |
-| 站点配置 | `views/site/SiteConfig.vue` | 站点设置 |
-
-#### API 请求封装
-
-`src/api/http.ts` 配置了 Axios 拦截器：
-
-- **请求拦截**：自动附带 JWT Token
-- **响应拦截**：统一处理错误提示，401 自动清除登录状态
-
-在 `src/api/index.ts` 中添加新接口：
-
-```ts
-// GET 请求
-export const getXXX = (params?: any) => http.get('/blog-api/v1/xxx', { params })
-
-// POST 请求
-export const createXXX = (data: any) => http.post('/admin-api/v1/xxx', data)
 ```
 
 ---
@@ -417,6 +160,7 @@ export const createXXX = (data: any) => http.post('/admin-api/v1/xxx', data)
 | GET | /messages | 留言列表 | 否 |
 | GET | /pages | 页面列表 | 否 |
 | GET | /site/config | 站点配置 | 否 |
+| GET | /user/info | 用户信息 | JWT |
 | POST | /comments | 发表评论 | JWT |
 | POST | /messages | 发表留言 | JWT |
 
@@ -424,18 +168,55 @@ export const createXXX = (data: any) => http.post('/admin-api/v1/xxx', data)
 
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
-| POST | /login | 管理员登录 | 否 |
-| GET/POST/PUT/DELETE | /articles | 文章 CRUD | JWT+RBAC |
-| GET/POST/PUT/DELETE | /categories | 分类 CRUD | JWT+RBAC |
-| GET/POST/PUT/DELETE | /tags | 标签 CRUD | JWT+RBAC |
-| GET/DELETE | /users | 用户管理 | JWT+RBAC |
-| GET/PUT/DELETE | /comments | 评论管理 | JWT+RBAC |
-| GET/POST/PUT/DELETE | /friend-links | 友链 CRUD | JWT+RBAC |
-| GET/DELETE | /messages | 留言管理 | JWT+RBAC |
-| GET/POST/PUT/DELETE | /pages | 页面 CRUD | JWT+RBAC |
-| GET/PUT | /site/config | 站点配置 | JWT+RBAC |
-| GET/POST/PUT/DELETE | /roles | 角色 CRUD | JWT+RBAC |
-| GET/POST/PUT/DELETE | /menus | 菜单 CRUD | JWT+RBAC |
+| POST | /login | 登录 | 否 |
+| GET | /logout | 登出 | JWT |
+| GET | /user/get_user_info | 用户信息 | JWT |
+| GET | /user/get_user_menus | 用户菜单 | JWT |
+| GET | /user/get_user_roles | 用户角色 | JWT |
+| GET | /user/get_user_apis | 用户权限 | JWT |
+| POST | /article/find_article_list | 文章列表 | JWT |
+| POST | /article/get_article | 文章详情 | JWT |
+| POST | /article/add_article | 新增文章 | JWT |
+| PUT | /article/update_article | 更新文章 | JWT |
+| DELETE | /article/delete_article | 删除文章 | JWT |
+| POST | /category/find_category_list | 分类列表 | JWT |
+| POST | /category/add_category | 新增分类 | JWT |
+| PUT | /category/update_category | 更新分类 | JWT |
+| DELETE | /category/deletes_category | 删除分类 | JWT |
+| POST | /tag/find_tag_list | 标签列表 | JWT |
+| POST | /tag/add_tag | 新增标签 | JWT |
+| PUT | /tag/update_tag | 更新标签 | JWT |
+| DELETE | /tag/deletes_tag | 删除标签 | JWT |
+| POST | /comment/find_comment_back_list | 评论列表 | JWT |
+| PUT | /comment/update_comment_status | 更新评论状态 | JWT |
+| DELETE | /comment/deletes_comment | 删除评论 | JWT |
+| POST | /friend/find_friend_list | 友链列表 | JWT |
+| POST | /friend/add_friend | 新增友链 | JWT |
+| PUT | /friend/update_friend | 更新友链 | JWT |
+| DELETE | /friend/deletes_friend | 删除友链 | JWT |
+| POST | /message/find_message_list | 留言列表 | JWT |
+| PUT | /message/update_message_status | 更新留言状态 | JWT |
+| DELETE | /message/deletes_message | 删除留言 | JWT |
+| POST | /page/find_page_list | 页面列表 | JWT |
+| POST | /page/add_page | 新增页面 | JWT |
+| PUT | /page/update_page | 更新页面 | JWT |
+| DELETE | /page/delete_page | 删除页面 | JWT |
+| POST | /role/find_role_list | 角色列表 | JWT |
+| POST | /role/add_role | 新增角色 | JWT |
+| PUT | /role/update_role | 更新角色 | JWT |
+| DELETE | /role/deletes_role | 删除角色 | JWT |
+| POST | /role/find_role_resources | 角色资源 | JWT |
+| PUT | /role/update_role_menus | 更新角色菜单 | JWT |
+| POST | /menu/find_menu_list | 菜单列表 | JWT |
+| POST | /menu/add_menu | 新增菜单 | JWT |
+| PUT | /menu/update_menu | 更新菜单 | JWT |
+| DELETE | /menu/deletes_menu | 删除菜单 | JWT |
+| POST | /account/find_account_list | 用户列表 | JWT |
+| PUT | /account/update_account_status | 更新用户状态 | JWT |
+| GET | /admin | 首页统计 | JWT |
+| GET | /admin/get_website_config | 网站配置 | JWT |
+| PUT | /admin/update_website_config | 更新配置 | JWT |
+| POST | /upload/upload_file | 文件上传 | JWT |
 
 ---
 
@@ -447,15 +228,15 @@ export const createXXX = (data: any) => http.post('/admin-api/v1/xxx', data)
 | ORM | GORM |
 | 数据库 | MySQL |
 | 缓存 | Redis |
-| 认证 | JWT |
+| 认证 | JWT (golang-jwt/jwt/v5) |
 | 日志 | Zap |
 | 博客前端 | Vue3 + Naive UI + Pinia + TypeScript + Vite |
-| 管理后台 | Vue3 + Element Plus + Pinia + TypeScript + Vite |
+| 管理后台 | Vue3 + Element Plus + UnoCSS + Pinia + TypeScript + Vite |
 
 ---
 
 ## 参考项目
 
-- [ve-blog-golang](https://github.com/ve-weiyi/ve-blog-golang) — Go-Zero 微服务架构参考
-- [ve-blog-naive](https://github.com/ve-weiyi/ve-blog-naive) — Naive UI 前端设计参考
-- [ve-admin-element](https://github.com/ve-weiyi/ve-admin-element) — Element Plus 后台设计参考
+- [ve-admin-element](https://github.com/ve-weiyi/ve-admin-element) — 后台管理前端基础框架
+- [ve-blog-golang](https://github.com/ve-weiyi/ve-blog-golang) — Go-Zero 后端架构参考
+- [ve-blog-naive](https://github.com/ve-weiyi/ve-blog-naive) — 博客前台设计参考

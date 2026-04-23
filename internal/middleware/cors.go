@@ -36,19 +36,19 @@ func Logger() gin.HandlerFunc {
 
 		gin.DefaultWriter.Write([]byte(
 			"[" + start.Format("2006-01-02 15:04:05") + "] " +
-			method + " " + path + " " +
-			"status=" + intToStr(status) + " " +
-			"latency=" + latency.String() + "\n",
+				method + " " + path + " " +
+				"status=" + intToStr(status) + " " +
+				"latency=" + latency.String() + "\n",
 		))
 	}
 }
 
 func intToStr(i int) string {
 	if i >= 100 {
-		return string([]byte{byte(i/100+'0'), byte(i%100/10+'0'), byte(i%10+'0')})
+		return string([]byte{byte(i/100 + '0'), byte(i%100/10 + '0'), byte(i%10 + '0')})
 	}
 	if i >= 10 {
-		return string([]byte{byte(i/10+'0'), byte(i%10+'0')})
+		return string([]byte{byte(i/10 + '0'), byte(i%10 + '0')})
 	}
-	return string([]byte{byte(i+'0')})
+	return string([]byte{byte(i + '0')})
 }

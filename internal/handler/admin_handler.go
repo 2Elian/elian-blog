@@ -620,3 +620,16 @@ func AdminDeleteMenuHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		ok(w, nil)
 	}
 }
+
+// --- 仪表盘 ---
+
+func AdminDashboardStatsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		data, err := admin.NewDashboardLogic(svcCtx).GetStats(r.Context())
+		if err != nil {
+			fail(w, 500, "获取统计数据失败")
+			return
+		}
+		ok(w, data)
+	}
+}

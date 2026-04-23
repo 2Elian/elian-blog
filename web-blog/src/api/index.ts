@@ -4,8 +4,14 @@ import http from './http'
 export const login = (data: { username: string; password: string }) =>
   http.post('/login', data)
 
-export const register = (data: { username: string; password: string; email: string }) =>
-  http.post('/register', data)
+export const register = (data: {
+  username: string
+  password: string
+  email: string
+  avatar?: string
+  intro?: string
+  website?: string
+}) => http.post('/register', data)
 
 // User
 export const getUserInfo = () => http.get('/user/info')

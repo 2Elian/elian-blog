@@ -91,7 +91,7 @@ function formatDate(date: string) {
   box-shadow: var(--shadow-sm);
 
   &:hover {
-    transform: translateY(-6px);
+    transform: translateY(-4px);
     box-shadow: var(--shadow-lg);
 
     .cover-overlay {
@@ -108,7 +108,7 @@ function formatDate(date: string) {
   position: relative;
   height: 180px;
   overflow: hidden;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
 
   img {
     width: 100%;
@@ -123,10 +123,10 @@ function formatDate(date: string) {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent-gradient);
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
     font-size: 48px;
     font-weight: 700;
-    color: white;
+    color: rgba(255, 255, 255, 0.8);
   }
 
   .cover-overlay {
@@ -145,7 +145,7 @@ function formatDate(date: string) {
 
   span {
     background: rgba(255, 255, 255, 0.9);
-    color: var(--primary-color);
+    color: #1a1a1a;
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 12px;
@@ -158,7 +158,7 @@ function formatDate(date: string) {
 }
 
 .card-title {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 10px;
@@ -188,8 +188,8 @@ function formatDate(date: string) {
   margin-bottom: 14px;
 
   .tag-item {
-    background: rgba(233, 84, 107, 0.08);
-    color: var(--primary-color);
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-secondary);
     font-size: 12px;
   }
 }

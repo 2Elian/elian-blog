@@ -152,6 +152,11 @@ onMounted(() => {
   animation: fadeInUp 0.5s ease;
   max-width: 800px;
   margin: 0 auto;
+  padding: 0 32px;
+
+  @media (max-width: 640px) {
+    padding: 0 20px;
+  }
 }
 
 .page-header {
@@ -203,7 +208,7 @@ onMounted(() => {
   }
 
   &:hover {
-    background: rgba(233, 84, 107, 0.02);
+    background: rgba(0, 0, 0, 0.02);
   }
 }
 

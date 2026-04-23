@@ -1,6 +1,6 @@
 Name: elian-blog-api
 Host: 0.0.0.0
-Port: 1011
+Port: 8080
 Mode: dev
 
 Database:
@@ -23,7 +23,7 @@ JWT:
   Secret: "elian-blog-jwt-secret-key-change-in-production"
   ExpireHours: 72
 
-Log:
+AppLog:
   Level: debug
 
 Upload:

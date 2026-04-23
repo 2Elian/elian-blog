@@ -1,23 +1,50 @@
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import ElementPlus from 'element-plus'
-import * as ElementPlusIconsVue from '@element-plus/icons-vue'
-import 'element-plus/dist/index.css'
-import zhCn from 'element-plus/es/locale/lang/zh-cn'
+/**
+ * 应用启动入口
+ *
+ * @description
+ * Vue3 应用初始化，包括样式、插件、配置的加载
+ */
 
-import App from './App.vue'
-import router from './router'
-import './styles/index.scss'
+import { createApp } from "vue";
+import App from "./App.vue";
 
-const app = createApp(App)
+// ===== 样式导入 =====
+import "element-plus/theme-chalk/dark/css-vars.css";
+import "@/styles/index.scss";
+import "@/styles/table.scss";
+import "uno.css";
+import "animate.css";
 
-// 注册所有 Element Plus 图标
-for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
-  app.component(key, component)
-}
+// ===== 核心配置 =====
+import { setupDirective } from "@/directives";
+import { setupRouter } from "@/router";
+import { setupStore } from "@/store";
 
-app.use(createPinia())
-app.use(router)
-app.use(ElementPlus, { locale: zhCn })
+// ===== 全局组件 =====
+import * as ElementPlusIcons from "@element-plus/icons-vue";
 
-app.mount('#app')
+// ===== 第三方插件 =====
+import { InstallCodeMirror } from "codemirror-editor-vue3";
+
+// ===== 路由守卫 =====
+import { setupPermissionGuard } from "@/permission";
+
+// 创建 Vue 应用实例
+const app = createApp(App);
+
+// 1️⃣ 核心配置
+setupDirective(app);
+setupRouter(app);
+setupStore(app);
+
+// 2️⃣ 全局组件（Element Plus 图标）
+Object.entries(ElementPlusIcons).forEach(([name, comp]) => app.component(name, comp));
+
+// 3️⃣ 第三方插件
+app.use(InstallCodeMirror);
+
+// 4️⃣ 路由守卫
+setupPermissionGuard();
+
+// 6️⃣ 挂载应用
+app.mount("#app");

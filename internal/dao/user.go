@@ -49,3 +49,8 @@ func (d *UserDao) List(page, pageSize int) ([]model.User, int64, error) {
 func (d *UserDao) UpdateLoginTime(id uint) error {
 	return d.db.Model(&model.User{}).Where("id = ?", id).Update("last_login", gorm.Expr("NOW()")).Error
 }
+
+// AssignRole 给用户分配角色
+func (d *UserDao) AssignRole(userID uint, roleID uint) error {
+	return d.db.Exec("INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)", userID, roleID).Error
+}

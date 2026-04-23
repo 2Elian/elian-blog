@@ -27,3 +27,11 @@ type Body struct {
 	Message string      `json:"message"`
 	Data    interface{} `json:"data,omitempty"`
 }
+
+// DashboardStats 仪表盘统计
+type DashboardStats struct {
+	ArticleCount int `json:"article_count"`
+	UserCount    int `json:"user_count"`
+	CommentCount int `json:"comment_count"`
+	ViewCount    int `json:"view_count"`
+}

@@ -1,3 +1,25 @@
 /dev/
 .idea
 .claude
+
+# Binaries
+*.exe
+server
+
+# Dependencies
+node_modules/
+.vite/
+
+# Build output
+dist/
+
+# Environment
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Upload directory
+uploads/

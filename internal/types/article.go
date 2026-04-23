@@ -3,29 +3,29 @@ package types
 // --- 文章 ---
 
 type ArticleHome struct {
-	ID          uint     `json:"id"`
-	Title       string   `json:"title"`
-	Summary     string   `json:"summary"`
-	Content     string   `json:"content"`
-	Cover       string   `json:"cover"`
-	CategoryID  uint     `json:"category_id"`
-	CategoryName string  `json:"category_name"`
-	AuthorID    uint     `json:"author_id"`
-	Status      int      `json:"status"`
-	IsTop       int      `json:"is_top"`
-	IsOriginal  int      `json:"is_original"`
-	Type        int      `json:"type"`
-	ViewCount   int      `json:"view_count"`
-	LikeCount   int      `json:"like_count"`
-	TagNameList []string `json:"tag_name_list"`
-	CreatedAt   string   `json:"created_at"`
-	UpdatedAt   string   `json:"updated_at"`
+	ID           uint     `json:"id"`
+	Title        string   `json:"title"`
+	Summary      string   `json:"summary"`
+	Content      string   `json:"content"`
+	Cover        string   `json:"cover"`
+	CategoryID   uint     `json:"category_id"`
+	CategoryName string   `json:"category_name"`
+	AuthorID     uint     `json:"author_id"`
+	Status       int      `json:"status"`
+	IsTop        int      `json:"is_top"`
+	IsOriginal   int      `json:"is_original"`
+	Type         int      `json:"type"`
+	ViewCount    int      `json:"view_count"`
+	LikeCount    int      `json:"like_count"`
+	TagNameList  []string `json:"tag_name_list"`
+	CreatedAt    string   `json:"created_at"`
+	UpdatedAt    string   `json:"updated_at"`
 }
 
 type ArticleDetails struct {
 	ArticleHome
-	PrevArticle *ArticlePreview   `json:"prev_article"`
-	NextArticle *ArticlePreview   `json:"next_article"`
+	PrevArticle *ArticlePreview `json:"prev_article"`
+	NextArticle *ArticlePreview `json:"next_article"`
 }
 
 type ArticlePreview struct {

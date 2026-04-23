@@ -10,20 +10,6 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-// --- 统一响应 ---
-
-func ok(w http.ResponseWriter, data interface{}) {
-	httpx.OkJson(w, types.Body{Code: 0, Message: "success", Data: data})
-}
-
-func okPage(w http.ResponseWriter, list interface{}, total int64, page, pageSize int) {
-	ok(w, types.PageResp{List: list, Total: total, Page: page, PageSize: pageSize})
-}
-
-func fail(w http.ResponseWriter, code int, msg string) {
-	httpx.OkJson(w, types.Body{Code: code, Message: msg})
-}
-
 // --- 文章 ---
 
 func ListArticlesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {

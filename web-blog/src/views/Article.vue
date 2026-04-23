@@ -209,10 +209,17 @@ watch(() => route.params.id, (newId) => {
 <style scoped lang="scss">
 .article-page {
   animation: fadeInUp 0.5s ease;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 32px;
+
+  @media (max-width: 640px) {
+    padding: 0 20px;
+  }
 }
 
 .article-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #0a0a0a 0%, #2a2a2a 100%);
   padding: 50px 40px 60px;
   border-radius: var(--radius-lg);
   margin-bottom: 30px;
@@ -342,12 +349,12 @@ watch(() => route.params.id, (newId) => {
 .nav-item {
   padding: 16px;
   border-radius: var(--radius-sm);
-  background: rgba(233, 84, 107, 0.03);
+  background: rgba(0, 0, 0, 0.02);
   cursor: pointer;
   transition: all var(--transition-fast);
 
   &:hover {
-    background: rgba(233, 84, 107, 0.08);
+    background: rgba(0, 0, 0, 0.05);
   }
 
   &.next {
@@ -397,7 +404,7 @@ watch(() => route.params.id, (newId) => {
   transition: background-color var(--transition-fast);
 
   &:hover {
-    background: rgba(233, 84, 107, 0.03);
+    background: rgba(0, 0, 0, 0.02);
   }
 }
 
@@ -405,8 +412,8 @@ watch(() => route.params.id, (newId) => {
   flex-shrink: 0;
 
   :deep(.n-avatar) {
-    background: var(--accent-gradient);
-    color: white;
+    background: var(--text-primary);
+    color: var(--bg-card);
     font-weight: 600;
   }
 }

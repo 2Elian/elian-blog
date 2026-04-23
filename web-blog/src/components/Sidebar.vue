@@ -1,6 +1,6 @@
 <template>
   <aside class="sidebar">
-    <!-- Author Card -->
+    <!-- Author Card (Commented out per user request)
     <div class="widget author-card">
       <div class="author-avatar">
         <n-avatar round :size="80" class="avatar">
@@ -24,6 +24,7 @@
         </div>
       </div>
     </div>
+    -->
 
     <!-- Categories Widget -->
     <div class="widget categories-widget" v-if="categories.length">
@@ -50,7 +51,6 @@
           :key="tag.id"
           :bordered="false"
           class="tag-item"
-          :style="{ fontSize: getTagSize(tag.count) + 'px' }"
           @click="filterByTag(tag.id)"
         >
           {{ tag.name }}
@@ -63,7 +63,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { NAvatar, NTag } from 'naive-ui'
+import { NTag } from 'naive-ui'
 import { getCategories, getTags } from '@/api'
 
 interface Category {
@@ -103,11 +103,6 @@ onMounted(async () => {
   }
 })
 
-function getTagSize(count?: number) {
-  if (!count) return 13
-  return Math.min(16, 12 + count)
-}
-
 function filterByCategory(id: number) {
   router.push({ path: '/blog', query: { category: String(id) } })
 }
@@ -140,70 +135,12 @@ function filterByTag(id: number) {
 }
 
 .widget-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 16px;
   padding-bottom: 10px;
   border-bottom: 1px solid var(--border-color);
-}
-
-// Author Card
-.author-card {
-  text-align: center;
-  background: linear-gradient(180deg, rgba(233, 84, 107, 0.05) 0%, var(--bg-card) 100%);
-}
-
-.author-avatar {
-  margin-bottom: 12px;
-}
-
-.avatar {
-  background: var(--accent-gradient);
-  color: white;
-  font-size: 32px;
-  font-weight: 700;
-}
-
-.author-name {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 6px;
-}
-
-.author-bio {
-  font-size: 14px;
-  color: var(--text-muted);
-  margin-bottom: 16px;
-}
-
-.author-stats {
-  display: flex;
-  justify-content: space-around;
-  padding-top: 16px;
-  border-top: 1px solid var(--border-color);
-}
-
-.stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.stat-value {
-  font-size: 20px;
-  font-weight: 700;
-  background: var(--accent-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.stat-label {
-  font-size: 12px;
-  color: var(--text-muted);
 }
 
 // Categories
@@ -218,12 +155,12 @@ function filterByTag(id: number) {
   justify-content: space-between;
   align-items: center;
   padding: 10px 12px;
-  border-radius: var(--radius-sm);
+  border-radius: 6px;
   cursor: pointer;
   transition: background-color var(--transition-fast);
 
   &:hover {
-    background: rgba(233, 84, 107, 0.06);
+    background: rgba(0, 0, 0, 0.04);
   }
 
   .category-name {
@@ -232,8 +169,8 @@ function filterByTag(id: number) {
   }
 
   .category-count {
-    background: rgba(233, 84, 107, 0.1);
-    color: var(--primary-color);
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--text-secondary);
     font-size: 12px;
     padding: 2px 8px;
     border-radius: 10px;
@@ -248,14 +185,14 @@ function filterByTag(id: number) {
 }
 
 .tag-item {
-  background: rgba(233, 84, 107, 0.08);
-  color: var(--primary-color);
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast);
 
   &:hover {
-    background: rgba(233, 84, 107, 0.15);
-    transform: translateY(-2px);
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--text-primary);
   }
 }
 

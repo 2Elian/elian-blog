@@ -31,7 +31,7 @@ func main() {
 	conf.MustLoad(*configFile, &c)
 
 	// 初始化日志
-	log := logger.New(c.Log.Level)
+	log := logger.New(c.AppLog.Level)
 	zap.ReplaceGlobals(log)
 
 	// 初始化数据库
@@ -43,6 +43,9 @@ func main() {
 	// 自动迁移
 	_ = model.AutoMigrate(db)
 
+	// 初始化菜单数据
+	model.SeedMenus(db)
+
 	// 初始化 Redis
 	rdb, err := initRedis(&c)
 	if err != nil {
@@ -51,6 +54,8 @@ func main() {
 
 	// 创建 ServiceContext
 	svcCtx := svc.NewServiceContext(c, db, rdb, log)
+	// 初始化默认角色
+	initRoles(svcCtx)
 
 	// 创建 HTTP 服务器
 	server := rest.MustNewServer(c.RestConf, rest.WithCors())
@@ -127,4 +132,17 @@ func initRedis(c *config.Config) (*redis.Client, error) {
 	}
 
 	return rdb, nil
+}
+
+func initRoles(svcCtx *svc.ServiceContext) {
+	roles := []model.Role{
+		{Name: "管理员", Label: "admin", Description: "系统管理员", Status: 1, Sort: 1},
+		{Name: "编辑者", Label: "editor", Description: "内容编辑", Status: 1, Sort: 2},
+		{Name: "普通用户", Label: "user", Description: "默认用户角色", Status: 1, Sort: 3},
+	}
+	for i := range roles {
+		if err := svcCtx.RoleDao.CreateIfNotExist(&roles[i]); err != nil {
+			fmt.Printf("初始化角色 %s 失败: %v\n", roles[i].Label, err)
+		}
+	}
 }

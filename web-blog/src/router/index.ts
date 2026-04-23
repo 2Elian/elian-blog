@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -75,6 +76,21 @@ const router = createRouter({
 router.beforeEach((to, _from, next) => {
   const title = (to.meta.title as string) || 'Elian Blog'
   document.title = `${title} - Elian Blog`
+
+  // 首页和登录页不需要认证
+  const publicPages = ['/', '/login']
+  if (publicPages.includes(to.path)) {
+    next()
+    return
+  }
+
+  // 其他页面需要登录
+  const userStore = useUserStore()
+  if (!userStore.isLoggedIn) {
+    next(`/login?redirect=${to.path}`)
+    return
+  }
+
   next()
 })
 

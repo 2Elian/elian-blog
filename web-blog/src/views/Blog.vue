@@ -176,6 +176,13 @@ watch(() => route.query, () => {
 <style scoped lang="scss">
 .blog-page {
   animation: fadeInUp 0.5s ease;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 32px;
+
+  @media (max-width: 1024px) {
+    padding: 0 20px;
+  }
 }
 
 .blog-layout {
