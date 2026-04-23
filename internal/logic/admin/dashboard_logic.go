@@ -16,15 +16,15 @@ func NewDashboardLogic(svcCtx *svc.ServiceContext) *DashboardLogic {
 }
 
 type CategoryVO struct {
-	ID            uint   `json:"id"`
-	CategoryName  string `json:"category_name"`
-	ArticleCount  int    `json:"article_count"`
+	ID            uint   `json:"id" gorm:"column:id"`
+	CategoryName  string `json:"category_name" gorm:"column:name"`
+	ArticleCount  int    `json:"article_count" gorm:"-"`
 }
 
 type TagVO struct {
-	ID           uint   `json:"id"`
-	TagName      string `json:"tag_name"`
-	ArticleCount int    `json:"article_count"`
+	ID           uint   `json:"id" gorm:"column:id"`
+	TagName      string `json:"tag_name" gorm:"column:name"`
+	ArticleCount int    `json:"article_count" gorm:"-"`
 }
 
 type ArticleViewVO struct {

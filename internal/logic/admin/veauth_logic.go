@@ -88,11 +88,16 @@ func (l *VeAuthLogic) VeGetUserInfo(ctx context.Context) (*types.VeUserInfoResp,
 
 	perms := []string{"*"}
 
+	avatar := user.Avatar
+	if avatar == "" {
+		avatar = "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+	}
+
 	return &types.VeUserInfoResp{
 		UserID:       strconv.FormatUint(uint64(user.ID), 10),
 		Username:     user.Username,
 		Nickname:     user.Nickname,
-		Avatar:       user.Avatar,
+		Avatar:       avatar,
 		Email:        user.Email,
 		Phone:        "",
 		CreatedAt:    user.CreatedAt.Unix(),
@@ -107,13 +112,8 @@ func (l *VeAuthLogic) VeGetUserInfo(ctx context.Context) (*types.VeUserInfoResp,
 
 // VeGetUserMenus 获取用户菜单
 func (l *VeAuthLogic) VeGetUserMenus(ctx context.Context) (interface{}, error) {
-	userID := getUserIDFromCtx(ctx)
-	if userID == 0 {
-		return nil, errors.New("未获取到用户信息")
-	}
-
-	menuLogic := NewMenuLogic(l.svcCtx)
-	return menuLogic.List(ctx)
+	// 返回空列表，让前端使用静态路由模块（已正确配置）
+	return []interface{}{}, nil
 }
 
 // VeGetUserRoles 获取用户角色列表
