@@ -5,7 +5,6 @@ import (
 
 	"elian-blog/internal/model"
 	"elian-blog/internal/svc"
-	"elian-blog/internal/types"
 )
 
 type DashboardLogic struct {
@@ -16,8 +15,52 @@ func NewDashboardLogic(svcCtx *svc.ServiceContext) *DashboardLogic {
 	return &DashboardLogic{svcCtx: svcCtx}
 }
 
+type CategoryVO struct {
+	ID            uint   `json:"id"`
+	CategoryName  string `json:"category_name"`
+	ArticleCount  int    `json:"article_count"`
+}
+
+type TagVO struct {
+	ID           uint   `json:"id"`
+	TagName      string `json:"tag_name"`
+	ArticleCount int    `json:"article_count"`
+}
+
+type ArticleViewVO struct {
+	ID            uint   `json:"id"`
+	ArticleTitle  string `json:"article_title"`
+	ViewCount     int    `json:"view_count"`
+}
+
+type ArticleStatisticsVO struct {
+	Date  string `json:"date"`
+	Count int    `json:"count"`
+}
+
+type AdminHomeInfoResp struct {
+	UserCount         int                  `json:"user_count"`
+	ArticleCount      int                  `json:"article_count"`
+	MessageCount      int                  `json:"message_count"`
+	CategoryList      []CategoryVO         `json:"category_list"`
+	TagList           []TagVO              `json:"tag_list"`
+	ArticleViewRanks  []ArticleViewVO      `json:"article_view_ranks"`
+	ArticleStatistics []ArticleStatisticsVO `json:"article_statistics"`
+}
+
+type VisitTrendItem struct {
+	Date    string `json:"date"`
+	PVCount int    `json:"pv_count"`
+	UVCount int    `json:"uv_count"`
+}
+
+type UserAreaVO struct {
+	Name  string `json:"name"`
+	Value int    `json:"value"`
+}
+
 func (l *DashboardLogic) GetStats(ctx context.Context) (interface{}, error) {
-	var articleCount, userCount, commentCount, viewCount int64
+	var articleCount, userCount, commentCount, messageCount, viewCount int64
 
 	// 文章总数
 	l.svcCtx.DB.Model(&model.Article{}).Count(&articleCount)
@@ -28,13 +71,51 @@ func (l *DashboardLogic) GetStats(ctx context.Context) (interface{}, error) {
 	// 评论总数
 	l.svcCtx.DB.Model(&model.Comment{}).Count(&commentCount)
 
-	// 访问总量（文章浏览数总和）
-	l.svcCtx.DB.Model(&model.Article{}).Select("SUM(views)").Scan(&viewCount)
+	// 留言总数
+	l.svcCtx.DB.Model(&model.Message{}).Count(&messageCount)
 
-	return types.DashboardStats{
-		ArticleCount: int(articleCount),
-		UserCount:    int(userCount),
-		CommentCount: int(commentCount),
-		ViewCount:    int(viewCount),
+	// 访问总量（文章浏览数总和）
+	l.svcCtx.DB.Model(&model.Article{}).Select("COALESCE(SUM(view_count), 0)").Scan(&viewCount)
+
+	// 分类列表
+	var categoryList []CategoryVO
+	l.svcCtx.DB.Model(&model.Category{}).Find(&categoryList)
+	for i := range categoryList {
+		var count int64
+		l.svcCtx.DB.Model(&model.Article{}).Where("category_id = ?", categoryList[i].ID).Count(&count)
+		categoryList[i].ArticleCount = int(count)
+	}
+
+	// 标签列表
+	var tagList []TagVO
+	l.svcCtx.DB.Model(&model.Tag{}).Find(&tagList)
+	for i := range tagList {
+		var count int64
+		l.svcCtx.DB.Table("article_tags").Where("tag_id = ?", tagList[i].ID).Count(&count)
+		tagList[i].ArticleCount = int(count)
+	}
+
+	// 文章浏览量排行 (前10)
+	var articleViewRanks []ArticleViewVO
+	l.svcCtx.DB.Model(&model.Article{}).Select("id, title as article_title, view_count").Order("view_count DESC").Limit(10).Find(&articleViewRanks)
+
+	// 文章提交统计 (近30天)
+	var articleStatistics []ArticleStatisticsVO
+	l.svcCtx.DB.Raw(`
+		SELECT DATE(created_at) as date, COUNT(*) as count
+		FROM article
+		WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) AND deleted_at IS NULL
+		GROUP BY DATE(created_at)
+		ORDER BY date ASC
+	`).Scan(&articleStatistics)
+
+	return AdminHomeInfoResp{
+		UserCount:          int(userCount),
+		ArticleCount:       int(articleCount),
+		MessageCount:       int(messageCount),
+		CategoryList:       categoryList,
+		TagList:            tagList,
+		ArticleViewRanks:   articleViewRanks,
+		ArticleStatistics:  articleStatistics,
 	}, nil
 }

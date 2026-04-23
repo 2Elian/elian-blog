@@ -152,7 +152,10 @@ func registerVeAdminHandlers(server *rest.Server, svcCtx *svc.ServiceContext) {
 		{Method: http.MethodGet, Path: "/admin-api/v1/admin/get_system_state", Handler: handler.VeGetSystemStateHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/admin/get_user_area_stats", Handler: handler.VeGetUserAreaStatsHandler(svcCtx)},
 
-		// 文件上传
+		// 通知
+			{Method: http.MethodPost, Path: "/admin-api/v1/notice/find_user_notice_list", Handler: handler.VeFindUserNoticeListHandler(svcCtx)},
+
+			// 文件上传
 		{Method: http.MethodPost, Path: "/admin-api/v1/upload/upload_file", Handler: handler.VeUploadFileHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/upload/multi_upload_file", Handler: handler.VeMultiUploadFileHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/upload/list_upload_file", Handler: handler.VeListUploadFileHandler(svcCtx)},

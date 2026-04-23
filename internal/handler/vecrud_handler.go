@@ -782,14 +782,21 @@ func VeUpdateWebsiteConfigHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 func VeGetVisitStatsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		veOk(w, map[string]interface{}{
-			"pv_count": 0, "uv_count": 0, "ip_count": 0,
+			"today_uv_count":   0,
+			"total_uv_count":   0,
+			"uv_growth_rate":   0,
+			"today_pv_count":   0,
+			"total_pv_count":   0,
+			"pv_growth_rate":   0,
 		})
 	}
 }
 
 func VeGetVisitTrendHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		veOk(w, []interface{}{})
+		veOk(w, map[string]interface{}{
+			"visit_trend": []interface{}{},
+		})
 	}
 }
 
@@ -813,7 +820,10 @@ func VeGetSystemStateHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 func VeGetUserAreaStatsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		veOk(w, []interface{}{})
+		veOk(w, map[string]interface{}{
+			"user_areas":   []interface{}{},
+			"tourist_areas": []interface{}{},
+		})
 	}
 }
 
@@ -840,6 +850,14 @@ func VeListUploadFileHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 func VeDeletesUploadFileHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		veOk(w, nil)
+	}
+}
+
+// --- 通知 ---
+
+func VeFindUserNoticeListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		veOk(w, map[string]interface{}{"list": []interface{}{}, "total": 0})
 	}
 }
 
