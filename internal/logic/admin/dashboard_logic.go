@@ -7,6 +7,7 @@ import (
 	"elian-blog/internal/svc"
 )
 
+
 type DashboardLogic struct {
 	svcCtx *svc.ServiceContext
 }
@@ -39,12 +40,13 @@ type ArticleStatisticsVO struct {
 }
 
 type AdminHomeInfoResp struct {
-	UserCount         int                  `json:"user_count"`
-	ArticleCount      int                  `json:"article_count"`
-	MessageCount      int                  `json:"message_count"`
-	CategoryList      []CategoryVO         `json:"category_list"`
-	TagList           []TagVO              `json:"tag_list"`
-	ArticleViewRanks  []ArticleViewVO      `json:"article_view_ranks"`
+	UserCount         int                   `json:"user_count"`
+	ArticleCount      int                   `json:"article_count"`
+	MessageCount      int                   `json:"message_count"`
+	ProductCount      int                   `json:"product_count"`
+	CategoryList      []CategoryVO          `json:"category_list"`
+	TagList           []TagVO               `json:"tag_list"`
+	ArticleViewRanks  []ArticleViewVO       `json:"article_view_ranks"`
 	ArticleStatistics []ArticleStatisticsVO `json:"article_statistics"`
 }
 
@@ -60,7 +62,7 @@ type UserAreaVO struct {
 }
 
 func (l *DashboardLogic) GetStats(ctx context.Context) (interface{}, error) {
-	var articleCount, userCount, commentCount, messageCount, viewCount int64
+	var articleCount, userCount, commentCount, messageCount, productCount, viewCount int64
 
 	// 文章总数
 	l.svcCtx.DB.Model(&model.Article{}).Count(&articleCount)
@@ -73,6 +75,9 @@ func (l *DashboardLogic) GetStats(ctx context.Context) (interface{}, error) {
 
 	// 留言总数
 	l.svcCtx.DB.Model(&model.Message{}).Count(&messageCount)
+
+	// 产品总数
+	l.svcCtx.DB.Model(&model.Product{}).Count(&productCount)
 
 	// 访问总量（文章浏览数总和）
 	l.svcCtx.DB.Model(&model.Article{}).Select("COALESCE(SUM(view_count), 0)").Scan(&viewCount)
@@ -110,12 +115,13 @@ func (l *DashboardLogic) GetStats(ctx context.Context) (interface{}, error) {
 	`).Scan(&articleStatistics)
 
 	return AdminHomeInfoResp{
-		UserCount:          int(userCount),
-		ArticleCount:       int(articleCount),
-		MessageCount:       int(messageCount),
-		CategoryList:       categoryList,
-		TagList:            tagList,
-		ArticleViewRanks:   articleViewRanks,
-		ArticleStatistics:  articleStatistics,
+		UserCount:         int(userCount),
+		ArticleCount:      int(articleCount),
+		MessageCount:      int(messageCount),
+		ProductCount:      int(productCount),
+		CategoryList:      categoryList,
+		TagList:           tagList,
+		ArticleViewRanks:  articleViewRanks,
+		ArticleStatistics: articleStatistics,
 	}, nil
 }

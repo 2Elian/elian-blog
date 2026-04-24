@@ -147,11 +147,8 @@ func VeUpdateArticleTopHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			veBadRequest(w, "参数错误")
 			return
 		}
-		err := admin.NewArticleLogic(svcCtx).Update(r.Context(), &types.UpdateArticleReq{
-			ID:    req.ID,
-			IsTop: req.IsTop,
-		})
-		if err != nil {
+		// 直接更新 is_top 字段，支持 0（取消置顶）
+		if err := svcCtx.DB.Table("article").Where("id = ?", req.ID).Update("is_top", req.IsTop).Error; err != nil {
 			veInternalError(w, "更新置顶失败")
 			return
 		}
@@ -796,8 +793,10 @@ func VeUpdateAccountStatusHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 func VeUpdateAccountRolesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req struct {
-			UserID  json.Number `json:"user_id"`
-			RoleIDs []uint      `json:"role_ids"`
+			UserID   json.Number `json:"user_id"`
+			RoleIDs  []uint      `json:"role_ids"`
+			Nickname string      `json:"nickname"`
+			Email    string      `json:"email"`
 		}
 		if err := parseJSON(r, &req); err != nil {
 			veBadRequest(w, "参数错误")
@@ -809,6 +808,20 @@ func VeUpdateAccountRolesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 		uid := uint(userID)
+
+		// Update user profile fields
+		updates := map[string]interface{}{}
+		if req.Nickname != "" {
+			updates["nickname"] = req.Nickname
+		}
+		if req.Email != "" {
+			updates["email"] = req.Email
+		}
+		if len(updates) > 0 {
+			svcCtx.DB.Table("user").Where("id = ?", uid).Updates(updates)
+		}
+
+		// Update roles
 		svcCtx.DB.Exec("DELETE FROM user_roles WHERE user_id = ?", uid)
 		for _, roleID := range req.RoleIDs {
 			svcCtx.DB.Exec("INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)", uid, roleID)
@@ -871,11 +884,15 @@ func VeFindAccountOnlineListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc
 				continue
 			}
 			ts, _ := svcCtx.RDB.Get(ctx, key).Result()
+			avatar := user.Avatar
+			if avatar == "" || avatar == "https://example.com/avatar.png" || (!strings.HasPrefix(avatar, "http") && !strings.HasPrefix(avatar, "/")) {
+				avatar = "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+			}
 			list = append(list, OnlineUser{
 				UserID:    user.ID,
 				Username:  user.Username,
 				Nickname:  user.Nickname,
-				Avatar:    user.Avatar,
+				Avatar:    avatar,
 				LoginTime: ts,
 			})
 		}
@@ -1511,8 +1528,11 @@ func VeFindProductListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		voList := make([]types.ProductVO, 0, len(products))
 		for _, p := range products {
 			cover := p.Cover
-			if cover != "" && !strings.HasPrefix(cover, "http") && !strings.HasPrefix(cover, "/") {
-				cover = "/" + cover
+			if cover != "" && !strings.HasPrefix(cover, "http") {
+				if !strings.HasPrefix(cover, "/") {
+					cover = "/" + cover
+				}
+				cover = "http://localhost:8080" + cover
 			}
 			voList = append(voList, types.ProductVO{
 				ID:          p.ID,

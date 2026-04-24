@@ -224,26 +224,26 @@
         </el-card>
       </el-col>
 
-      <!-- 留言量 -->
+      <!-- 产品量 -->
       <el-col :xs="8" :sm="8" :md="4">
         <el-card shadow="never" :loading="homeInfoLoading" class="h-full">
           <template #header>
             <div class="flex-x-between">
-              <span class="text-gray">留言量</span>
+              <span class="text-gray">产品量</span>
               <el-tag type="info" size="small">总</el-tag>
             </div>
           </template>
 
           <div class="flex-x-between mt-2">
             <div class="flex-y-center">
-              <span class="text-lg">{{ Math.round(transitionMessageCount) }}</span>
+              <span class="text-lg">{{ Math.round(transitionProductCount) }}</span>
             </div>
-            <div class="i-svg:message w-8 h-8" />
+            <div class="i-svg:component w-8 h-8" />
           </div>
 
           <div class="flex-x-between mt-2 text-sm text-gray">
-            <span>留言总数</span>
-            <span>{{ Math.round(transitionMessageCount) }}</span>
+            <span>产品总数</span>
+            <span>{{ Math.round(transitionProductCount) }}</span>
           </div>
         </el-card>
       </el-col>
@@ -604,6 +604,14 @@ const transitionArticleCount = useTransition(
 
 const transitionMessageCount = useTransition(
   computed(() => homeInfoData.value.message_count),
+  {
+    duration: 1000,
+    transition: [0.25, 0.1, 0.25, 1.0],
+  }
+);
+
+const transitionProductCount = useTransition(
+  computed(() => homeInfoData.value.product_count),
   {
     duration: 1000,
     transition: [0.25, 0.1, 0.25, 1.0],

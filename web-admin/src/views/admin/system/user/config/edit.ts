@@ -39,17 +39,11 @@ const modalConfig: IModalConfig<UpdateAccountRolesReq> = {
       label: "昵称",
       prop: "nickname",
       type: "input",
-      attrs: {
-        disabled: true,
-      },
     },
     {
       label: "邮箱",
       prop: "email",
       type: "input",
-      attrs: {
-        disabled: true,
-      },
     },
     {
       label: "手机号",

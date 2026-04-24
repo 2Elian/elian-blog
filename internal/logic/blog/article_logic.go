@@ -3,6 +3,7 @@ package blog
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"elian-blog/internal/model"
@@ -68,10 +69,21 @@ func (l *ArticleLogic) convertToArticleHomeList(articles []model.Article) []type
 }
 
 func (l *ArticleLogic) convertToArticleDetails(article *model.Article) *types.ArticleDetails {
+	// Get prev/next articles
+	var prevArticle, nextArticle *types.ArticlePreview
+	var prev model.Article
+	if l.svcCtx.DB.Where("id < ? AND status = 1 AND deleted_at IS NULL", article.ID).Order("id DESC").First(&prev).Error == nil {
+		prevArticle = &types.ArticlePreview{ID: prev.ID, Title: prev.Title}
+	}
+	var next model.Article
+	if l.svcCtx.DB.Where("id > ? AND status = 1 AND deleted_at IS NULL", article.ID).Order("id ASC").First(&next).Error == nil {
+		nextArticle = &types.ArticlePreview{ID: next.ID, Title: next.Title}
+	}
+
 	return &types.ArticleDetails{
 		ArticleHome: l.articleToHome(article),
-		PrevArticle: nil,
-		NextArticle: nil,
+		PrevArticle: prevArticle,
+		NextArticle: nextArticle,
 	}
 }
 
@@ -80,12 +92,19 @@ func (l *ArticleLogic) articleToHome(article *model.Article) types.ArticleHome {
 	if article.CategoryID != nil {
 		catID = *article.CategoryID
 	}
+	cover := article.Cover
+	if cover != "" && !strings.HasPrefix(cover, "http") {
+		if !strings.HasPrefix(cover, "/") {
+			cover = "/" + cover
+		}
+		cover = "http://localhost:8080" + cover
+	}
 	return types.ArticleHome{
 		ID:           article.ID,
 		Title:        article.Title,
 		Summary:      article.Summary,
 		Content:      article.Content,
-		Cover:        article.Cover,
+		Cover:        cover,
 		CategoryID:   catID,
 		CategoryName: article.Category.Name,
 		AuthorID:     article.AuthorID,

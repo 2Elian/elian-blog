@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"elian-blog/internal/svc"
-	"elian-blog/internal/types"
 )
 
 type CategoryLogic struct {
@@ -22,15 +21,15 @@ func (l *CategoryLogic) List(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	result := make([]types.CategoryVO, 0, len(categories))
+	result := make([]map[string]interface{}, 0, len(categories))
 	for _, cat := range categories {
 		count, _ := l.svcCtx.CategoryDao.CountArticles(cat.ID)
-		result = append(result, types.CategoryVO{
-			ID:           cat.ID,
-			CategoryName: cat.Name,
-			Description:  cat.Description,
-			Sort:         cat.Sort,
-			ArticleCount: int(count),
+		result = append(result, map[string]interface{}{
+			"id":            cat.ID,
+			"name":          cat.Name,
+			"description":   cat.Description,
+			"sort":          cat.Sort,
+			"article_count": count,
 		})
 	}
 

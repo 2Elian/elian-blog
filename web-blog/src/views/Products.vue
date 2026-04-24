@@ -6,13 +6,11 @@
     </div>
 
     <div class="products-grid">
-      <a
+      <div
         v-for="product in products"
         :key="product.id"
-        :href="product.link || '#'"
-        target="_blank"
-        rel="noopener noreferrer"
         class="product-card"
+        @click="product.link && !product.link.includes('example.com') ? openLink(product.link) : null"
       >
         <div class="card-cover">
           <img v-if="product.cover" :src="getImageUrl(product.cover)" :alt="product.name" />
@@ -32,7 +30,7 @@
             <n-icon v-if="product.link" size="16"><OpenOutline /></n-icon>
           </div>
         </div>
-      </a>
+      </div>
     </div>
 
     <n-empty v-if="!loading && products.length === 0" description="暂无产品" style="padding: 60px 0;" />
@@ -83,6 +81,10 @@ function getTypeClass(type: number): string {
     3: 'type-other'
   }
   return classes[type] || 'type-other'
+}
+
+function openLink(url: string) {
+  window.open(url, '_blank', 'noopener,noreferrer')
 }
 
 async function loadProducts() {

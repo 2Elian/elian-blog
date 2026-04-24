@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"elian-blog/internal/middleware"
 	"elian-blog/internal/model"
 	"elian-blog/internal/svc"
 	"elian-blog/internal/types"
@@ -60,8 +61,8 @@ func (l *CommentLogic) Recent(ctx context.Context) (interface{}, error) {
 // Create 创建评论
 func (l *CommentLogic) Create(ctx context.Context, req *types.CreateCommentReq) (interface{}, error) {
 	// 从上下文中获取用户ID
-	userID, exists := ctx.Value("user_id").(uint)
-	if !exists || userID == 0 {
+	userID := middleware.GetUserID(ctx)
+	if userID == 0 {
 		return nil, errors.New("请先登录")
 	}
 

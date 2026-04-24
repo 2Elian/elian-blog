@@ -81,7 +81,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { NEmpty } from 'naive-ui'
 import ArticleCard from '@/components/ArticleCard.vue'
 import Sidebar from '@/components/Sidebar.vue'
-import { getArticles } from '@/api'
+import { getArticles, getCategories, getTags } from '@/api'
 
 interface Article {
   id: number
@@ -144,10 +144,16 @@ onMounted(async () => {
   typingTimer = setTimeout(typeEffect, 500)
 
   try {
-    const res = await getArticles({ page: 1, page_size: 6 }) as any
-    const data = res.data
+    const [articlesRes, categoriesRes, tagsRes] = await Promise.all([
+      getArticles({ page: 1, page_size: 6 }) as any,
+      getCategories() as any,
+      getTags() as any
+    ])
+    const data = articlesRes.data
     articles.value = data?.list || data || []
     articleCount.value = data?.total || articles.value.length
+    categoryCount.value = (categoriesRes.data || []).length
+    tagCount.value = (tagsRes.data || []).length
   } catch (e) {
     console.error('Failed to load articles:', e)
   } finally {

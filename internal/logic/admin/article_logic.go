@@ -181,6 +181,9 @@ func (l *ArticleLogic) findOrCreateTags(names []string) ([]model.Tag, error) {
 func toArticleBackVO(a *model.Article) types.ArticleBackVO {
 	cover := a.Cover
 	if cover != "" && !strings.HasPrefix(cover, "http") {
+		if !strings.HasPrefix(cover, "/") {
+			cover = "/" + cover
+		}
 		cover = "http://localhost:8080" + cover
 	}
 
