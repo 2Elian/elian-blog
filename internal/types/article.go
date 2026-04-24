@@ -28,16 +28,29 @@ type ArticleHome struct {
 	Cover        string   `json:"cover"`
 	CategoryID   uint     `json:"category_id"`
 	CategoryName string   `json:"category_name"`
+	Category     CategoryInfo `json:"category"`
 	AuthorID     uint     `json:"author_id"`
 	Status       int      `json:"status"`
 	IsTop        int      `json:"is_top"`
 	IsOriginal   int      `json:"is_original"`
 	Type         int      `json:"type"`
 	ViewCount    int      `json:"view_count"`
+	Views        int      `json:"views"`
 	LikeCount    int      `json:"like_count"`
 	TagNameList  []string `json:"tag_name_list"`
+	Tags         []TagInfo `json:"tags"`
 	CreatedAt    string   `json:"created_at"`
 	UpdatedAt    string   `json:"updated_at"`
+}
+
+type CategoryInfo struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+}
+
+type TagInfo struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
 }
 
 type ArticleDetails struct {

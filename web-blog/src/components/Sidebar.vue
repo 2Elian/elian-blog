@@ -94,8 +94,8 @@ onMounted(async () => {
       getCategories() as any,
       getTags() as any
     ])
-    categories.value = catRes.data || []
-    tags.value = tagRes.data || []
+    categories.value = (catRes.data || []).map((c: any) => ({ id: c.id, name: c.name, count: c.article_count }))
+    tags.value = (tagRes.data || []).map((t: any) => ({ id: t.id, name: t.name, count: t.article_count }))
     stats.value.categories = categories.value.length
     stats.value.tags = tags.value.length
   } catch (e) {

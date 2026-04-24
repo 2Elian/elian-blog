@@ -611,7 +611,7 @@ const transitionMessageCount = useTransition(
 );
 
 const transitionProductCount = useTransition(
-  computed(() => homeInfoData.value.product_count),
+  computed(() => homeInfoData.value.product_count ?? 0),
   {
     duration: 1000,
     transition: [0.25, 0.1, 0.25, 1.0],

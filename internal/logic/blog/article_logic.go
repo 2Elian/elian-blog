@@ -99,6 +99,12 @@ func (l *ArticleLogic) articleToHome(article *model.Article) types.ArticleHome {
 		}
 		cover = "http://localhost:8080" + cover
 	}
+
+	tags := make([]types.TagInfo, 0, len(article.Tags))
+	for _, t := range article.Tags {
+		tags = append(tags, types.TagInfo{ID: t.ID, Name: t.Name})
+	}
+
 	return types.ArticleHome{
 		ID:           article.ID,
 		Title:        article.Title,
@@ -107,14 +113,17 @@ func (l *ArticleLogic) articleToHome(article *model.Article) types.ArticleHome {
 		Cover:        cover,
 		CategoryID:   catID,
 		CategoryName: article.Category.Name,
+		Category:     types.CategoryInfo{ID: article.Category.ID, Name: article.Category.Name},
 		AuthorID:     article.AuthorID,
 		Status:       article.Status,
 		IsTop:        article.IsTop,
 		IsOriginal:   article.IsOriginal,
 		Type:         article.Type,
 		ViewCount:    article.ViewCount,
+		Views:        article.ViewCount,
 		LikeCount:    article.LikeCount,
 		TagNameList:  l.getTagNames(article.Tags),
+		Tags:         tags,
 		CreatedAt:    article.CreatedAt.Format(time.DateTime),
 		UpdatedAt:    article.UpdatedAt.Format(time.DateTime),
 	}

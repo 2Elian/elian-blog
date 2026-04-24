@@ -158,7 +158,7 @@ onMounted(async () => {
 
   try {
     const catRes = await getCategories() as any
-    categories.value = catRes.data || []
+    categories.value = (catRes.data || []).map((c: any) => ({ id: c.id, name: c.name }))
   } catch (e) {
     console.error('Failed to load categories:', e)
   }

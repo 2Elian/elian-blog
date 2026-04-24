@@ -112,7 +112,7 @@ onMounted(async () => {
       getTags() as any,
       getArticles({ page: 1, page_size: 1000 }) as any
     ])
-    tags.value = tagsRes.data || []
+    tags.value = (tagsRes.data || []).map((t: any) => ({ id: t.id, name: t.name, count: t.article_count }))
     articles.value = articlesRes.data?.list || []
   } catch (e) {
     console.error('Failed to load tags:', e)
