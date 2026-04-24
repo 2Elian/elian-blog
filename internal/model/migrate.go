@@ -16,6 +16,9 @@ func AutoMigrate(db *gorm.DB) error {
 		&Page{},
 		&SiteConfig{},
 		&OperationLog{},
+		&Album{},
+		&Photo{},
+		&Product{},
 	)
 }
 

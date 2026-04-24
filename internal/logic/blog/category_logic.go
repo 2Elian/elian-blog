@@ -22,13 +22,12 @@ func (l *CategoryLogic) List(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	// 转换为 CategoryVO 列表，并添加文章数量
 	result := make([]types.CategoryVO, 0, len(categories))
 	for _, cat := range categories {
 		count, _ := l.svcCtx.CategoryDao.CountArticles(cat.ID)
 		result = append(result, types.CategoryVO{
 			ID:           cat.ID,
-			Name:         cat.Name,
+			CategoryName: cat.Name,
 			Description:  cat.Description,
 			Sort:         cat.Sort,
 			ArticleCount: int(count),

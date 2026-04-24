@@ -43,5 +43,10 @@ func (l *CommentLogic) Delete(ctx context.Context, id uint) error {
 }
 
 func (l *CommentLogic) UpdateStatus(ctx context.Context, req *types.UpdateCommentStatusReq) error {
-	return l.svcCtx.CommentDao.UpdateStatus(req.ID, req.Status)
+	for _, id := range req.IDs {
+		if err := l.svcCtx.CommentDao.UpdateStatus(id, req.Status); err != nil {
+			return err
+		}
+	}
+	return nil
 }

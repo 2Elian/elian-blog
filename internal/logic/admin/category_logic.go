@@ -2,6 +2,8 @@ package admin
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"elian-blog/internal/model"
 	"elian-blog/internal/svc"
@@ -18,14 +20,14 @@ func NewCategoryLogic(svcCtx *svc.ServiceContext) *CategoryLogic {
 
 func (l *CategoryLogic) Create(ctx context.Context, req *types.CreateCategoryReq) (interface{}, error) {
 	cat := &model.Category{
-		Name:        req.Name,
+		Name:        req.CategoryName,
 		Description: req.Description,
 		Sort:        req.Sort,
 	}
 	if err := l.svcCtx.CategoryDao.Create(cat); err != nil {
 		return nil, err
 	}
-	return cat, nil
+	return toCategoryVO(cat), nil
 }
 
 func (l *CategoryLogic) Update(ctx context.Context, req *types.UpdateCategoryReq) error {
@@ -34,8 +36,8 @@ func (l *CategoryLogic) Update(ctx context.Context, req *types.UpdateCategoryReq
 		return err
 	}
 
-	if req.Name != "" {
-		cat.Name = req.Name
+	if req.CategoryName != "" {
+		cat.Name = req.CategoryName
 	}
 	if req.Description != "" {
 		cat.Description = req.Description
@@ -51,27 +53,47 @@ func (l *CategoryLogic) Delete(ctx context.Context, id uint) error {
 	return l.svcCtx.CategoryDao.Delete(id)
 }
 
-func (l *CategoryLogic) List(ctx context.Context) (interface{}, error) {
+func (l *CategoryLogic) List(ctx context.Context, req *types.QueryCategoryReq) (interface{}, int64, error) {
 	cats, err := l.svcCtx.CategoryDao.List()
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	// Build VO list with article count
 	list := make([]types.CategoryVO, 0, len(cats))
 	for _, cat := range cats {
-		count, err := l.svcCtx.CategoryDao.CountArticles(cat.ID)
-		if err != nil {
-			count = 0
-		}
-		list = append(list, types.CategoryVO{
-			ID:           cat.ID,
-			Name:         cat.Name,
-			Description:  cat.Description,
-			Sort:         cat.Sort,
-			ArticleCount: int(count),
-		})
+		count, _ := l.svcCtx.CategoryDao.CountArticles(cat.ID)
+		vo := toCategoryVO(&cat)
+		vo.ArticleCount = int(count)
+		list = append(list, vo)
 	}
 
-	return list, nil
+	total := int64(len(list))
+	page := req.Page
+	pageSize := req.PageSize
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+
+	return list, total, nil
+}
+
+func toCategoryVO(cat *model.Category) types.CategoryVO {
+	return types.CategoryVO{
+		ID:           cat.ID,
+		CategoryName: cat.Name,
+		Description:  cat.Description,
+		Sort:         cat.Sort,
+		CreatedAt:    formatTime(cat.CreatedAt),
+		UpdatedAt:    formatTime(cat.UpdatedAt),
+	}
+}
+
+func formatTime(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	return fmt.Sprintf("%d", t.Unix())
 }

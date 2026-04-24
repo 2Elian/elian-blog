@@ -32,12 +32,17 @@ func (d *ArticleDao) GetByID(id uint) (*model.Article, error) {
 	return &article, err
 }
 
-func (d *ArticleDao) List(page, pageSize int, status int, categoryID uint, tagID uint) ([]model.Article, int64, error) {
+func (d *ArticleDao) List(page, pageSize, status int, categoryID, tagID uint, isDelete int) ([]model.Article, int64, error) {
 	var articles []model.Article
 	var total int64
 
 	query := d.db.Model(&model.Article{})
-	if status >= 0 {
+	if isDelete == 1 {
+		query = query.Unscoped().Where("deleted_at IS NOT NULL")
+	} else if isDelete == -1 {
+		query = query.Unscoped()
+	}
+	if status > 0 {
 		query = query.Where("status = ?", status)
 	}
 	if categoryID > 0 {

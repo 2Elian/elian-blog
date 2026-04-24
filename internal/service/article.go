@@ -60,12 +60,16 @@ type ArticleQueryReq struct {
 }
 
 func (s *ArticleService) Create(req *ArticleCreateReq) (*model.Article, error) {
+	var catID *uint
+	if req.CategoryID > 0 {
+		catID = &req.CategoryID
+	}
 	article := &model.Article{
 		Title:      req.Title,
 		Summary:    req.Summary,
 		Content:    req.Content,
 		Cover:      req.Cover,
-		CategoryID: req.CategoryID,
+		CategoryID: catID,
 		AuthorID:   req.AuthorID,
 		Status:     req.Status,
 		IsTop:      req.IsTop,
@@ -112,7 +116,11 @@ func (s *ArticleService) Update(req *ArticleUpdateReq) (*model.Article, error) {
 	if req.Cover != "" {
 		article.Cover = req.Cover
 	}
-	article.CategoryID = req.CategoryID
+	if req.CategoryID > 0 {
+		article.CategoryID = &req.CategoryID
+	} else {
+		article.CategoryID = nil
+	}
 	article.Status = req.Status
 	article.IsTop = req.IsTop
 	article.IsOriginal = req.IsOriginal
@@ -159,7 +167,7 @@ func (s *ArticleService) List(req *ArticleQueryReq) ([]model.Article, int64, err
 	if req.PageSize <= 0 {
 		req.PageSize = 10
 	}
-	return s.articleDao.List(req.Page, req.PageSize, req.Status, req.CategoryID, req.TagID)
+	return s.articleDao.List(req.Page, req.PageSize, req.Status, req.CategoryID, req.TagID, 0)
 }
 
 func (s *ArticleService) ListPublished(page, pageSize int) ([]model.Article, int64, error) {
@@ -169,5 +177,5 @@ func (s *ArticleService) ListPublished(page, pageSize int) ([]model.Article, int
 	if pageSize <= 0 {
 		pageSize = 10
 	}
-	return s.articleDao.List(page, pageSize, 1, 0, 0)
+	return s.articleDao.List(page, pageSize, 1, 0, 0, 0)
 }

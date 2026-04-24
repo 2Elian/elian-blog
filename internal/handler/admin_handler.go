@@ -10,6 +10,144 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
+// --- 分类管理 ---
+
+func AdminCreateCategoryHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req types.CreateCategoryReq
+		if err := httpx.ParseJsonBody(r, &req); err != nil {
+			fail(w, 400, "参数错误")
+			return
+		}
+		data, err := admin.NewCategoryLogic(svcCtx).Create(r.Context(), &req)
+		if err != nil {
+			fail(w, 500, "创建分类失败")
+			return
+		}
+		ok(w, data)
+	}
+}
+
+func AdminUpdateCategoryHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req types.UpdateCategoryReq
+		if err := httpx.ParseJsonBody(r, &req); err != nil {
+			fail(w, 400, "参数错误")
+			return
+		}
+		err := admin.NewCategoryLogic(svcCtx).Update(r.Context(), &req)
+		if err != nil {
+			fail(w, 500, "更新分类失败")
+			return
+		}
+		ok(w, nil)
+	}
+}
+
+func AdminDeleteCategoryHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req types.IDReq
+		if err := httpx.ParsePath(r, &req); err != nil {
+			fail(w, 400, "参数错误")
+			return
+		}
+		err := admin.NewCategoryLogic(svcCtx).Delete(r.Context(), req.ID)
+		if err != nil {
+			fail(w, 500, "删除失败")
+			return
+		}
+		ok(w, nil)
+	}
+}
+
+func AdminListCategoriesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req types.QueryCategoryReq
+		_ = httpx.Parse(r, &req)
+		if req.Page == 0 {
+			req.Page = 1
+		}
+		if req.PageSize == 0 {
+			req.PageSize = 100
+		}
+		list, total, err := admin.NewCategoryLogic(svcCtx).List(r.Context(), &req)
+		if err != nil {
+			fail(w, 500, "获取分类失败")
+			return
+		}
+		okPage(w, list, total, req.Page, req.PageSize)
+	}
+}
+
+// --- 标签管理 ---
+
+func AdminCreateTagHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req types.CreateTagReq
+		if err := httpx.ParseJsonBody(r, &req); err != nil {
+			fail(w, 400, "参数错误")
+			return
+		}
+		data, err := admin.NewTagLogic(svcCtx).Create(r.Context(), &req)
+		if err != nil {
+			fail(w, 500, "创建标签失败")
+			return
+		}
+		ok(w, data)
+	}
+}
+
+func AdminUpdateTagHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req types.UpdateTagReq
+		if err := httpx.ParseJsonBody(r, &req); err != nil {
+			fail(w, 400, "参数错误")
+			return
+		}
+		err := admin.NewTagLogic(svcCtx).Update(r.Context(), &req)
+		if err != nil {
+			fail(w, 500, "更新标签失败")
+			return
+		}
+		ok(w, nil)
+	}
+}
+
+func AdminDeleteTagHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req types.IDReq
+		if err := httpx.ParsePath(r, &req); err != nil {
+			fail(w, 400, "参数错误")
+			return
+		}
+		err := admin.NewTagLogic(svcCtx).Delete(r.Context(), req.ID)
+		if err != nil {
+			fail(w, 500, "删除失败")
+			return
+		}
+		ok(w, nil)
+	}
+}
+
+func AdminListTagsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req types.QueryTagReq
+		_ = httpx.Parse(r, &req)
+		if req.Page == 0 {
+			req.Page = 1
+		}
+		if req.PageSize == 0 {
+			req.PageSize = 100
+		}
+		list, total, err := admin.NewTagLogic(svcCtx).List(r.Context(), &req)
+		if err != nil {
+			fail(w, 500, "获取标签失败")
+			return
+		}
+		okPage(w, list, total, req.Page, req.PageSize)
+	}
+}
+
 // --- 文章管理 ---
 
 func AdminCreateArticleHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
@@ -19,7 +157,7 @@ func AdminCreateArticleHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			fail(w, 400, "参数错误")
 			return
 		}
-		data, err := admin.NewArticleLogic(svcCtx).Create(r.Context(), &req)
+		data, err := admin.NewArticleLogic(svcCtx).Create(r.Context(), &req, 0)
 		if err != nil {
 			fail(w, 500, "创建文章失败")
 			return
@@ -86,128 +224,6 @@ func AdminGetArticleHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		data, err := admin.NewArticleLogic(svcCtx).Get(r.Context(), req.ID)
 		if err != nil {
 			fail(w, 404, "文章不存在")
-			return
-		}
-		ok(w, data)
-	}
-}
-
-// --- 分类管理 ---
-
-func AdminCreateCategoryHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.CreateCategoryReq
-		if err := httpx.ParseJsonBody(r, &req); err != nil {
-			fail(w, 400, "参数错误")
-			return
-		}
-		data, err := admin.NewCategoryLogic(svcCtx).Create(r.Context(), &req)
-		if err != nil {
-			fail(w, 500, "创建分类失败")
-			return
-		}
-		ok(w, data)
-	}
-}
-
-func AdminUpdateCategoryHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.UpdateCategoryReq
-		if err := httpx.ParseJsonBody(r, &req); err != nil {
-			fail(w, 400, "参数错误")
-			return
-		}
-		err := admin.NewCategoryLogic(svcCtx).Update(r.Context(), &req)
-		if err != nil {
-			fail(w, 500, "更新分类失败")
-			return
-		}
-		ok(w, nil)
-	}
-}
-
-func AdminDeleteCategoryHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.IDReq
-		if err := httpx.ParsePath(r, &req); err != nil {
-			fail(w, 400, "参数错误")
-			return
-		}
-		err := admin.NewCategoryLogic(svcCtx).Delete(r.Context(), req.ID)
-		if err != nil {
-			fail(w, 500, "删除失败")
-			return
-		}
-		ok(w, nil)
-	}
-}
-
-func AdminListCategoriesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		data, err := admin.NewCategoryLogic(svcCtx).List(r.Context())
-		if err != nil {
-			fail(w, 500, "获取分类失败")
-			return
-		}
-		ok(w, data)
-	}
-}
-
-// --- 标签管理 ---
-
-func AdminCreateTagHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.CreateTagReq
-		if err := httpx.ParseJsonBody(r, &req); err != nil {
-			fail(w, 400, "参数错误")
-			return
-		}
-		data, err := admin.NewTagLogic(svcCtx).Create(r.Context(), &req)
-		if err != nil {
-			fail(w, 500, "创建标签失败")
-			return
-		}
-		ok(w, data)
-	}
-}
-
-func AdminUpdateTagHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.UpdateTagReq
-		if err := httpx.ParseJsonBody(r, &req); err != nil {
-			fail(w, 400, "参数错误")
-			return
-		}
-		err := admin.NewTagLogic(svcCtx).Update(r.Context(), &req)
-		if err != nil {
-			fail(w, 500, "更新标签失败")
-			return
-		}
-		ok(w, nil)
-	}
-}
-
-func AdminDeleteTagHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.IDReq
-		if err := httpx.ParsePath(r, &req); err != nil {
-			fail(w, 400, "参数错误")
-			return
-		}
-		err := admin.NewTagLogic(svcCtx).Delete(r.Context(), req.ID)
-		if err != nil {
-			fail(w, 500, "删除失败")
-			return
-		}
-		ok(w, nil)
-	}
-}
-
-func AdminListTagsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		data, err := admin.NewTagLogic(svcCtx).List(r.Context())
-		if err != nil {
-			fail(w, 500, "获取标签失败")
 			return
 		}
 		ok(w, data)
@@ -302,12 +318,20 @@ func AdminUpdateCommentStatusHandler(svcCtx *svc.ServiceContext) http.HandlerFun
 
 func AdminListFriendLinksHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		data, err := admin.NewFriendLogic(svcCtx).List(r.Context())
+		var req types.QueryFriendReq
+		_ = httpx.Parse(r, &req)
+		if req.Page == 0 {
+			req.Page = 1
+		}
+		if req.PageSize == 0 {
+			req.PageSize = 100
+		}
+		list, total, err := admin.NewFriendLogic(svcCtx).List(r.Context(), &req)
 		if err != nil {
 			fail(w, 500, "获取友链失败")
 			return
 		}
-		ok(w, data)
+		okPage(w, list, total, req.Page, req.PageSize)
 	}
 }
 
@@ -363,7 +387,7 @@ func AdminDeleteFriendLinkHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 func AdminListMessagesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.PageQuery
+		var req types.QueryMessageReq
 		if err := httpx.Parse(r, &req); err != nil {
 			fail(w, 400, "参数错误")
 			return
@@ -397,12 +421,20 @@ func AdminDeleteMessageHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 func AdminListPagesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		data, err := admin.NewPageLogic(svcCtx).List(r.Context())
+		var req types.QueryPageReq
+		_ = httpx.Parse(r, &req)
+		if req.Page == 0 {
+			req.Page = 1
+		}
+		if req.PageSize == 0 {
+			req.PageSize = 100
+		}
+		list, total, err := admin.NewPageLogic(svcCtx).List(r.Context(), &req)
 		if err != nil {
 			fail(w, 500, "获取页面失败")
 			return
 		}
-		ok(w, data)
+		okPage(w, list, total, req.Page, req.PageSize)
 	}
 }
 
@@ -487,12 +519,20 @@ func AdminSetSiteConfigHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 func AdminListRolesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		data, err := admin.NewRoleLogic(svcCtx).List(r.Context())
+		var req types.QueryRoleReq
+		_ = httpx.Parse(r, &req)
+		if req.Page == 0 {
+			req.Page = 1
+		}
+		if req.PageSize == 0 {
+			req.PageSize = 100
+		}
+		list, total, err := admin.NewRoleLogic(svcCtx).List(r.Context(), &req)
 		if err != nil {
 			fail(w, 500, "获取角色失败")
 			return
 		}
-		ok(w, data)
+		okPage(w, list, total, req.Page, req.PageSize)
 	}
 }
 

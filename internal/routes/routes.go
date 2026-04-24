@@ -41,6 +41,7 @@ func registerBlogHandlers(server *rest.Server, svcCtx *svc.ServiceContext) {
 		{Method: http.MethodGet, Path: "/blog-api/v1/pages", Handler: handler.ListPagesHandler(svcCtx)},
 		{Method: http.MethodGet, Path: "/blog-api/v1/pages/:slug", Handler: handler.GetPageBySlugHandler(svcCtx)},
 		{Method: http.MethodGet, Path: "/blog-api/v1/site/config", Handler: handler.GetSiteConfigHandler(svcCtx)},
+		{Method: http.MethodGet, Path: "/blog-api/v1/products", Handler: handler.ListProductsHandler(svcCtx)},
 	})
 
 	authRoutes := []rest.Route{
@@ -48,24 +49,21 @@ func registerBlogHandlers(server *rest.Server, svcCtx *svc.ServiceContext) {
 		{Method: http.MethodPost, Path: "/blog-api/v1/comments", Handler: handler.CreateCommentHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/blog-api/v1/messages", Handler: handler.CreateMessageHandler(svcCtx)},
 	}
-	server.AddRoutes(
-		rest.WithMiddlewares([]rest.Middleware{middleware.JWTAuthMiddleware(svcCtx)}, authRoutes...),
-	)
+	server.AddRoutes(rest.WithMiddlewares([]rest.Middleware{middleware.JWTAuthMiddleware(svcCtx)}, authRoutes...))
 }
 
-// ve-admin-element 路由注册
 func registerVeAdminHandlers(server *rest.Server, svcCtx *svc.ServiceContext) {
-	// 公开接口
+	stubs := handler.VeStubRoutes(svcCtx)
+
 	server.AddRoutes([]rest.Route{
 		{Method: http.MethodPost, Path: "/admin-api/v1/login", Handler: handler.VeLoginHandler(svcCtx)},
 	})
 
-	// 需要 JWT 认证的接口
 	protectedRoutes := []rest.Route{
-		// 认证
 		{Method: http.MethodGet, Path: "/admin-api/v1/logout", Handler: handler.VeLogoutHandler(svcCtx)},
+		{Method: http.MethodGet, Path: "/admin-api/v1/get_client_info", Handler: stubs["GET /admin-api/v1/get_client_info"]},
+		{Method: http.MethodPost, Path: "/admin-api/v1/refresh_token", Handler: stubs["POST /admin-api/v1/refresh_token"]},
 
-		// 用户信息
 		{Method: http.MethodGet, Path: "/admin-api/v1/user/get_user_info", Handler: handler.VeGetUserInfoHandler(svcCtx)},
 		{Method: http.MethodGet, Path: "/admin-api/v1/user/get_user_menus", Handler: handler.VeGetUserMenusHandler(svcCtx)},
 		{Method: http.MethodGet, Path: "/admin-api/v1/user/get_user_roles", Handler: handler.VeGetUserRolesHandler(svcCtx)},
@@ -73,8 +71,8 @@ func registerVeAdminHandlers(server *rest.Server, svcCtx *svc.ServiceContext) {
 		{Method: http.MethodPut, Path: "/admin-api/v1/user/update_user_info", Handler: handler.VeUpdateUserInfoHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/user/update_user_avatar", Handler: handler.VeUpdateUserAvatarHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/user/update_user_password", Handler: handler.VeUpdateUserPasswordHandler(svcCtx)},
+		{Method: http.MethodPost, Path: "/admin-api/v1/user/get_user_login_history_list", Handler: stubs["POST /admin-api/v1/user/get_user_login_history_list"]},
 
-		// 文章
 		{Method: http.MethodPost, Path: "/admin-api/v1/article/find_article_list", Handler: handler.VeFindArticleListHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/article/get_article", Handler: handler.VeGetArticleHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/article/add_article", Handler: handler.VeAddArticleHandler(svcCtx)},
@@ -84,41 +82,34 @@ func registerVeAdminHandlers(server *rest.Server, svcCtx *svc.ServiceContext) {
 		{Method: http.MethodPut, Path: "/admin-api/v1/article/update_article_delete", Handler: handler.VeUpdateArticleDeleteHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/article/export_article_list", Handler: handler.VeExportArticleListHandler(svcCtx)},
 
-		// 分类
 		{Method: http.MethodPost, Path: "/admin-api/v1/category/find_category_list", Handler: handler.VeFindCategoryListHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/category/add_category", Handler: handler.VeAddCategoryHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/category/update_category", Handler: handler.VeUpdateCategoryHandler(svcCtx)},
 		{Method: http.MethodDelete, Path: "/admin-api/v1/category/deletes_category", Handler: handler.VeDeletesCategoryHandler(svcCtx)},
 
-		// 标签
 		{Method: http.MethodPost, Path: "/admin-api/v1/tag/find_tag_list", Handler: handler.VeFindTagListHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/tag/add_tag", Handler: handler.VeAddTagHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/tag/update_tag", Handler: handler.VeUpdateTagHandler(svcCtx)},
 		{Method: http.MethodDelete, Path: "/admin-api/v1/tag/deletes_tag", Handler: handler.VeDeletesTagHandler(svcCtx)},
 
-		// 评论
 		{Method: http.MethodPost, Path: "/admin-api/v1/comment/find_comment_back_list", Handler: handler.VeFindCommentBackListHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/comment/update_comment_status", Handler: handler.VeUpdateCommentStatusHandler(svcCtx)},
 		{Method: http.MethodDelete, Path: "/admin-api/v1/comment/deletes_comment", Handler: handler.VeDeletesCommentHandler(svcCtx)},
 
-		// 友链
 		{Method: http.MethodPost, Path: "/admin-api/v1/friend/find_friend_list", Handler: handler.VeFindFriendListHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/friend/add_friend", Handler: handler.VeAddFriendHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/friend/update_friend", Handler: handler.VeUpdateFriendHandler(svcCtx)},
 		{Method: http.MethodDelete, Path: "/admin-api/v1/friend/deletes_friend", Handler: handler.VeDeletesFriendHandler(svcCtx)},
 
-		// 留言
 		{Method: http.MethodPost, Path: "/admin-api/v1/message/find_message_list", Handler: handler.VeFindMessageListHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/message/update_message_status", Handler: handler.VeUpdateMessageStatusHandler(svcCtx)},
 		{Method: http.MethodDelete, Path: "/admin-api/v1/message/deletes_message", Handler: handler.VeDeletesMessageHandler(svcCtx)},
 
-		// 页面
 		{Method: http.MethodPost, Path: "/admin-api/v1/page/find_page_list", Handler: handler.VeFindPageListHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/page/add_page", Handler: handler.VeAddPageHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/page/update_page", Handler: handler.VeUpdatePageHandler(svcCtx)},
 		{Method: http.MethodDelete, Path: "/admin-api/v1/page/delete_page", Handler: handler.VeDeletePageHandler(svcCtx)},
 
-		// 角色
 		{Method: http.MethodPost, Path: "/admin-api/v1/role/find_role_list", Handler: handler.VeFindRoleListHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/role/add_role", Handler: handler.VeAddRoleHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/role/update_role", Handler: handler.VeUpdateRoleHandler(svcCtx)},
@@ -127,21 +118,19 @@ func registerVeAdminHandlers(server *rest.Server, svcCtx *svc.ServiceContext) {
 		{Method: http.MethodPut, Path: "/admin-api/v1/role/update_role_menus", Handler: handler.VeUpdateRoleMenusHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/role/update_role_apis", Handler: handler.VeUpdateRoleApisHandler(svcCtx)},
 
-		// 菜单
 		{Method: http.MethodPost, Path: "/admin-api/v1/menu/find_menu_list", Handler: handler.VeFindMenuListHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/menu/add_menu", Handler: handler.VeAddMenuHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/menu/update_menu", Handler: handler.VeUpdateMenuHandler(svcCtx)},
 		{Method: http.MethodDelete, Path: "/admin-api/v1/menu/deletes_menu", Handler: handler.VeDeletesMenuHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/menu/sync_menu_list", Handler: handler.VeSyncMenuListHandler(svcCtx)},
+		{Method: http.MethodPost, Path: "/admin-api/v1/menu/clean_menu_list", Handler: handler.VeCleanMenuListHandler(svcCtx)},
 
-		// 账号管理
 		{Method: http.MethodPost, Path: "/admin-api/v1/account/find_account_list", Handler: handler.VeFindAccountListHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/account/find_account_online_list", Handler: handler.VeFindAccountOnlineListHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/account/update_account_status", Handler: handler.VeUpdateAccountStatusHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/account/update_account_roles", Handler: handler.VeUpdateAccountRolesHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/account/update_account_password", Handler: handler.VeUpdateAccountPasswordHandler(svcCtx)},
 
-		// 首页/网站
 		{Method: http.MethodGet, Path: "/admin-api/v1/admin", Handler: handler.VeGetAdminHomeInfoHandler(svcCtx)},
 		{Method: http.MethodGet, Path: "/admin-api/v1/admin/get_website_config", Handler: handler.VeGetWebsiteConfigHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/admin/update_website_config", Handler: handler.VeUpdateWebsiteConfigHandler(svcCtx)},
@@ -152,19 +141,59 @@ func registerVeAdminHandlers(server *rest.Server, svcCtx *svc.ServiceContext) {
 		{Method: http.MethodGet, Path: "/admin-api/v1/admin/get_system_state", Handler: handler.VeGetSystemStateHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/admin/get_user_area_stats", Handler: handler.VeGetUserAreaStatsHandler(svcCtx)},
 
-		// 通知
-			{Method: http.MethodPost, Path: "/admin-api/v1/notice/find_user_notice_list", Handler: handler.VeFindUserNoticeListHandler(svcCtx)},
+		{Method: http.MethodPost, Path: "/admin-api/v1/notice/find_user_notice_list", Handler: handler.VeFindUserNoticeListHandler(svcCtx)},
+		{Method: http.MethodPost, Path: "/admin-api/v1/notice/find_notice_list", Handler: stubs["POST /admin-api/v1/notice/find_notice_list"]},
+		{Method: http.MethodPost, Path: "/admin-api/v1/notice/add_notice", Handler: stubs["POST /admin-api/v1/notice/add_notice"]},
+		{Method: http.MethodGet, Path: "/admin-api/v1/notice/get_notice", Handler: stubs["GET /admin-api/v1/notice/get_notice"]},
+		{Method: http.MethodPut, Path: "/admin-api/v1/notice/update_notice", Handler: stubs["PUT /admin-api/v1/notice/update_notice"]},
+		{Method: http.MethodPut, Path: "/admin-api/v1/notice/update_notice_status", Handler: stubs["PUT /admin-api/v1/notice/update_notice_status"]},
 
-			// 文件上传
+		{Method: http.MethodPost, Path: "/admin-api/v1/api/find_api_list", Handler: stubs["POST /admin-api/v1/api/find_api_list"]},
+		{Method: http.MethodPost, Path: "/admin-api/v1/api/add_api", Handler: stubs["POST /admin-api/v1/api/add_api"]},
+		{Method: http.MethodPut, Path: "/admin-api/v1/api/update_api", Handler: stubs["PUT /admin-api/v1/api/update_api"]},
+		{Method: http.MethodDelete, Path: "/admin-api/v1/api/deletes_api", Handler: stubs["DELETE /admin-api/v1/api/deletes_api"]},
+		{Method: http.MethodPost, Path: "/admin-api/v1/api/sync_api_list", Handler: stubs["POST /admin-api/v1/api/sync_api_list"]},
+		{Method: http.MethodPost, Path: "/admin-api/v1/api/clean_api_list", Handler: stubs["POST /admin-api/v1/api/clean_api_list"]},
+
+		{Method: http.MethodPost, Path: "/admin-api/v1/album/find_album_list", Handler: handler.VeFindAlbumListHandler(svcCtx)},
+		{Method: http.MethodPost, Path: "/admin-api/v1/album/add_album", Handler: handler.VeAddAlbumHandler(svcCtx)},
+		{Method: http.MethodPost, Path: "/admin-api/v1/album/get_album", Handler: handler.VeGetAlbumHandler(svcCtx)},
+		{Method: http.MethodPut, Path: "/admin-api/v1/album/update_album", Handler: handler.VeUpdateAlbumHandler(svcCtx)},
+		{Method: http.MethodDelete, Path: "/admin-api/v1/album/deletes_album", Handler: handler.VeDeletesAlbumHandler(svcCtx)},
+		{Method: http.MethodPut, Path: "/admin-api/v1/album/update_album_delete", Handler: handler.VeUpdateAlbumDeleteHandler(svcCtx)},
+
+		{Method: http.MethodPost, Path: "/admin-api/v1/photo/find_photo_list", Handler: handler.VeFindPhotoListHandler(svcCtx)},
+		{Method: http.MethodPost, Path: "/admin-api/v1/photo/add_photo", Handler: handler.VeAddPhotoHandler(svcCtx)},
+		{Method: http.MethodPut, Path: "/admin-api/v1/photo/update_photo", Handler: handler.VeUpdatePhotoHandler(svcCtx)},
+		{Method: http.MethodDelete, Path: "/admin-api/v1/photo/deletes_photo", Handler: handler.VeDeletesPhotoHandler(svcCtx)},
+		{Method: http.MethodPut, Path: "/admin-api/v1/photo/update_photo_delete", Handler: handler.VeUpdatePhotoDeleteHandler(svcCtx)},
+
+		{Method: http.MethodPost, Path: "/admin-api/v1/talk/find_talk_list", Handler: stubs["POST /admin-api/v1/talk/find_talk_list"]},
+		{Method: http.MethodPost, Path: "/admin-api/v1/talk/get_talk", Handler: stubs["POST /admin-api/v1/talk/get_talk"]},
+		{Method: http.MethodPost, Path: "/admin-api/v1/talk/add_talk", Handler: stubs["POST /admin-api/v1/talk/add_talk"]},
+		{Method: http.MethodPut, Path: "/admin-api/v1/talk/update_talk", Handler: stubs["PUT /admin-api/v1/talk/update_talk"]},
+		{Method: http.MethodDelete, Path: "/admin-api/v1/talk/delete_talk", Handler: stubs["DELETE /admin-api/v1/talk/delete_talk"]},
+
+		{Method: http.MethodPost, Path: "/admin-api/v1/operation_log/find_operation_log_list", Handler: stubs["POST /admin-api/v1/operation_log/find_operation_log_list"]},
+		{Method: http.MethodDelete, Path: "/admin-api/v1/operation_log/deletes_operation_log", Handler: stubs["DELETE /admin-api/v1/operation_log/deletes_operation_log"]},
+		{Method: http.MethodPost, Path: "/admin-api/v1/file_log/find_file_log_list", Handler: stubs["POST /admin-api/v1/file_log/find_file_log_list"]},
+		{Method: http.MethodDelete, Path: "/admin-api/v1/file_log/deletes_file_log", Handler: stubs["DELETE /admin-api/v1/file_log/deletes_file_log"]},
+		{Method: http.MethodPost, Path: "/admin-api/v1/login_log/find_login_log_list", Handler: stubs["POST /admin-api/v1/login_log/find_login_log_list"]},
+		{Method: http.MethodDelete, Path: "/admin-api/v1/login_log/deletes_login_log", Handler: stubs["DELETE /admin-api/v1/login_log/deletes_login_log"]},
+		{Method: http.MethodPost, Path: "/admin-api/v1/visit_log/find_visit_log_list", Handler: stubs["POST /admin-api/v1/visit_log/find_visit_log_list"]},
+		{Method: http.MethodDelete, Path: "/admin-api/v1/visit_log/deletes_visit_log", Handler: stubs["DELETE /admin-api/v1/visit_log/deletes_visit_log"]},
+		{Method: http.MethodPost, Path: "/admin-api/v1/visitor/find_visitor_list", Handler: stubs["POST /admin-api/v1/visitor/find_visitor_list"]},
+
 		{Method: http.MethodPost, Path: "/admin-api/v1/upload/upload_file", Handler: handler.VeUploadFileHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/upload/multi_upload_file", Handler: handler.VeMultiUploadFileHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/upload/list_upload_file", Handler: handler.VeListUploadFileHandler(svcCtx)},
 		{Method: http.MethodDelete, Path: "/admin-api/v1/upload/deletes_upload_file", Handler: handler.VeDeletesUploadFileHandler(svcCtx)},
+
+		{Method: http.MethodPost, Path: "/admin-api/v1/product/find_product_list", Handler: handler.VeFindProductListHandler(svcCtx)},
+		{Method: http.MethodPost, Path: "/admin-api/v1/product/add_product", Handler: handler.VeAddProductHandler(svcCtx)},
+		{Method: http.MethodPut, Path: "/admin-api/v1/product/update_product", Handler: handler.VeUpdateProductHandler(svcCtx)},
+		{Method: http.MethodDelete, Path: "/admin-api/v1/product/deletes_product", Handler: handler.VeDeletesProductHandler(svcCtx)},
 	}
 
-	server.AddRoutes(
-		rest.WithMiddlewares([]rest.Middleware{
-			middleware.JWTAuthMiddleware(svcCtx),
-		}, protectedRoutes...),
-	)
+	server.AddRoutes(rest.WithMiddlewares([]rest.Middleware{middleware.JWTAuthMiddleware(svcCtx)}, protectedRoutes...))
 }

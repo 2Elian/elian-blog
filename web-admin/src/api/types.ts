@@ -444,14 +444,18 @@ export interface OperationLogBackVO {
 }
 
 export interface PageBackVO {
-  id?: number; // 页面id
-  page_name: string; // 页面名
-  page_label: string; // 页面标签
-  page_cover: string; // 页面封面
-  is_carousel: number; // 是否轮播
-  carousel_covers: string[]; // 轮播封面
-  created_at: number; // 创建时间
-  updated_at: number; // 更新时间
+  id?: number;
+  title?: string;
+  page_name?: string;
+  slug?: string;
+  page_label?: string;
+  cover?: string;
+  page_cover?: string;
+  content?: string;
+  sort?: number;
+  status?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface PageQuery {

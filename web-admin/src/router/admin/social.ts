@@ -6,19 +6,14 @@ export default {
   path: "/social",
   name: "",
   component: Layout,
-  redirect: "/social/about",
+  redirect: "/social/friend",
   meta: {
     title: "社交管理",
     icon: "el-icon-link",
     rank: 3,
+    hidden: true,
   },
   children: [
-    {
-      path: "/social/talk",
-      component: () => import("@/views/admin/social/talk/Talk.vue"),
-      name: "Talk",
-      meta: { title: "说说管理", keepAlive: true },
-    },
     {
       path: "/social/friend",
       component: () => import("@/views/admin/social/friend/Friend.vue"),

@@ -5,7 +5,7 @@
       <el-form :inline="true">
         <el-form-item label="页面名称">
           <el-input
-            v-model="queryParams.page_name"
+            v-model="queryParams.title"
             style="width: 200px"
             placeholder="请输入页面名称"
             clearable
@@ -53,8 +53,8 @@
                 </template>
               </el-dropdown>
             </div>
-            <el-image :src="item.page_cover" class="page-cover" fit="cover" />
-            <div class="page-name">{{ item.page_name }}</div>
+            <el-image :src="getImageUrl(item.cover)" class="page-cover" fit="cover" />
+            <div class="page-name">{{ item.title }}</div>
           </div>
         </el-col>
       </el-row>
@@ -79,13 +79,13 @@
         </div>
       </template>
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px" size="default">
-        <el-form-item label="页面名称" prop="page_name">
-          <el-input v-model="formData.page_name" />
+        <el-form-item label="页面名称" prop="title">
+          <el-input v-model="formData.title" />
         </el-form-item>
-        <el-form-item label="页面标签" prop="page_label">
-          <el-input v-model="formData.page_label" />
+        <el-form-item label="页面标签" prop="slug">
+          <el-input v-model="formData.slug" />
         </el-form-item>
-        <el-form-item label="上传封面" prop="page_cover">
+        <el-form-item label="上传封面" prop="cover">
           <el-radio-group v-model="uploadType">
             <el-radio value="upload">上传文件</el-radio>
             <el-radio value="select">选择文件</el-radio>
@@ -93,9 +93,9 @@
           </el-radio-group>
         </el-form-item>
         <option-image-upload
-          v-model="formData.page_cover"
+          v-model="formData.cover"
           :upload-type="uploadType"
-          upload-path="blog/page/"
+          upload-path="pages/"
         />
       </el-form>
       <template #footer>
@@ -111,12 +111,20 @@ import { computed, onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
 import { PageAPI } from "@/api/page";
-import type { NewPageReq, PageBackVO, QueryPageReq } from "@/api/types";
+import type { PageBackVO, QueryPageReq } from "@/api/types";
 import "@/styles/table.scss";
 import RightToolbar from "@/components/RightToolbar/index.vue";
 import OptionImageUpload from "@/components/Upload/OptionImageUpload.vue";
 
-// 响应式数据
+const API_BASE = "http://localhost:8080";
+
+function getImageUrl(cover: string | undefined): string {
+  if (!cover) return "";
+  if (cover.startsWith("http")) return cover;
+  if (cover.startsWith("/")) return API_BASE + cover;
+  return API_BASE + "/" + cover;
+}
+
 const route = useRoute();
 const router = useRouter();
 const loading = ref(false);
@@ -128,30 +136,40 @@ const queryParams = ref<QueryPageReq>({
 const pageList = ref<PageBackVO[]>([]);
 const count = ref(0);
 
-// 表单相关
 const modalVisible = ref(false);
 const formRef = ref<FormInstance>();
 const uploadType = ref("upload");
 
-const initFormData: NewPageReq = {
+interface PageFormData {
+  id: number;
+  title: string;
+  slug: string;
+  cover: string;
+  content: string;
+  status: number;
+  sort: number;
+}
+
+const initFormData: PageFormData = {
   id: 0,
-  page_name: "",
-  page_label: "",
-  page_cover: "",
+  title: "",
+  slug: "",
+  cover: "",
+  content: "",
+  status: 1,
+  sort: 0,
 };
 
-const formData = reactive<NewPageReq>({ ...initFormData });
+const formData = reactive<PageFormData>({ ...initFormData });
 
-const formRules: FormRules<NewPageReq> = {
-  page_name: [{ required: true, message: "请输入页面名称", trigger: "blur" }],
-  page_label: [{ required: true, message: "请输入页面标签", trigger: "blur" }],
-  page_cover: [{ required: true, message: "请上传页面封面", trigger: "blur" }],
+const formRules: FormRules<PageFormData> = {
+  title: [{ required: true, message: "请输入页面名称", trigger: "blur" }],
+  slug: [{ required: true, message: "请输入页面标签", trigger: "blur" }],
+  cover: [{ required: true, message: "请上传页面封面", trigger: "blur" }],
 };
 
-// 计算属性
 const dialogTitle = computed(() => (formData.id === 0 ? "添加页面" : "编辑页面"));
 
-// 分页处理
 const handleSizeChange = (size: number) => {
   queryParams.value.page_size = size;
   refreshList();
@@ -162,13 +180,12 @@ const handleCurrentChange = (current: number) => {
   refreshList();
 };
 
-// 列表操作
 const refreshList = async () => {
   loading.value = true;
   try {
     const res = await PageAPI.findPageListApi(queryParams.value);
-    pageList.value = res.data.list;
-    count.value = res.data.total;
+    pageList.value = res.data.list || [];
+    count.value = res.data.total || 0;
   } finally {
     loading.value = false;
   }
@@ -182,7 +199,6 @@ const resetSearch = () => {
   refreshList();
 };
 
-// 表单操作
 const handleAdd = () => {
   Object.assign(formData, initFormData);
   uploadType.value = "upload";
@@ -190,7 +206,13 @@ const handleAdd = () => {
 };
 
 const handleEdit = (data: PageBackVO) => {
-  Object.assign(formData, data);
+  formData.id = data.id;
+  formData.title = data.title || data.page_name || "";
+  formData.slug = data.slug || data.page_label || "";
+  formData.cover = data.cover || data.page_cover || "";
+  formData.content = data.content || "";
+  formData.status = data.status || 1;
+  formData.sort = data.sort || 0;
   uploadType.value = "upload";
   modalVisible.value = true;
 };
@@ -220,23 +242,30 @@ const handleSubmit = async () => {
     const valid = await formRef.value.validate();
     if (!valid) return;
 
-    const data = { ...formData };
-    if (data.id === 0) {
-      await PageAPI.addPageApi(data);
-      ElMessage.success("创建成功");
-    } else {
+    const data: any = {
+      title: formData.title,
+      slug: formData.slug,
+      cover: formData.cover,
+      content: formData.content,
+      status: formData.status,
+      sort: formData.sort,
+    };
+
+    if (formData.id !== 0) {
+      data.id = formData.id;
       await PageAPI.updatePageApi(data);
       ElMessage.success("编辑成功");
+    } else {
+      await PageAPI.addPageApi(data);
+      ElMessage.success("创建成功");
     }
 
     modalVisible.value = false;
     refreshList();
   } catch (error) {
-    // 错误已由API处理
   }
 };
 
-// 初始化
 onMounted(() => {
   refreshList();
 });

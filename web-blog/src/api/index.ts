@@ -35,13 +35,9 @@ export const getRecentComments = () => http.get('/comments/recent')
 export const postComment = (data: { article_id: number; content: string; parent_id?: number }) =>
   http.post('/comments', data)
 
-// Friend Links
-export const getFriendLinks = () => http.get('/friend-links')
-
-// Messages
-export const getMessages = (params?: { page?: number; page_size?: number }) =>
-  http.get('/messages', { params })
-export const postMessage = (data: { content: string }) => http.post('/messages', data)
+// Products
+export const getProducts = (params?: { page?: number; page_size?: number }) =>
+  http.get('/products', { params })
 
 // Pages
 export const getPages = () => http.get('/pages')

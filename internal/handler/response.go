@@ -1,11 +1,10 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"elian-blog/internal/types"
-
-	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 // VeResponse ve-admin-element 期望的响应格式
@@ -17,9 +16,14 @@ type VeResponse struct {
 	TraceID string      `json:"trace_id"`
 }
 
+func writeJSON(w http.ResponseWriter, v interface{}) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(w).Encode(v)
+}
+
 // veOk 成功响应 (code: 200)
 func veOk(w http.ResponseWriter, data interface{}) {
-	httpx.OkJson(w, VeResponse{
+	writeJSON(w, VeResponse{
 		Flag:    0,
 		Code:    200,
 		Data:    data,
@@ -35,7 +39,7 @@ func veOkPage(w http.ResponseWriter, list interface{}, total int64, page, pageSi
 
 // veOkMsg 成功响应带消息
 func veOkMsg(w http.ResponseWriter, msg string, data interface{}) {
-	httpx.OkJson(w, VeResponse{
+	writeJSON(w, VeResponse{
 		Flag:    0,
 		Code:    200,
 		Data:    data,
@@ -46,7 +50,7 @@ func veOkMsg(w http.ResponseWriter, msg string, data interface{}) {
 
 // veFail 错误响应
 func veFail(w http.ResponseWriter, code int, msg string) {
-	httpx.OkJson(w, VeResponse{
+	writeJSON(w, VeResponse{
 		Flag:    0,
 		Code:    code,
 		Data:    nil,
@@ -82,7 +86,7 @@ func veInternalError(w http.ResponseWriter, msg string) {
 
 // --- 旧响应格式兼容 (blog API) ---
 func ok(w http.ResponseWriter, data interface{}) {
-	httpx.OkJson(w, types.Body{Code: 0, Message: "success", Data: data})
+	writeJSON(w, types.Body{Code: 0, Message: "success", Data: data})
 }
 
 func okPage(w http.ResponseWriter, list interface{}, total int64, page, pageSize int) {
@@ -90,5 +94,5 @@ func okPage(w http.ResponseWriter, list interface{}, total int64, page, pageSize
 }
 
 func fail(w http.ResponseWriter, code int, msg string) {
-	httpx.OkJson(w, types.Body{Code: code, Message: msg})
+	writeJSON(w, types.Body{Code: code, Message: msg})
 }

@@ -23,3 +23,6 @@ Thumbs.db
 
 # Upload directory
 uploads/
+
+# create admin account
+/cmd/create-admin/

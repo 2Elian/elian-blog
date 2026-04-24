@@ -28,6 +28,9 @@ type ServiceContext struct {
 	RoleDao         *dao.RoleDao
 	MenuDao         *dao.MenuDao
 	OperationLogDao *dao.OperationLogDao
+	AlbumDao        *dao.AlbumDao
+	PhotoDao        *dao.PhotoDao
+	ProductDao      *dao.ProductDao
 }
 
 func NewServiceContext(c config.Config, db *gorm.DB, rdb *redis.Client, log *zap.Logger) *ServiceContext {
@@ -48,5 +51,8 @@ func NewServiceContext(c config.Config, db *gorm.DB, rdb *redis.Client, log *zap
 		RoleDao:         dao.NewRoleDao(db),
 		MenuDao:         dao.NewMenuDao(db),
 		OperationLogDao: dao.NewOperationLogDao(db),
+		AlbumDao:        dao.NewAlbumDao(db),
+		PhotoDao:        dao.NewPhotoDao(db),
+		ProductDao:      dao.NewProductDao(db),
 	}
 }

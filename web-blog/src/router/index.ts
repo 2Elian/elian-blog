@@ -37,16 +37,10 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '标签' }
       },
       {
-        path: 'friends',
-        name: 'Friends',
-        component: () => import('@/views/Friends.vue'),
-        meta: { title: '友链' }
-      },
-      {
-        path: 'messages',
-        name: 'Messages',
-        component: () => import('@/views/Messages.vue'),
-        meta: { title: '留言板' }
+        path: 'products',
+        name: 'Products',
+        component: () => import('@/views/Products.vue'),
+        meta: { title: '产品' }
       },
       {
         path: 'about',
@@ -77,9 +71,9 @@ router.beforeEach((to, _from, next) => {
   const title = (to.meta.title as string) || 'Elian Blog'
   document.title = `${title} - Elian Blog`
 
-  // 首页和登录页不需要认证
-  const publicPages = ['/', '/login']
-  if (publicPages.includes(to.path)) {
+  // 公开页面不需要认证
+  const publicPages = ['/', '/login', '/blog', '/archive', '/tags', '/products', '/about']
+  if (publicPages.includes(to.path) || to.path.startsWith('/article/')) {
     next()
     return
   }

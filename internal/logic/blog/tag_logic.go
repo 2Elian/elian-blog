@@ -22,13 +22,12 @@ func (l *TagLogic) List(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	// 转换为 TagVO 列表
 	result := make([]types.TagVO, 0, len(tags))
 	for _, tag := range tags {
 		result = append(result, types.TagVO{
-			ID:    tag.ID,
-			Name:  tag.Name,
-			Color: tag.Color,
+			ID:      tag.ID,
+			TagName: tag.Name,
+			Color:   tag.Color,
 		})
 	}
 

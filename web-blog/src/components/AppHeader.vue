@@ -92,8 +92,7 @@ import {
   BookOutline,
   TimeOutline,
   PricetagOutline,
-  PersonOutline,
-  ChatbubblesOutline,
+  CubeOutline,
   MenuOutline
 } from '@vicons/ionicons5'
 import { useUserStore } from '@/stores/user'
@@ -113,8 +112,7 @@ const navLinks = [
   { path: '/blog', text: '博客', icon: BookOutline },
   { path: '/archive', text: '归档', icon: TimeOutline },
   { path: '/tags', text: '标签', icon: PricetagOutline },
-  { path: '/friends', text: '友链', icon: PersonOutline },
-  { path: '/messages', text: '留言', icon: ChatbubblesOutline }
+  { path: '/products', text: '产品', icon: CubeOutline }
 ]
 
 const userOptions = [

@@ -19,6 +19,12 @@ func ListArticlesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			fail(w, 400, "参数错误")
 			return
 		}
+		if req.Page <= 0 {
+			req.Page = 1
+		}
+		if req.PageSize <= 0 {
+			req.PageSize = 10
+		}
 		list, total, err := blog.NewArticleLogic(svcCtx).ListArticles(r.Context(), &req)
 		if err != nil {
 			fail(w, 500, "获取文章失败")
@@ -50,6 +56,12 @@ func SearchArticlesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		if err := httpx.Parse(r, &req); err != nil {
 			fail(w, 400, "参数错误")
 			return
+		}
+		if req.Page <= 0 {
+			req.Page = 1
+		}
+		if req.PageSize <= 0 {
+			req.PageSize = 10
 		}
 		list, total, err := blog.NewArticleLogic(svcCtx).ListArticles(r.Context(), &req)
 		if err != nil {
@@ -198,6 +210,12 @@ func ListMessagesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			fail(w, 400, "参数错误")
 			return
 		}
+		if req.Page <= 0 {
+			req.Page = 1
+		}
+		if req.PageSize <= 0 {
+			req.PageSize = 10
+		}
 		data, err := blog.NewMessageLogic(svcCtx).List(r.Context(), &req)
 		if err != nil {
 			fail(w, 500, "获取留言失败")
@@ -264,5 +282,57 @@ func GetSiteConfigHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 		ok(w, data)
+	}
+}
+
+// --- 产品 ---
+
+func ListProductsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req types.PageQuery
+		if err := httpx.Parse(r, &req); err != nil {
+			req.Page = 1
+			req.PageSize = 100
+		}
+		if req.Page <= 0 {
+			req.Page = 1
+		}
+		if req.PageSize <= 0 {
+			req.PageSize = 100
+		}
+		products, total, err := svcCtx.ProductDao.List(req.Page, req.PageSize)
+		if err != nil {
+			fail(w, 500, "获取产品失败")
+			return
+		}
+		type ProductVO struct {
+			ID          uint    `json:"id"`
+			Name        string  `json:"name"`
+			Description string  `json:"description"`
+			Price       float64 `json:"price"`
+			Cover       string  `json:"cover"`
+			Status      int     `json:"status"`
+			Sort        int     `json:"sort"`
+			Type        int     `json:"type"`
+			Link        string  `json:"link"`
+		}
+		list := make([]ProductVO, 0, len(products))
+		for _, p := range products {
+			if p.Status != 1 {
+				continue
+			}
+			list = append(list, ProductVO{
+				ID:          p.ID,
+				Name:        p.Name,
+				Description: p.Description,
+				Price:       p.Price,
+				Cover:       p.Cover,
+				Status:      p.Status,
+				Sort:        p.Sort,
+				Type:        p.Type,
+				Link:        p.Link,
+			})
+		}
+		okPage(w, list, total, req.Page, req.PageSize)
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"elian-blog/internal/svc"
 	"elian-blog/internal/utils"
@@ -58,6 +59,10 @@ func JWTAuthMiddleware(svcCtx *svc.ServiceContext) func(http.HandlerFunc) http.H
 			ctx := context.WithValue(r.Context(), UserIDKey, claims.UserID)
 			ctx = context.WithValue(ctx, UsernameKey, claims.Username)
 			ctx = context.WithValue(ctx, RoleKey, claims.Role)
+
+			// Track online user in Redis (5 minute TTL)
+			onlineKey := fmt.Sprintf("online:%d", claims.UserID)
+			svcCtx.RDB.Set(ctx, onlineKey, fmt.Sprintf("%d", time.Now().Unix()), 5*time.Minute)
 
 			next(w, r.WithContext(ctx))
 		}

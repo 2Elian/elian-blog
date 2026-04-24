@@ -7,7 +7,7 @@ type Article struct {
 	Summary    string   `json:"summary" gorm:"size:500"`
 	Content    string   `json:"content" gorm:"type:longtext;not null"`
 	Cover      string   `json:"cover" gorm:"size:500"`
-	CategoryID uint     `json:"category_id" gorm:"index"`
+	CategoryID *uint    `json:"category_id" gorm:"index"`
 	AuthorID   uint     `json:"author_id" gorm:"index"`
 	Status     int      `json:"status" gorm:"default:0;comment:0-草稿 1-公开 2-私密"`
 	IsTop      int      `json:"is_top" gorm:"default:0;comment:0-否 1-是"`

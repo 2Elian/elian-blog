@@ -3,6 +3,7 @@ package blog
 import (
 	"context"
 	"errors"
+	"time"
 
 	"elian-blog/internal/model"
 	"elian-blog/internal/svc"
@@ -84,14 +85,15 @@ func (l *AuthLogic) Register(ctx context.Context, req *types.RegisterReq) (inter
 	}
 
 	user := &model.User{
-		Username: req.Username,
-		Password: hashedPwd,
-		Nickname: req.Username,
-		Email:    req.Email,
-		Avatar:   req.Avatar,
-		Intro:    req.Intro,
-		Website:  req.Website,
-		Status:   1,
+		Username:  req.Username,
+		Password:  hashedPwd,
+		Nickname:  req.Username,
+		Email:     req.Email,
+		Avatar:    req.Avatar,
+		Intro:     req.Intro,
+		Website:   req.Website,
+		Status:    1,
+		LastLogin: time.Now(),
 	}
 
 	if err := l.svcCtx.UserDao.Create(user); err != nil {

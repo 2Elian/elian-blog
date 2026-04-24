@@ -20,10 +20,10 @@ export default {
       meta: { title: "评论管理", keepAlive: true },
     },
     {
-      path: "/news/message",
-      component: () => import("@/views/admin/news/message/Message.vue"),
-      name: "Message",
-      meta: { title: "留言管理", keepAlive: true },
+      path: "/news/ai-assistant",
+      component: () => import("@/views/admin/news/ai-assistant/AiAssistant.vue"),
+      name: "AiAssistant",
+      meta: { title: "AI助手", keepAlive: true },
     },
   ],
 } satisfies RouteRecordRaw;

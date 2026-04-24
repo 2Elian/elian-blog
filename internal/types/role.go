@@ -1,5 +1,17 @@
 package types
 
+type RoleBackVO struct {
+	ID          uint   `json:"id"`
+	ParentID    int    `json:"parent_id"`
+	RoleKey     string `json:"role_key"`
+	RoleLabel   string `json:"role_label"`
+	RoleComment string `json:"role_comment"`
+	IsDefault   int    `json:"is_default"`
+	Status      int    `json:"status"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+}
+
 type RoleVO struct {
 	ID          uint   `json:"id"`
 	Name        string `json:"name"`
@@ -9,23 +21,37 @@ type RoleVO struct {
 }
 
 type CreateRoleReq struct {
-	Name        string `json:"name"`
-	Label       string `json:"label"`
-	Description string `json:"description,optional"`
-	Sort        int    `json:"sort,optional"`
+	RoleKey     string `json:"role_key"`
+	RoleLabel   string `json:"role_label"`
+	RoleComment string `json:"role_comment,optional"`
+	IsDefault   int    `json:"is_default,optional"`
+	Status      int    `json:"status,optional"`
 }
 
 type UpdateRoleReq struct {
 	ID          uint   `json:"id"`
-	Name        string `json:"name,optional"`
-	Label       string `json:"label,optional"`
-	Description string `json:"description,optional"`
-	Sort        int    `json:"sort,optional"`
+	RoleKey     string `json:"role_key,optional"`
+	RoleLabel   string `json:"role_label,optional"`
+	RoleComment string `json:"role_comment,optional"`
+	IsDefault   int    `json:"is_default,optional"`
+	Status      int    `json:"status,optional"`
+}
+
+type QueryRoleReq struct {
+	PageQuery
+	RoleKey   string `json:"role_key,optional" form:"role_key,optional"`
+	RoleLabel string `json:"role_label,optional" form:"role_label,optional"`
+	Status    int    `json:"status,optional" form:"status,optional"`
 }
 
 type UpdateRoleMenusReq struct {
 	ID      uint   `json:"id"`
 	MenuIDs []uint `json:"menu_ids"`
+}
+
+type UpdateRoleApisReq struct {
+	RoleID uint   `json:"role_id"`
+	ApiIDs []uint `json:"api_ids"`
 }
 
 type MenuMetaVO struct {
@@ -49,6 +75,19 @@ type MenuVO struct {
 	Sort      int        `json:"sort"`
 	Meta      MenuMetaVO `json:"meta"`
 	Children  []MenuVO   `json:"children"`
+}
+
+type MenuBackVO struct {
+	ID        uint         `json:"id"`
+	ParentID  uint         `json:"parent_id"`
+	Name      string       `json:"name"`
+	Path      string       `json:"path"`
+	Component string       `json:"component"`
+	Redirect  string       `json:"redirect"`
+	Meta      MenuMetaVO   `json:"meta"`
+	Children  []MenuBackVO `json:"children"`
+	CreatedAt string       `json:"created_at"`
+	UpdatedAt string       `json:"updated_at"`
 }
 
 type CreateMenuReq struct {

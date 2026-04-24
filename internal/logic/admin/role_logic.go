@@ -16,21 +16,31 @@ func NewRoleLogic(svcCtx *svc.ServiceContext) *RoleLogic {
 	return &RoleLogic{svcCtx: svcCtx}
 }
 
-func (l *RoleLogic) List(ctx context.Context) (interface{}, error) {
-	return l.svcCtx.RoleDao.List()
+func (l *RoleLogic) List(ctx context.Context, req *types.QueryRoleReq) (interface{}, int64, error) {
+	roles, err := l.svcCtx.RoleDao.List()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	list := make([]types.RoleBackVO, 0, len(roles))
+	for _, role := range roles {
+		list = append(list, toRoleBackVO(&role))
+	}
+
+	total := int64(len(list))
+	return list, total, nil
 }
 
 func (l *RoleLogic) Create(ctx context.Context, req *types.CreateRoleReq) (interface{}, error) {
 	role := &model.Role{
-		Name:        req.Name,
-		Label:       req.Label,
-		Description: req.Description,
-		Sort:        req.Sort,
+		Name:        req.RoleLabel,
+		Label:       req.RoleKey,
+		Description: req.RoleComment,
 	}
 	if err := l.svcCtx.RoleDao.Create(role); err != nil {
 		return nil, err
 	}
-	return role, nil
+	return toRoleBackVO(role), nil
 }
 
 func (l *RoleLogic) Update(ctx context.Context, req *types.UpdateRoleReq) error {
@@ -39,17 +49,14 @@ func (l *RoleLogic) Update(ctx context.Context, req *types.UpdateRoleReq) error 
 		return err
 	}
 
-	if req.Name != "" {
-		role.Name = req.Name
+	if req.RoleLabel != "" {
+		role.Name = req.RoleLabel
 	}
-	if req.Label != "" {
-		role.Label = req.Label
+	if req.RoleKey != "" {
+		role.Label = req.RoleKey
 	}
-	if req.Description != "" {
-		role.Description = req.Description
-	}
-	if req.Sort != 0 {
-		role.Sort = req.Sort
+	if req.RoleComment != "" {
+		role.Description = req.RoleComment
 	}
 
 	return l.svcCtx.RoleDao.Update(role)
@@ -71,4 +78,17 @@ func (l *RoleLogic) UpdateMenus(ctx context.Context, req *types.UpdateRoleMenusR
 	}
 
 	return l.svcCtx.RoleDao.UpdateMenus(role, menus)
+}
+
+func toRoleBackVO(role *model.Role) types.RoleBackVO {
+	return types.RoleBackVO{
+		ID:          role.ID,
+		ParentID:    0,
+		RoleKey:     role.Label,
+		RoleLabel:   role.Name,
+		RoleComment: role.Description,
+		Status:      role.Status,
+		CreatedAt:   formatTime(role.CreatedAt),
+		UpdatedAt:   formatTime(role.UpdatedAt),
+	}
 }

@@ -5,7 +5,7 @@ export const LoginLogAPI = {
   /** 查询登录日志 */
   findLoginLogListApi(data?: QueryLoginLogReq): Promise<IApiResponse<PageResp>> {
     return request({
-      url: "/admin-api/v1/file_log/find_login_log_list",
+      url: "/admin-api/v1/login_log/find_login_log_list",
       method: "POST",
       data: data,
     });

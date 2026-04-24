@@ -18,8 +18,8 @@
           <div class="link-group">
             <h4>更多</h4>
             <router-link to="/tags">标签</router-link>
-            <router-link to="/friends">友链</router-link>
-            <router-link to="/messages">留言</router-link>
+            <router-link to="/products">产品</router-link>
+            <router-link to="/about">关于</router-link>
           </div>
         </div>
       </div>

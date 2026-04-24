@@ -5,6 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
@@ -26,48 +29,44 @@ var configFile = flag.String("f", "configs/config.yaml", "the config file")
 func main() {
 	flag.Parse()
 
-	// 加载配置
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 
-	// 初始化日志
 	log := logger.New(c.AppLog.Level)
 	zap.ReplaceGlobals(log)
 
-	// 初始化数据库
 	db, err := initDB(&c)
 	if err != nil {
 		log.Fatal("Failed to connect database", zap.Error(err))
 	}
 
-	// 自动迁移
 	_ = model.AutoMigrate(db)
-
-	// 初始化菜单数据
 	model.SeedMenus(db)
 
-	// 初始化 Redis
 	rdb, err := initRedis(&c)
 	if err != nil {
 		log.Fatal("Failed to connect redis", zap.Error(err))
 	}
 
-	// 创建 ServiceContext
 	svcCtx := svc.NewServiceContext(c, db, rdb, log)
-	// 初始化默认角色
 	initRoles(svcCtx)
 
-	// 创建 HTTP 服务器
 	server := rest.MustNewServer(c.RestConf, rest.WithCors())
 	defer server.Stop()
 
-	// 全局 CORS 中间件
 	server.Use(corsMiddleware)
 
-	// 注册路由
 	routes.RegisterHandlers(server, svcCtx)
 
-	// 打印路由信息
+	// Register uploads file server - match /uploads/:subdir/:year/:month/:file
+	// This covers the pattern: /uploads/misc/2026/04/file.jpg
+	uploadsHandler := http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads")))
+	server.AddRoute(rest.Route{
+		Method:  http.MethodGet,
+		Path:    "/uploads/:a/:b/:c/:d",
+		Handler: uploadsHandler.ServeHTTP,
+	})
+
 	server.PrintRoutes()
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
@@ -125,7 +124,6 @@ func initRedis(c *config.Config) (*redis.Client, error) {
 		DB:       c.Redis.DB,
 	})
 
-	// 测试连接
 	_, err := rdb.Ping(context.Background()).Result()
 	if err != nil {
 		return nil, err
@@ -146,3 +144,8 @@ func initRoles(svcCtx *svc.ServiceContext) {
 		}
 	}
 }
+
+// unused but kept for potential future use
+var _ = filepath.Clean
+var _ = os.Stat
+var _ = strings.HasPrefix

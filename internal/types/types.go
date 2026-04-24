@@ -11,8 +11,14 @@ type IDReq struct {
 }
 
 type PageQuery struct {
-	Page     int `json:"page" form:"page"`
-	PageSize int `json:"page_size" form:"page_size"`
+	Page     int `json:"page,optional" form:"page,optional"`
+	PageSize int `json:"page_size,optional" form:"page_size,optional"`
+}
+
+type ListUploadFileReq struct {
+	Page     int    `json:"page,optional" form:"page,optional"`
+	Limit    int    `json:"limit,optional" form:"limit,optional"`
+	FilePath string `json:"file_path,optional" form:"file_path,optional"`
 }
 
 type PageResp struct {
