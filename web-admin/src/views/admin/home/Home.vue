@@ -293,20 +293,6 @@
       <div class="title">文章贡献统计🎉</div>
       <Calender style="width: 100%" :values="homeInfoData.article_statistics || []" />
     </el-row>
-
-    <!-- 用户地域分布 -->
-    <el-card shadow="never" :loading="homeInfoLoading">
-      <div class="title">用户地域分布</div>
-      <div v-loading="homeInfoLoading" style="height: 450px">
-        <div class="chart-wrapper">
-          <el-radio-group v-model="userType" size="small">
-            <el-radio :value="0">用户</el-radio>
-            <el-radio :value="1">游客</el-radio>
-          </el-radio-group>
-        </div>
-        <ChinaMap :values="userAreaData || []" />
-      </div>
-    </el-card>
   </div>
 </template>
 
@@ -327,11 +313,9 @@ import {
   CategoryVO,
   GetVisitStatsResp,
   GetVisitTrendResp,
-  UserAreaVO,
 } from "@/api/types";
 import { WebsiteAPI } from "@/api/website";
 import ECharts from "@/components/ECharts/index.vue";
-import ChinaMap from "./components/ChinaMap.vue";
 import Calender from "./components/Calender.vue";
 import TagCloud from "./components/TagCloud.vue";
 
@@ -633,17 +617,6 @@ const fetchHomeInfoData = () => {
     });
 };
 
-/**
- * 获取用户地区分布数据
- */
-const fetchUserAreaData = () => {
-  WebsiteAPI.getUserAreaStatsApi({
-    user_type: userType.value,
-  }).then((res) => {
-    userAreaData.value = res.data.user_areas;
-  });
-};
-
 // 组件挂载后加载访客统计数据和首页信息数据
 onMounted(() => {
   fetchVisitStatsData();
@@ -721,22 +694,6 @@ const updateCategoryOptions = (categories: CategoryVO[]) => {
     ],
   };
 };
-
-// 用户类型（0：用户，1：游客）
-const userType = ref(1);
-
-// 用户地域分布数据
-const userAreaData = ref<UserAreaVO[]>([]);
-
-// 监听用户类型的变化，重新获取用户地区分布数据
-watch(
-  () => userType.value,
-  (newVal) => {
-    console.log("User type changed:", newVal);
-    fetchUserAreaData();
-  },
-  { immediate: true }
-);
 </script>
 
 <style lang="scss" scoped>

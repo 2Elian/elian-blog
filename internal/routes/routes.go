@@ -26,30 +26,38 @@ func pingHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func registerBlogHandlers(server *rest.Server, svcCtx *svc.ServiceContext) {
+	// Public routes without tracking
 	server.AddRoutes([]rest.Route{
 		{Method: http.MethodPost, Path: "/blog-api/v1/login", Handler: handler.LoginHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/blog-api/v1/register", Handler: handler.RegisterHandler(svcCtx)},
-		{Method: http.MethodGet, Path: "/blog-api/v1/articles", Handler: handler.ListArticlesHandler(svcCtx)},
-		{Method: http.MethodGet, Path: "/blog-api/v1/articles/:id", Handler: handler.GetArticleHandler(svcCtx)},
 		{Method: http.MethodGet, Path: "/blog-api/v1/articles/search", Handler: handler.SearchArticlesHandler(svcCtx)},
-		{Method: http.MethodGet, Path: "/blog-api/v1/categories", Handler: handler.ListCategoriesHandler(svcCtx)},
-		{Method: http.MethodGet, Path: "/blog-api/v1/tags", Handler: handler.ListTagsHandler(svcCtx)},
 		{Method: http.MethodGet, Path: "/blog-api/v1/articles/:id/comments", Handler: handler.ListCommentsHandler(svcCtx)},
 		{Method: http.MethodGet, Path: "/blog-api/v1/comments/recent", Handler: handler.RecentCommentsHandler(svcCtx)},
 		{Method: http.MethodGet, Path: "/blog-api/v1/friend-links", Handler: handler.ListFriendLinksHandler(svcCtx)},
 		{Method: http.MethodGet, Path: "/blog-api/v1/messages", Handler: handler.ListMessagesHandler(svcCtx)},
-		{Method: http.MethodGet, Path: "/blog-api/v1/pages", Handler: handler.ListPagesHandler(svcCtx)},
-		{Method: http.MethodGet, Path: "/blog-api/v1/pages/:slug", Handler: handler.GetPageBySlugHandler(svcCtx)},
-		{Method: http.MethodGet, Path: "/blog-api/v1/site/config", Handler: handler.GetSiteConfigHandler(svcCtx)},
-		{Method: http.MethodGet, Path: "/blog-api/v1/products", Handler: handler.ListProductsHandler(svcCtx)},
 	})
 
+	// Content routes with visit tracking
+	server.AddRoutes(rest.WithMiddlewares([]rest.Middleware{middleware.VisitTrackMiddleware(svcCtx)}, []rest.Route{
+		{Method: http.MethodGet, Path: "/blog-api/v1/articles", Handler: handler.ListArticlesHandler(svcCtx)},
+		{Method: http.MethodGet, Path: "/blog-api/v1/articles/:id", Handler: handler.GetArticleHandler(svcCtx)},
+		{Method: http.MethodGet, Path: "/blog-api/v1/categories", Handler: handler.ListCategoriesHandler(svcCtx)},
+		{Method: http.MethodGet, Path: "/blog-api/v1/tags", Handler: handler.ListTagsHandler(svcCtx)},
+		{Method: http.MethodGet, Path: "/blog-api/v1/pages", Handler: handler.ListPagesHandler(svcCtx)},
+		{Method: http.MethodGet, Path: "/blog-api/v1/pages/:slug", Handler: handler.GetPageBySlugHandler(svcCtx)},
+		{Method: http.MethodGet, Path: "/blog-api/v1/site/about", Handler: handler.GetAboutMeHandler(svcCtx)},
+		{Method: http.MethodGet, Path: "/blog-api/v1/site/config", Handler: handler.GetSiteConfigHandler(svcCtx)},
+		{Method: http.MethodGet, Path: "/blog-api/v1/products", Handler: handler.ListProductsHandler(svcCtx)},
+		{Method: http.MethodGet, Path: "/blog-api/v1/products/:id", Handler: handler.GetProductHandler(svcCtx)},
+	}...))
+
+	// Auth-protected routes
 	authRoutes := []rest.Route{
 		{Method: http.MethodGet, Path: "/blog-api/v1/user/info", Handler: handler.GetUserInfoHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/blog-api/v1/comments", Handler: handler.CreateCommentHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/blog-api/v1/messages", Handler: handler.CreateMessageHandler(svcCtx)},
 	}
-	server.AddRoutes(rest.WithMiddlewares([]rest.Middleware{middleware.JWTAuthMiddleware(svcCtx)}, authRoutes...))
+	server.AddRoutes(rest.WithMiddlewares([]rest.Middleware{middleware.BlogJWTAuthMiddleware(svcCtx)}, authRoutes...))
 }
 
 func registerVeAdminHandlers(server *rest.Server, svcCtx *svc.ServiceContext) {
@@ -139,7 +147,6 @@ func registerVeAdminHandlers(server *rest.Server, svcCtx *svc.ServiceContext) {
 		{Method: http.MethodGet, Path: "/admin-api/v1/admin/get_about_me", Handler: handler.VeGetAboutMeHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/admin/update_about_me", Handler: handler.VeUpdateAboutMeHandler(svcCtx)},
 		{Method: http.MethodGet, Path: "/admin-api/v1/admin/get_system_state", Handler: handler.VeGetSystemStateHandler(svcCtx)},
-		{Method: http.MethodPost, Path: "/admin-api/v1/admin/get_user_area_stats", Handler: handler.VeGetUserAreaStatsHandler(svcCtx)},
 
 		{Method: http.MethodPost, Path: "/admin-api/v1/notice/find_user_notice_list", Handler: handler.VeFindUserNoticeListHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/notice/find_notice_list", Handler: stubs["POST /admin-api/v1/notice/find_notice_list"]},
@@ -174,15 +181,6 @@ func registerVeAdminHandlers(server *rest.Server, svcCtx *svc.ServiceContext) {
 		{Method: http.MethodPut, Path: "/admin-api/v1/talk/update_talk", Handler: stubs["PUT /admin-api/v1/talk/update_talk"]},
 		{Method: http.MethodDelete, Path: "/admin-api/v1/talk/delete_talk", Handler: stubs["DELETE /admin-api/v1/talk/delete_talk"]},
 
-		{Method: http.MethodPost, Path: "/admin-api/v1/operation_log/find_operation_log_list", Handler: stubs["POST /admin-api/v1/operation_log/find_operation_log_list"]},
-		{Method: http.MethodDelete, Path: "/admin-api/v1/operation_log/deletes_operation_log", Handler: stubs["DELETE /admin-api/v1/operation_log/deletes_operation_log"]},
-		{Method: http.MethodPost, Path: "/admin-api/v1/file_log/find_file_log_list", Handler: stubs["POST /admin-api/v1/file_log/find_file_log_list"]},
-		{Method: http.MethodDelete, Path: "/admin-api/v1/file_log/deletes_file_log", Handler: stubs["DELETE /admin-api/v1/file_log/deletes_file_log"]},
-		{Method: http.MethodPost, Path: "/admin-api/v1/login_log/find_login_log_list", Handler: stubs["POST /admin-api/v1/login_log/find_login_log_list"]},
-		{Method: http.MethodDelete, Path: "/admin-api/v1/login_log/deletes_login_log", Handler: stubs["DELETE /admin-api/v1/login_log/deletes_login_log"]},
-		{Method: http.MethodPost, Path: "/admin-api/v1/visit_log/find_visit_log_list", Handler: stubs["POST /admin-api/v1/visit_log/find_visit_log_list"]},
-		{Method: http.MethodDelete, Path: "/admin-api/v1/visit_log/deletes_visit_log", Handler: stubs["DELETE /admin-api/v1/visit_log/deletes_visit_log"]},
-		{Method: http.MethodPost, Path: "/admin-api/v1/visitor/find_visitor_list", Handler: stubs["POST /admin-api/v1/visitor/find_visitor_list"]},
 
 		{Method: http.MethodPost, Path: "/admin-api/v1/upload/upload_file", Handler: handler.VeUploadFileHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/upload/multi_upload_file", Handler: handler.VeMultiUploadFileHandler(svcCtx)},

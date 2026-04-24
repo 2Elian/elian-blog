@@ -23,7 +23,7 @@ http.interceptors.response.use(
   (response: AxiosResponse) => {
     const { data } = response
     if (data.code !== 0) {
-      return Promise.reject(new Error(data.message || '请求失败'))
+      return Promise.reject(new Error(data.message || data.msg || '请求失败'))
     }
     return data
   },
@@ -33,7 +33,7 @@ http.interceptors.response.use(
       userStore.logout()
       window.location.hash = '#/login'
     }
-    return Promise.reject(error.response?.data?.message || error.message || '网络错误')
+    return Promise.reject(error.response?.data?.message || error.response?.data?.msg || error.message || '网络错误')
   }
 )
 

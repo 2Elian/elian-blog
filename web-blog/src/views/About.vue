@@ -59,6 +59,11 @@
     <!-- Content -->
     <div class="about-body">
       <div class="body-inner">
+        <!-- Dynamic About Content from Backend -->
+        <div v-if="aboutContent" class="about-dynamic" v-html="renderedAbout"></div>
+
+        <!-- Default Static Content (shown when no backend content) -->
+        <template v-else>
         <!-- Tech Stack -->
         <section class="content-block">
           <h2 class="block-title">
@@ -140,12 +145,34 @@
             主要用于记录学习笔记、技术分享和项目经验。如果你对文章内容有任何疑问或建议，欢迎留言交流。
           </p>
         </section>
+        </template>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, computed } from 'vue'
+import { marked } from 'marked'
+import { getAboutMe } from '@/api'
+
+const aboutContent = ref('')
+const renderedAbout = computed(() => {
+  if (!aboutContent.value) return ''
+  return marked(aboutContent.value)
+})
+
+onMounted(async () => {
+  try {
+    const res = await getAboutMe() as any
+    if (res.data?.content) {
+      aboutContent.value = res.data.content
+    }
+  } catch (e) {
+    // Use default content
+  }
+})
+
 const backendTech = [
   'Python', 'Go', 'Java',
   'FastAPI', 'Gin', 'Go-Zero', 'SpringBoot',
@@ -521,5 +548,48 @@ html.dark .tech-tag {
   font-size: 14px;
   color: var(--text-secondary);
   line-height: 1.6;
+}
+
+.about-dynamic {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+
+  :deep(h1), :deep(h2), :deep(h3) {
+    color: var(--text-primary);
+    margin: 24px 0 12px;
+  }
+
+  :deep(p) {
+    margin-bottom: 12px;
+  }
+
+  :deep(code) {
+    background: rgba(0, 0, 0, 0.06);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+
+  :deep(pre) {
+    background: rgba(0, 0, 0, 0.06);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+
+  :deep(ul), :deep(ol) {
+    padding-left: 24px;
+    margin-bottom: 12px;
+  }
+
+  :deep(img) {
+    max-width: 100%;
+    border-radius: 8px;
+  }
 }
 </style>

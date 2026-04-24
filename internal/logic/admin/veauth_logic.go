@@ -107,6 +107,7 @@ func (l *VeAuthLogic) VeGetUserInfo(ctx context.Context) (*types.VeUserInfoResp,
 		Perms:        perms,
 		Intro:        user.Intro,
 		Website:      user.Website,
+		Gender:       user.Gender,
 	}, nil
 }
 

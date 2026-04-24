@@ -39,9 +39,14 @@ export const postComment = (data: { article_id: number; content: string; parent_
 export const getProducts = (params?: { page?: number; page_size?: number }) =>
   http.get('/products', { params })
 
+export const getProduct = (id: number) => http.get(`/products/${id}`)
+
 // Pages
 export const getPages = () => http.get('/pages')
 export const getPage = (slug: string) => http.get(`/pages/${slug}`)
 
 // Site Config
 export const getSiteConfig = () => http.get('/site/config')
+
+// About Me
+export const getAboutMe = () => http.get('/site/about')

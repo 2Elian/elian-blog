@@ -43,6 +43,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '产品' }
       },
       {
+        path: 'product/:id',
+        name: 'ProductDetail',
+        component: () => import('@/views/ProductDetail.vue'),
+        meta: { title: '产品详情' }
+      },
+      {
         path: 'about',
         name: 'About',
         component: () => import('@/views/About.vue'),
@@ -73,7 +79,7 @@ router.beforeEach((to, _from, next) => {
 
   // 公开页面不需要认证
   const publicPages = ['/', '/login', '/blog', '/archive', '/tags', '/products', '/about']
-  if (publicPages.includes(to.path) || to.path.startsWith('/article/')) {
+  if (publicPages.includes(to.path) || to.path.startsWith('/article/') || to.path.startsWith('/product/')) {
     next()
     return
   }

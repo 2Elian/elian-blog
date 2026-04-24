@@ -45,6 +45,7 @@ type VeUserInfoResp struct {
 	Perms        []string `json:"perms"`
 	Intro        string   `json:"intro"`
 	Website      string   `json:"website"`
+	Gender       int      `json:"gender"`
 }
 
 // 旧格式兼容 (blog API)

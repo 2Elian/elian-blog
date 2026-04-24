@@ -15,7 +15,7 @@ func NewCommentDao(db *gorm.DB) *CommentDao {
 }
 
 func (d *CommentDao) Create(comment *model.Comment) error {
-	return d.db.Create(comment).Error
+	return d.db.Omit("User", "ReplyUser", "Children").Create(comment).Error
 }
 
 func (d *CommentDao) Delete(id uint) error {

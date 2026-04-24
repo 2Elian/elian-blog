@@ -10,7 +10,7 @@
         v-for="product in products"
         :key="product.id"
         class="product-card"
-        @click="product.link && !product.link.includes('example.com') ? openLink(product.link) : null"
+        @click="router.push(`/product/${product.id}`)"
       >
         <div class="card-cover">
           <img v-if="product.cover" :src="getImageUrl(product.cover)" :alt="product.name" />
@@ -39,6 +39,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { NIcon, NEmpty } from 'naive-ui'
 import { CubeOutline, OpenOutline } from '@vicons/ionicons5'
 import { getProducts } from '@/api'
@@ -58,6 +59,7 @@ interface Product {
 
 const products = ref<Product[]>([])
 const loading = ref(true)
+const router = useRouter()
 
 function getImageUrl(path: string): string {
   if (!path) return ''

@@ -9,6 +9,7 @@
       <div class="card-category" v-if="article.category">
         <span>{{ article.category.name }}</span>
       </div>
+      <div class="card-top-badge" v-if="article.is_top">置顶</div>
     </div>
 
     <div class="card-content">
@@ -58,6 +59,7 @@ interface Article {
   created_at: string
   views?: number
   comments_count?: number
+  is_top?: number
   category?: { id: number; name: string }
   tags?: { id: number; name: string }[]
 }
@@ -151,6 +153,18 @@ function formatDate(date: string) {
     font-size: 12px;
     font-weight: 500;
   }
+}
+
+.card-top-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #e74c3c;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .card-content {

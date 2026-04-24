@@ -6,19 +6,13 @@ export default {
   path: "/resource",
   name: "",
   component: Layout,
-  redirect: "/resource/file",
+  redirect: "/resource/page",
   meta: {
     title: "资源管理",
     icon: "el-icon-folder",
     rank: 4,
   },
   children: [
-    {
-      path: "/resource/file",
-      component: () => import("@/views/admin/resource/file/File.vue"),
-      name: "File",
-      meta: { title: "文件管理", keepAlive: true },
-    },
     {
       path: "/resource/page",
       component: () => import("@/views/admin/resource/page/Page.vue"),
@@ -28,7 +22,6 @@ export default {
     {
       path: "/resource/picture",
       name: "",
-      // component: Layout,
       redirect: "/resource/albums",
       meta: {
         title: "图片管理",

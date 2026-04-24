@@ -947,22 +947,64 @@ func VeUpdateWebsiteConfigHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 func VeGetVisitStatsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		now := time.Now()
+		todayKey := now.Format("2006-01-02")
+		yesterdayKey := now.AddDate(0, 0, -1).Format("2006-01-02")
+
+		todayPV, _ := svcCtx.RDB.Get(ctx, "pv:"+todayKey).Int()
+		yesterdayPV, _ := svcCtx.RDB.Get(ctx, "pv:"+yesterdayKey).Int()
+		todayUV, _ := svcCtx.RDB.Get(ctx, "uv:"+todayKey).Int()
+		yesterdayUV, _ := svcCtx.RDB.Get(ctx, "uv:"+yesterdayKey).Int()
+
+		totalPV := 0
+		totalUV := 0
+		for i := 0; i < 365; i++ {
+			key := now.AddDate(0, 0, -i).Format("2006-01-02")
+			pv, _ := svcCtx.RDB.Get(ctx, "pv:"+key).Int()
+			uv, _ := svcCtx.RDB.Get(ctx, "uv:"+key).Int()
+			totalPV += pv
+			totalUV += uv
+		}
+
+		pvGrowth := float64(0)
+		if yesterdayPV > 0 {
+			pvGrowth = float64(todayPV-yesterdayPV) / float64(yesterdayPV)
+		}
+		uvGrowth := float64(0)
+		if yesterdayUV > 0 {
+			uvGrowth = float64(todayUV-yesterdayUV) / float64(yesterdayUV)
+		}
+
 		veOk(w, map[string]interface{}{
-			"today_uv_count": 0,
-			"total_uv_count": 0,
-			"uv_growth_rate": 0,
-			"today_pv_count": 0,
-			"total_pv_count": 0,
-			"pv_growth_rate": 0,
+			"today_uv_count": todayUV,
+			"total_uv_count": totalUV,
+			"uv_growth_rate": pvGrowth,
+			"today_pv_count": todayPV,
+			"total_pv_count": totalPV,
+			"pv_growth_rate": uvGrowth,
 		})
 	}
 }
 
 func VeGetVisitTrendHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		veOk(w, map[string]interface{}{
-			"visit_trend": []interface{}{},
-		})
+		ctx := r.Context()
+		now := time.Now()
+		type TrendItem struct {
+			Date string `json:"date"`
+			PVCount int `json:"pv_count"`
+			UVCount int `json:"uv_count"`
+		}
+		trend := make([]TrendItem, 0, 7)
+		for i := 6; i >= 0; i-- {
+			date := now.AddDate(0, 0, -i)
+			key := date.Format("2006-01-02")
+			pv, _ := svcCtx.RDB.Get(ctx, "pv:"+key).Int()
+			uv, _ := svcCtx.RDB.Get(ctx, "uv:"+key).Int()
+			trend = append(trend, TrendItem{Date: key, PVCount: pv, UVCount: uv})
+		}
+		veOk(w, map[string]interface{}{"visit_trend": trend})
 	}
 }
 
@@ -1012,15 +1054,6 @@ func VeGetSystemStateHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			},
 			"disk": diskStats,
 			"mem":  memStats,
-		})
-	}
-}
-
-func VeGetUserAreaStatsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		veOk(w, map[string]interface{}{
-			"user_areas":    []interface{}{},
-			"tourist_areas": []interface{}{},
 		})
 	}
 }
@@ -1236,6 +1269,7 @@ func VeUpdateUserInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			Email    string `json:"email"`
 			Intro    string `json:"intro"`
 			Website  string `json:"website"`
+			Gender   int    `json:"gender"`
 		}
 		if err := parseJSON(r, &req); err != nil {
 			veBadRequest(w, "参数错误")
@@ -1253,6 +1287,9 @@ func VeUpdateUserInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		if req.Website != "" {
 			updates["website"] = req.Website
+		}
+		if req.Gender != 0 {
+			updates["gender"] = req.Gender
 		}
 		if len(updates) > 0 {
 			svcCtx.DB.Table("user").Where("id = ?", userID).Updates(updates)

@@ -2,6 +2,8 @@ package handler
 
 import (
 	"net/http"
+	"strings"
+	"time"
 
 	"elian-blog/internal/logic/blog"
 	"elian-blog/internal/svc"
@@ -181,7 +183,7 @@ func CreateCommentHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		data, err := blog.NewCommentLogic(svcCtx).Create(r.Context(), &req)
 		if err != nil {
-			fail(w, 500, "评论失败")
+			fail(w, 500, err.Error())
 			return
 		}
 		ok(w, data)
@@ -334,5 +336,54 @@ func ListProductsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			})
 		}
 		okPage(w, list, total, req.Page, req.PageSize)
+	}
+}
+
+func GetProductHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req types.IDReq
+		if err := httpx.ParsePath(r, &req); err != nil {
+			fail(w, 400, "参数错误")
+			return
+		}
+		product, err := svcCtx.ProductDao.GetByID(req.ID)
+		if err != nil {
+			fail(w, 404, "产品不存在")
+			return
+		}
+		if product.Status != 1 {
+			fail(w, 404, "产品不存在")
+			return
+		}
+		cover := product.Cover
+		if cover != "" && !strings.HasPrefix(cover, "http") {
+			if !strings.HasPrefix(cover, "/") {
+				cover = "/" + cover
+			}
+			cover = "http://localhost:8080" + cover
+		}
+		ok(w, map[string]interface{}{
+			"id":          product.ID,
+			"name":        product.Name,
+			"description": product.Description,
+			"price":       product.Price,
+			"cover":       cover,
+			"status":      product.Status,
+			"sort":        product.Sort,
+			"type":        product.Type,
+			"link":        product.Link,
+			"created_at":  product.CreatedAt.Format(time.DateTime),
+		})
+	}
+}
+
+func GetAboutMeHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cfg, err := svcCtx.SiteDao.GetByKey("about_me")
+		content := ""
+		if err == nil && cfg != nil {
+			content = cfg.Value
+		}
+		ok(w, map[string]interface{}{"content": content})
 	}
 }

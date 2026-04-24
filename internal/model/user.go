@@ -23,6 +23,7 @@ type User struct {
 	Email     string    `json:"email" gorm:"size:100"`
 	Intro     string    `json:"intro" gorm:"size:500"`
 	Website   string    `json:"website" gorm:"size:200"`
+	Gender    int       `json:"gender" gorm:"default:0;comment:0-保密 1-男 2-女"`
 	Status    int       `json:"status" gorm:"default:1;comment:1-正常 0-禁用"`
 	LoginType string    `json:"login_type" gorm:"size:20;default:username;comment:登录方式"`
 	LastLogin time.Time `json:"last_login"`

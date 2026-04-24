@@ -69,6 +69,40 @@ func JWTAuthMiddleware(svcCtx *svc.ServiceContext) func(http.HandlerFunc) http.H
 	}
 }
 
+// BlogJWTAuthMiddleware returns blog-format errors for blog API routes
+func BlogJWTAuthMiddleware(svcCtx *svc.ServiceContext) func(http.HandlerFunc) http.HandlerFunc {
+	return func(next http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			auth := r.Header.Get("Authorization")
+			if auth == "" {
+				w.Header().Set("Content-Type", "application/json; charset=utf-8")
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"code":401,"message":"未登录","data":null}`))
+				return
+			}
+
+			tokenString := strings.TrimPrefix(auth, "Bearer ")
+			claims, err := utils.ParseToken(tokenString, svcCtx.Config.JWT.Secret)
+			if err != nil {
+				w.Header().Set("Content-Type", "application/json; charset=utf-8")
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"code":401,"message":"token无效","data":null}`))
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), UserIDKey, claims.UserID)
+			ctx = context.WithValue(ctx, UsernameKey, claims.Username)
+			ctx = context.WithValue(ctx, RoleKey, claims.Role)
+
+			// Track online user in Redis (5 minute TTL)
+			onlineKey := fmt.Sprintf("online:%d", claims.UserID)
+			svcCtx.RDB.Set(ctx, onlineKey, fmt.Sprintf("%d", time.Now().Unix()), 5*time.Minute)
+
+			next(w, r.WithContext(ctx))
+		}
+	}
+}
+
 func RBACAuthMiddleware(svcCtx *svc.ServiceContext) func(http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
