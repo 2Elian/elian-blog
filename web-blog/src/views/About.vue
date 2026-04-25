@@ -2,7 +2,7 @@
   <div class="about-page">
     <!-- Hero Banner -->
     <section class="about-hero">
-      <div class="hero-bg"><div class="hero-grid"></div></div>
+      <div class="hero-bg"><HeroBackground /></div>
       <div class="hero-inner">
         <div class="hero-left">
           <div class="hero-badge">关于作者</div>
@@ -132,6 +132,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { getAboutMe } from '@/api'
+import HeroBackground from '@/components/HeroBackground.vue'
 
 interface AboutData {
   hero: {
@@ -223,7 +224,7 @@ onMounted(async () => {
   margin-left: calc(-50vw + 50%);
   margin-top: -20px;
   padding: 80px 32px;
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  background: #020210;
   overflow: hidden;
 
   @media (max-width: 768px) {
@@ -234,15 +235,7 @@ onMounted(async () => {
 .hero-bg {
   position: absolute;
   inset: 0;
-}
-
-.hero-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 50px 50px;
+  overflow: hidden;
 }
 
 .hero-inner {

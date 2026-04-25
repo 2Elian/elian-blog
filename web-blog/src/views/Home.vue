@@ -3,10 +3,7 @@
     <!-- Hero Section (Full Width) -->
     <section class="hero">
       <div class="hero-bg">
-        <div class="hero-grid"></div>
-        <div class="hero-shape shape-1"></div>
-        <div class="hero-shape shape-2"></div>
-        <div class="hero-shape shape-3"></div>
+        <HeroBackground />
       </div>
       <div class="hero-content">
         <div class="hero-badge">Welcome to my blog</div>
@@ -81,6 +78,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { NEmpty } from 'naive-ui'
 import ArticleCard from '@/components/ArticleCard.vue'
 import Sidebar from '@/components/Sidebar.vue'
+import HeroBackground from '@/components/HeroBackground.vue'
 import { getArticles, getCategories, getTags } from '@/api'
 import { useSiteConfigStore } from '@/stores/siteConfig'
 
@@ -191,7 +189,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #111111 100%);
+  background: #020210;
   padding: 80px 32px;
 
   @media (max-width: 640px) {
@@ -206,71 +204,6 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
-.hero-grid {
-  position: absolute;
-  inset: 0;
-  background-color: #0b0c1a; /* 深色宇宙底色 */
-  background-image:
-      /* 1. 动态光斑（柔和光晕） */
-      radial-gradient(circle at 20% 30%, rgba(18, 194, 233, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 80% 70%, rgba(196, 113, 237, 0.12) 0%, transparent 50%),
-      radial-gradient(circle at 50% 90%, rgba(0, 212, 255, 0.1) 0%, transparent 40%),
-        /* 2. 主网格线（白色微透明） */
-      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-        /* 3. 对角装饰线（增加科技感） */
-      linear-gradient(45deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-      linear-gradient(-45deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size:
-      100% 100%, /* 光斑跟随容器尺寸 */
-      100% 100%,
-      100% 100%,
-      60px 60px,  /* 主网格 */
-      60px 60px,
-      120px 120px, /* 对角网格间距稍大，形成错落感 */
-      120px 120px;
-  background-position:
-      0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
-
-  /* 可选叠加：微妙的噪点肌理（使用 SVG 滤镜实现） */
-  /* 如果不需要噪点，可删除 mask 相关属性 */
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 60%, transparent 100%);
-  mask-image: radial-gradient(circle at 50% 50%, black 60%, transparent 100%);
-}
-
-.hero-shape {
-  position: absolute;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.06), transparent 70%);
-
-  &.shape-1 {
-    width: 500px;
-    height: 500px;
-    top: -200px;
-    right: -100px;
-  }
-
-  &.shape-2 {
-    width: 350px;
-    height: 350px;
-    bottom: -150px;
-    left: -100px;
-  }
-
-  &.shape-3 {
-    width: 200px;
-    height: 200px;
-    top: 40%;
-    left: 15%;
-  }
-}
-/*
-属性	值	作用
-position	relative	相对定位，让内部绝对定位的子元素相对于这个容器定位，同时不脱离正常文档流
-text-align	center	内部文本/行内元素水平居中显示
-color	white	文字颜色为白色
-max-width	640px	最大宽度为 640 像素，超过这个宽度不再变宽，小于时自适应
-*/
 .hero-content {
   position: relative;
   text-align: center;
