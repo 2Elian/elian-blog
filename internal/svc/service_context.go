@@ -10,43 +10,49 @@ import (
 )
 
 type ServiceContext struct {
-	Config  config.Config
-	DB      *gorm.DB
-	RDB     *redis.Client
-	Log     *zap.Logger
+	Config config.Config
+	DB     *gorm.DB
+	RDB    *redis.Client
+	Log    *zap.Logger
 
 	// DAO
-	UserDao       *dao.UserDao
-	ArticleDao    *dao.ArticleDao
-	CategoryDao   *dao.CategoryDao
-	TagDao        *dao.TagDao
-	CommentDao    *dao.CommentDao
-	FriendDao     *dao.FriendLinkDao
-	MessageDao    *dao.MessageDao
-	PageDao       *dao.PageDao
-	SiteDao       *dao.SiteConfigDao
-	RoleDao       *dao.RoleDao
-	MenuDao       *dao.MenuDao
+	UserDao         *dao.UserDao
+	ArticleDao      *dao.ArticleDao
+	CategoryDao     *dao.CategoryDao
+	TagDao          *dao.TagDao
+	CommentDao      *dao.CommentDao
+	FriendDao       *dao.FriendLinkDao
+	MessageDao      *dao.MessageDao
+	PageDao         *dao.PageDao
+	SiteDao         *dao.SiteConfigDao
+	RoleDao         *dao.RoleDao
+	MenuDao         *dao.MenuDao
 	OperationLogDao *dao.OperationLogDao
+	AlbumDao        *dao.AlbumDao
+	PhotoDao        *dao.PhotoDao
+	ProductDao      *dao.ProductDao
 }
 
 func NewServiceContext(c config.Config, db *gorm.DB, rdb *redis.Client, log *zap.Logger) *ServiceContext {
 	return &ServiceContext{
-		Config:  c,
-		DB:      db,
-		RDB:     rdb,
-		Log:     log,
-		UserDao:       dao.NewUserDao(db),
-		ArticleDao:    dao.NewArticleDao(db),
-		CategoryDao:   dao.NewCategoryDao(db),
-		TagDao:        dao.NewTagDao(db),
-		CommentDao:    dao.NewCommentDao(db),
-		FriendDao:     dao.NewFriendLinkDao(db),
-		MessageDao:    dao.NewMessageDao(db),
-		PageDao:       dao.NewPageDao(db),
-		SiteDao:       dao.NewSiteConfigDao(db),
-		RoleDao:       dao.NewRoleDao(db),
-		MenuDao:       dao.NewMenuDao(db),
+		Config:          c,
+		DB:              db,
+		RDB:             rdb,
+		Log:             log,
+		UserDao:         dao.NewUserDao(db),
+		ArticleDao:      dao.NewArticleDao(db),
+		CategoryDao:     dao.NewCategoryDao(db),
+		TagDao:          dao.NewTagDao(db),
+		CommentDao:      dao.NewCommentDao(db),
+		FriendDao:       dao.NewFriendLinkDao(db),
+		MessageDao:      dao.NewMessageDao(db),
+		PageDao:         dao.NewPageDao(db),
+		SiteDao:         dao.NewSiteConfigDao(db),
+		RoleDao:         dao.NewRoleDao(db),
+		MenuDao:         dao.NewMenuDao(db),
 		OperationLogDao: dao.NewOperationLogDao(db),
+		AlbumDao:        dao.NewAlbumDao(db),
+		PhotoDao:        dao.NewPhotoDao(db),
+		ProductDao:      dao.NewProductDao(db),
 	}
 }

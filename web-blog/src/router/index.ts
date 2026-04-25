@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+import { useSiteConfigStore } from '@/stores/siteConfig'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -36,16 +38,16 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '标签' }
       },
       {
-        path: 'friends',
-        name: 'Friends',
-        component: () => import('@/views/Friends.vue'),
-        meta: { title: '友链' }
+        path: 'products',
+        name: 'Products',
+        component: () => import('@/views/Products.vue'),
+        meta: { title: '产品' }
       },
       {
-        path: 'messages',
-        name: 'Messages',
-        component: () => import('@/views/Messages.vue'),
-        meta: { title: '留言板' }
+        path: 'product/:id',
+        name: 'ProductDetail',
+        component: () => import('@/views/ProductDetail.vue'),
+        meta: { title: '产品详情' }
       },
       {
         path: 'about',
@@ -72,9 +74,27 @@ const router = createRouter({
   }
 })
 
-router.beforeEach((to, _from, next) => {
-  const title = (to.meta.title as string) || 'Elian Blog'
-  document.title = `${title} - Elian Blog`
+router.beforeEach(async (to, _from, next) => {
+  const siteConfig = useSiteConfigStore()
+  await siteConfig.fetchConfig()
+  const siteName = siteConfig.siteName
+  const title = (to.meta.title as string) || siteName
+  document.title = `${title} - ${siteName}`
+
+  // 公开页面不需要认证
+  const publicPages = ['/', '/login', '/blog', '/archive', '/tags', '/products', '/about']
+  if (publicPages.includes(to.path) || to.path.startsWith('/article/') || to.path.startsWith('/product/')) {
+    next()
+    return
+  }
+
+  // 其他页面需要登录
+  const userStore = useUserStore()
+  if (!userStore.isLoggedIn) {
+    next(`/login?redirect=${to.path}`)
+    return
+  }
+
   next()
 })
 

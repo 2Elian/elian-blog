@@ -112,7 +112,7 @@ onMounted(async () => {
       getTags() as any,
       getArticles({ page: 1, page_size: 1000 }) as any
     ])
-    tags.value = tagsRes.data || []
+    tags.value = (tagsRes.data || []).map((t: any) => ({ id: t.id, name: t.name, count: t.article_count }))
     articles.value = articlesRes.data?.list || []
   } catch (e) {
     console.error('Failed to load tags:', e)
@@ -125,6 +125,13 @@ onMounted(async () => {
 <style scoped lang="scss">
 .tags-page {
   animation: fadeInUp 0.5s ease;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 32px;
+
+  @media (max-width: 640px) {
+    padding: 0 20px;
+  }
 }
 
 .page-header {
@@ -159,7 +166,7 @@ onMounted(async () => {
   align-items: center;
   gap: 4px;
   padding: 12px 24px;
-  background: linear-gradient(135deg, rgba(237, 110, 160, 0.1) 0%, rgba(236, 140, 105, 0.1) 100%);
+  background: rgba(0, 0, 0, 0.04);
   border-radius: 24px;
   cursor: pointer;
   transition: all var(--transition-normal);
@@ -167,20 +174,20 @@ onMounted(async () => {
   font-weight: 500;
 
   &:hover {
-    background: linear-gradient(135deg, rgba(237, 110, 160, 0.2) 0%, rgba(236, 140, 105, 0.2) 100%);
+    background: rgba(0, 0, 0, 0.08);
     transform: translateY(-4px);
     box-shadow: var(--shadow-md);
   }
 
   .tag-hash {
-    color: var(--primary-color);
+    color: var(--text-muted);
     font-weight: 600;
   }
 
   .tag-count {
     font-size: 0.7em;
-    background: var(--primary-color);
-    color: white;
+    background: var(--text-primary);
+    color: var(--bg-card);
     padding: 2px 8px;
     border-radius: 10px;
     margin-left: 4px;
@@ -232,10 +239,10 @@ onMounted(async () => {
   transition: all var(--transition-fast);
 
   &:hover {
-    background: rgba(233, 84, 107, 0.05);
+    background: rgba(0, 0, 0, 0.03);
 
     .article-title {
-      color: var(--primary-color);
+      color: var(--text-primary);
     }
   }
 }

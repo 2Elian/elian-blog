@@ -15,7 +15,7 @@ func NewMessageLogic(svcCtx *svc.ServiceContext) *MessageLogic {
 	return &MessageLogic{svcCtx: svcCtx}
 }
 
-func (l *MessageLogic) List(ctx context.Context, req *types.PageQuery) (interface{}, error) {
+func (l *MessageLogic) List(ctx context.Context, req *types.QueryMessageReq) (interface{}, error) {
 	page := req.Page
 	pageSize := req.PageSize
 	if page <= 0 {
@@ -40,4 +40,13 @@ func (l *MessageLogic) List(ctx context.Context, req *types.PageQuery) (interfac
 
 func (l *MessageLogic) Delete(ctx context.Context, id uint) error {
 	return l.svcCtx.MessageDao.Delete(id)
+}
+
+func (l *MessageLogic) UpdateStatus(ctx context.Context, req *types.UpdateMessageStatusReq) error {
+	for _, id := range req.IDs {
+		if err := l.svcCtx.DB.Exec("UPDATE message SET status = ? WHERE id = ?", req.Status, id).Error; err != nil {
+			return err
+		}
+	}
+	return nil
 }

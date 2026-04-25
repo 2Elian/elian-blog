@@ -11,8 +11,14 @@ type IDReq struct {
 }
 
 type PageQuery struct {
-	Page     int `json:"page" form:"page"`
-	PageSize int `json:"page_size" form:"page_size"`
+	Page     int `json:"page,optional" form:"page,optional"`
+	PageSize int `json:"page_size,optional" form:"page_size,optional"`
+}
+
+type ListUploadFileReq struct {
+	Page     int    `json:"page,optional" form:"page,optional"`
+	Limit    int    `json:"limit,optional" form:"limit,optional"`
+	FilePath string `json:"file_path,optional" form:"file_path,optional"`
 }
 
 type PageResp struct {
@@ -26,4 +32,12 @@ type Body struct {
 	Code    int         `json:"code"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data,omitempty"`
+}
+
+// DashboardStats 仪表盘统计
+type DashboardStats struct {
+	ArticleCount int `json:"article_count"`
+	UserCount    int `json:"user_count"`
+	CommentCount int `json:"comment_count"`
+	ViewCount    int `json:"view_count"`
 }

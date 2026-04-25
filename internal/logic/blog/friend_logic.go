@@ -22,15 +22,14 @@ func (l *FriendLinkLogic) List(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	// 转换为 FriendLinkVO 列表
 	result := make([]types.FriendLinkVO, 0, len(links))
 	for _, link := range links {
 		result = append(result, types.FriendLinkVO{
 			ID:          link.ID,
-			Name:        link.Name,
-			URL:         link.URL,
-			Logo:        link.Logo,
-			Description: link.Description,
+			LinkName:    link.Name,
+			LinkAddress: link.URL,
+			LinkAvatar:  link.Logo,
+			LinkIntro:   link.Description,
 			Sort:        link.Sort,
 			Status:      link.Status,
 		})

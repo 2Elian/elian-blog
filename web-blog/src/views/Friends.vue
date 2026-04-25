@@ -84,6 +84,13 @@ onMounted(async () => {
 <style scoped lang="scss">
 .friends-page {
   animation: fadeInUp 0.5s ease;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 32px;
+
+  @media (max-width: 640px) {
+    padding: 0 20px;
+  }
 }
 
 .page-header {
@@ -136,7 +143,7 @@ onMounted(async () => {
 
 .card-cover {
   height: 100px;
-  background: var(--accent-gradient);
+  background: linear-gradient(135deg, #1a1a1a, #3a3a3a);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -188,7 +195,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--primary-color);
+  color: var(--text-secondary);
   font-size: 14px;
   font-weight: 500;
 }

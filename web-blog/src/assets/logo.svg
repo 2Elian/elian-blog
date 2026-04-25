@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 250" width="100%" height="100%">
+    <defs>
+        <!-- 主体吉祥物渐变（青色到紫色） -->
+        <linearGradient id="gradE" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#12c2e9" />
+            <stop offset="100%" stop-color="#c471ed" />
+        </linearGradient>
+
+        <!-- 底部投影 -->
+        <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+            <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.15" />
+        </filter>
+    </defs>
+
+    <!-- 背景装饰光斑（可选，使标志更有层次感） -->
+    <g id="background-elements">
+        <circle cx="110" cy="105" r="85" fill="#FFFFFF" opacity="0.03" />
+        <circle cx="500" cy="150" r="30" fill="#12c2e9" opacity="0.08" />
+        <circle cx="60" cy="40" r="15" fill="#c471ed" opacity="0.1" />
+    </g>
+
+    <!-- ==================== E 吉祥物部分 ==================== -->
+    <g id="mascot-E" filter="url(#shadow)">
+        <!-- 触角 -->
+        <path d="M 65 30 Q 65 15 55 10" stroke="url(#gradE)" stroke-width="8" stroke-linecap="round" fill="none" />
+        <circle cx="55" cy="10" r="9" fill="#12c2e9" />
+
+        <!-- E 的身体主体结构 -->
+        <!-- 背部脊椎 -->
+        <rect x="50" y="30" width="30" height="150" rx="15" fill="url(#gradE)" />
+
+        <!-- 顶部横臂（充当头部/触角底座） -->
+        <rect x="50" y="30" width="110" height="40" rx="20" fill="url(#gradE)" />
+
+        <!-- 中部横臂 -->
+        <rect x="50" y="90" width="90" height="30" rx="15" fill="url(#gradE)" />
+
+        <!-- 底部横臂（充当脚部） -->
+        <rect x="50" y="150" width="110" height="30" rx="15" fill="url(#gradE)" />
+
+        <!-- 磨砂质感高光 -->
+        <rect x="65" y="38" width="80" height="8" rx="4" fill="#FFFFFF" opacity="0.3" />
+        <rect x="65" y="98" width="65" height="8" rx="4" fill="#FFFFFF" opacity="0.3" />
+        <rect x="65" y="158" width="80" height="8" rx="4" fill="#FFFFFF" opacity="0.3" />
+
+        <!-- 面部细节（眼睛、腮红、微笑） -->
+        <!-- 左眼（眨眼） -->
+        <path d="M 93 65 L 107 65" stroke="#1E293B" stroke-width="6" stroke-linecap="round" />
+        <!-- 右眼（闪烁） -->
+        <circle cx="140" cy="65" r="8" fill="#1E293B" />
+        <circle cx="143" cy="62" r="3" fill="#FFFFFF" /> <!-- 眼睛高光 -->
+
+        <!-- 腮红 -->
+        <circle cx="90" cy="78" r="9" fill="#FF9A9E" opacity="0.6" />
+        <circle cx="155" cy="78" r="9" fill="#FF9A9E" opacity="0.6" />
+
+        <!-- 微笑 -->
+        <path d="M 110 82 Q 120 93 130 82" stroke="#1E293B" stroke-width="5" stroke-linecap="round" fill="none" />
+    </g>
+
+    <!-- ==================== 文字排版部分 ==================== -->
+    <g id="typography">
+        <!-- 文字 "lian" -->
+        <text x="210" y="125" font-family="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" font-weight="800" font-size="95" fill="#1E293B" letter-spacing="4">l</text>
+        <text x="260" y="125" font-family="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" font-weight="800" font-size="95" fill="#1E293B" letter-spacing="4">ian</text>
+
+        <!-- 自定义“i”字母的发亮圆点 -->
+        <circle cx="275" cy="48" r="11" fill="#00D4FF" />
+
+        <!-- 下方装饰性波浪线（品牌下划线） -->
+        <path d="M 210 150 Q 260 170 350 150" stroke="#12c2e9" stroke-width="6" stroke-linecap="round" fill="none" />
+    </g>
+</svg>

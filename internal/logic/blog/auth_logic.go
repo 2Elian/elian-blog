@@ -3,12 +3,14 @@ package blog
 import (
 	"context"
 	"errors"
+	"time"
 
 	"elian-blog/internal/model"
 	"elian-blog/internal/svc"
 	"elian-blog/internal/types"
 	"elian-blog/internal/utils"
 
+	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
 
@@ -58,6 +60,8 @@ func (l *AuthLogic) Login(ctx context.Context, req *types.LoginReq) (interface{}
 			Username: user.Username,
 			Avatar:   user.Avatar,
 			Email:    user.Email,
+			Intro:    user.Intro,
+			Website:  user.Website,
 			Role:     role,
 		},
 	}, nil
@@ -81,15 +85,41 @@ func (l *AuthLogic) Register(ctx context.Context, req *types.RegisterReq) (inter
 	}
 
 	user := &model.User{
-		Username: req.Username,
-		Password: hashedPwd,
-		Nickname: req.Username,
-		Email:    req.Email,
-		Status:   1,
+		Username:  req.Username,
+		Password:  hashedPwd,
+		Nickname:  req.Username,
+		Email:     req.Email,
+		Avatar:    req.Avatar,
+		Intro:     req.Intro,
+		Website:   req.Website,
+		Status:    1,
+		LastLogin: time.Now(),
 	}
 
 	if err := l.svcCtx.UserDao.Create(user); err != nil {
 		return nil, err
+	}
+
+	// 查找或创建默认 "user" 角色
+	defaultRole, err := l.svcCtx.RoleDao.FindByLabel("user")
+	if err != nil {
+		defaultRole = &model.Role{
+			Name:        "普通用户",
+			Label:       "user",
+			Description: "默认用户角色",
+			Status:      1,
+			Sort:        3,
+		}
+		if createErr := l.svcCtx.RoleDao.Create(defaultRole); createErr != nil {
+			logx.Errorf("创建默认角色失败: %v", createErr)
+		}
+	}
+
+	// 创建 user_roles 关联
+	if defaultRole != nil && defaultRole.ID > 0 {
+		if assignErr := l.svcCtx.UserDao.AssignRole(user.ID, defaultRole.ID); assignErr != nil {
+			logx.Errorf("分配角色失败: %v", assignErr)
+		}
 	}
 
 	// 生成token
@@ -105,6 +135,8 @@ func (l *AuthLogic) Register(ctx context.Context, req *types.RegisterReq) (inter
 			Username: user.Username,
 			Avatar:   user.Avatar,
 			Email:    user.Email,
+			Intro:    user.Intro,
+			Website:  user.Website,
 			Role:     "user",
 		},
 	}, nil
@@ -132,10 +164,12 @@ func (l *AuthLogic) GetUserInfo(ctx context.Context) (interface{}, error) {
 	}
 
 	return types.UserInfo{
-		ID:        user.ID,
-		Username:  user.Username,
-		Avatar:    user.Avatar,
-		Email:     user.Email,
-		Role:      role,
+		ID:       user.ID,
+		Username: user.Username,
+		Avatar:   user.Avatar,
+		Email:    user.Email,
+		Intro:    user.Intro,
+		Website:  user.Website,
+		Role:     role,
 	}, nil
 }

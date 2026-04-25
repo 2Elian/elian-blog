@@ -27,10 +27,10 @@ const isDark = computed(() => userStore.isDark)
 
 const themeOverrides = computed<GlobalThemeOverrides>(() => ({
   common: {
-    primaryColor: '#e9546b',
-    primaryColorHover: '#f06e82',
-    primaryColorPressed: '#d1435a',
-    primaryColorSuppl: '#e9546b',
+    primaryColor: '#1a1a1a',
+    primaryColorHover: '#333333',
+    primaryColorPressed: '#000000',
+    primaryColorSuppl: '#1a1a1a',
     borderRadius: '8px',
     borderRadiusSmall: '6px',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif'

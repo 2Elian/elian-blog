@@ -2,13 +2,11 @@
   <div class="blog-layout" :class="{ dark: isDark }">
     <AppHeader />
     <main class="main-content">
-      <div class="container">
-        <router-view v-slot="{ Component }">
-          <transition name="page" mode="out-in">
-            <component :is="Component" />
-          </transition>
-        </router-view>
-      </div>
+      <router-view v-slot="{ Component }">
+        <transition name="page" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </main>
     <AppFooter />
   </div>

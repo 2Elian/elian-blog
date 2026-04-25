@@ -9,7 +9,7 @@ type Config struct {
 	Database DatabaseConfig
 	Redis    RedisConfig
 	JWT      JWTConfig
-	Log      LogConfig
+	AppLog   LogConfig
 	Upload   UploadConfig
 }
 

@@ -4,8 +4,14 @@ import http from './http'
 export const login = (data: { username: string; password: string }) =>
   http.post('/login', data)
 
-export const register = (data: { username: string; password: string; email: string }) =>
-  http.post('/register', data)
+export const register = (data: {
+  username: string
+  password: string
+  email: string
+  avatar?: string
+  intro?: string
+  website?: string
+}) => http.post('/register', data)
 
 // User
 export const getUserInfo = () => http.get('/user/info')
@@ -29,13 +35,11 @@ export const getRecentComments = () => http.get('/comments/recent')
 export const postComment = (data: { article_id: number; content: string; parent_id?: number }) =>
   http.post('/comments', data)
 
-// Friend Links
-export const getFriendLinks = () => http.get('/friend-links')
+// Products
+export const getProducts = (params?: { page?: number; page_size?: number }) =>
+  http.get('/products', { params })
 
-// Messages
-export const getMessages = (params?: { page?: number; page_size?: number }) =>
-  http.get('/messages', { params })
-export const postMessage = (data: { content: string }) => http.post('/messages', data)
+export const getProduct = (id: number) => http.get(`/products/${id}`)
 
 // Pages
 export const getPages = () => http.get('/pages')
@@ -43,3 +47,6 @@ export const getPage = (slug: string) => http.get(`/pages/${slug}`)
 
 // Site Config
 export const getSiteConfig = () => http.get('/site/config')
+
+// About Me
+export const getAboutMe = () => http.get('/site/about')

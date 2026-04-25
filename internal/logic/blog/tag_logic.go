@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"elian-blog/internal/svc"
-	"elian-blog/internal/types"
 )
 
 type TagLogic struct {
@@ -22,13 +21,15 @@ func (l *TagLogic) List(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	// 转换为 TagVO 列表
-	result := make([]types.TagVO, 0, len(tags))
+	result := make([]map[string]interface{}, 0, len(tags))
 	for _, tag := range tags {
-		result = append(result, types.TagVO{
-			ID:    tag.ID,
-			Name:  tag.Name,
-			Color: tag.Color,
+		var articleCount int64
+		l.svcCtx.DB.Table("article_tags").Where("tag_id = ?", tag.ID).Count(&articleCount)
+		result = append(result, map[string]interface{}{
+			"id":            tag.ID,
+			"name":          tag.Name,
+			"color":         tag.Color,
+			"article_count": articleCount,
 		})
 	}
 

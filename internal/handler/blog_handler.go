@@ -2,6 +2,8 @@ package handler
 
 import (
 	"net/http"
+	"strings"
+	"time"
 
 	"elian-blog/internal/logic/blog"
 	"elian-blog/internal/svc"
@@ -9,20 +11,6 @@ import (
 
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
-
-// --- 统一响应 ---
-
-func ok(w http.ResponseWriter, data interface{}) {
-	httpx.OkJson(w, types.Body{Code: 0, Message: "success", Data: data})
-}
-
-func okPage(w http.ResponseWriter, list interface{}, total int64, page, pageSize int) {
-	ok(w, types.PageResp{List: list, Total: total, Page: page, PageSize: pageSize})
-}
-
-func fail(w http.ResponseWriter, code int, msg string) {
-	httpx.OkJson(w, types.Body{Code: code, Message: msg})
-}
 
 // --- 文章 ---
 
@@ -32,6 +20,12 @@ func ListArticlesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		if err := httpx.Parse(r, &req); err != nil {
 			fail(w, 400, "参数错误")
 			return
+		}
+		if req.Page <= 0 {
+			req.Page = 1
+		}
+		if req.PageSize <= 0 {
+			req.PageSize = 10
 		}
 		list, total, err := blog.NewArticleLogic(svcCtx).ListArticles(r.Context(), &req)
 		if err != nil {
@@ -64,6 +58,12 @@ func SearchArticlesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		if err := httpx.Parse(r, &req); err != nil {
 			fail(w, 400, "参数错误")
 			return
+		}
+		if req.Page <= 0 {
+			req.Page = 1
+		}
+		if req.PageSize <= 0 {
+			req.PageSize = 10
 		}
 		list, total, err := blog.NewArticleLogic(svcCtx).ListArticles(r.Context(), &req)
 		if err != nil {
@@ -149,11 +149,17 @@ func ListTagsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 func ListCommentsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var pathReq types.IDReq
+		if err := httpx.ParsePath(r, &pathReq); err != nil {
+			fail(w, 400, "参数错误")
+			return
+		}
 		var req types.QueryCommentReq
 		if err := httpx.Parse(r, &req); err != nil {
 			fail(w, 400, "参数错误")
 			return
 		}
+		req.ArticleID = pathReq.ID
 		data, err := blog.NewCommentLogic(svcCtx).ListByArticle(r.Context(), &req)
 		if err != nil {
 			fail(w, 500, "获取评论失败")
@@ -183,7 +189,7 @@ func CreateCommentHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		data, err := blog.NewCommentLogic(svcCtx).Create(r.Context(), &req)
 		if err != nil {
-			fail(w, 500, "评论失败")
+			fail(w, 500, err.Error())
 			return
 		}
 		ok(w, data)
@@ -211,6 +217,12 @@ func ListMessagesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		if err := httpx.Parse(r, &req); err != nil {
 			fail(w, 400, "参数错误")
 			return
+		}
+		if req.Page <= 0 {
+			req.Page = 1
+		}
+		if req.PageSize <= 0 {
+			req.PageSize = 10
 		}
 		data, err := blog.NewMessageLogic(svcCtx).List(r.Context(), &req)
 		if err != nil {
@@ -278,5 +290,104 @@ func GetSiteConfigHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 		ok(w, data)
+	}
+}
+
+// --- 产品 ---
+
+func ListProductsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req types.PageQuery
+		if err := httpx.Parse(r, &req); err != nil {
+			req.Page = 1
+			req.PageSize = 100
+		}
+		if req.Page <= 0 {
+			req.Page = 1
+		}
+		if req.PageSize <= 0 {
+			req.PageSize = 100
+		}
+		products, total, err := svcCtx.ProductDao.List(req.Page, req.PageSize)
+		if err != nil {
+			fail(w, 500, "获取产品失败")
+			return
+		}
+		type ProductVO struct {
+			ID          uint    `json:"id"`
+			Name        string  `json:"name"`
+			Description string  `json:"description"`
+			Price       float64 `json:"price"`
+			Cover       string  `json:"cover"`
+			Status      int     `json:"status"`
+			Sort        int     `json:"sort"`
+			Type        string  `json:"type"`
+		}
+		list := make([]ProductVO, 0, len(products))
+		for _, p := range products {
+			if p.Status != 1 {
+				continue
+			}
+			list = append(list, ProductVO{
+				ID:          p.ID,
+				Name:        p.Name,
+				Description: p.Description,
+				Price:       p.Price,
+				Cover:       p.Cover,
+				Status:      p.Status,
+				Sort:        p.Sort,
+				Type:        p.Type,
+			})
+		}
+		okPage(w, list, total, req.Page, req.PageSize)
+	}
+}
+
+func GetProductHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req types.IDReq
+		if err := httpx.ParsePath(r, &req); err != nil {
+			fail(w, 400, "参数错误")
+			return
+		}
+		product, err := svcCtx.ProductDao.GetByID(req.ID)
+		if err != nil {
+			fail(w, 404, "产品不存在")
+			return
+		}
+		if product.Status != 1 {
+			fail(w, 404, "产品不存在")
+			return
+		}
+		cover := product.Cover
+		if cover != "" && !strings.HasPrefix(cover, "http") {
+			if !strings.HasPrefix(cover, "/") {
+				cover = "/" + cover
+			}
+			cover = "http://localhost:8080" + cover
+		}
+		ok(w, map[string]interface{}{
+			"id":          product.ID,
+			"name":        product.Name,
+			"description": product.Description,
+			"content":     product.Content,
+			"price":       product.Price,
+			"cover":       cover,
+			"status":      product.Status,
+			"sort":        product.Sort,
+			"type":        product.Type,
+			"created_at":  product.CreatedAt.Format(time.DateTime),
+		})
+	}
+}
+
+func GetAboutMeHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cfg, err := svcCtx.SiteDao.GetByKey("about_me")
+		content := ""
+		if err == nil && cfg != nil {
+			content = cfg.Value
+		}
+		ok(w, map[string]interface{}{"content": content})
 	}
 }

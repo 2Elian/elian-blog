@@ -42,6 +42,23 @@ func (d *RoleDao) UpdateMenus(role *model.Role, menus []model.Menu) error {
 	return d.db.Model(role).Association("Menus").Replace(menus)
 }
 
+// FindByLabel 根据 label 查找角色
+func (d *RoleDao) FindByLabel(label string) (*model.Role, error) {
+	var role model.Role
+	err := d.db.Where("label = ?", label).First(&role).Error
+	return &role, err
+}
+
+// CreateIfNotExist 如果角色不存在则创建
+func (d *RoleDao) CreateIfNotExist(role *model.Role) error {
+	var existing model.Role
+	err := d.db.Where("label = ?", role.Label).First(&existing).Error
+	if err == gorm.ErrRecordNotFound {
+		return d.db.Create(role).Error
+	}
+	return nil
+}
+
 type MenuDao struct {
 	db *gorm.DB
 }

@@ -2,6 +2,9 @@
   <div class="article-page" v-if="article">
     <!-- Article Header -->
     <div class="article-header">
+      <div class="header-cover" v-if="article.cover">
+        <img :src="article.cover" alt="cover" class="cover-image" />
+      </div>
       <div class="header-content">
         <div class="header-meta">
           <span class="meta-category" v-if="article.category">
@@ -30,7 +33,7 @@
     <!-- Article Body -->
     <div class="article-body">
       <div class="article-wrapper">
-        <div class="article-content" v-html="article.content"></div>
+        <div class="article-content" v-html="renderedContent"></div>
 
         <!-- Prev / Next Navigation -->
         <div class="article-nav" v-if="prevArticle || nextArticle">
@@ -98,10 +101,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NTag, NInput, NButton, NAvatar, NIcon, NEmpty, NSpin, useMessage } from 'naive-ui'
 import { EyeOutline } from '@vicons/ionicons5'
+import { marked } from 'marked'
 import { getArticle, getComments, postComment } from '@/api'
 import { useUserStore } from '@/stores/user'
 
@@ -114,8 +118,8 @@ interface Article {
   views?: number
   category?: { id: number; name: string }
   tags?: { id: number; name: string }[]
-  prev?: { id: number; title: string }
-  next?: { id: number; title: string }
+  prev_article?: { id: number; title: string }
+  next_article?: { id: number; title: string }
 }
 
 interface Comment {
@@ -134,8 +138,14 @@ const article = ref<Article | null>(null)
 const comments = ref<Comment[]>([])
 const commentContent = ref('')
 const submitting = ref(false)
-const prevArticle = ref<{ id: number; title: string } | null>(null)
-const nextArticle = ref<{ id: number; title: string } | null>(null)
+
+const renderedContent = computed(() => {
+  if (!article.value?.content) return ''
+  return marked(article.value.content)
+})
+
+const prevArticle = computed(() => article.value?.prev_article)
+const nextArticle = computed(() => article.value?.next_article)
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString('zh-CN', {
@@ -153,8 +163,6 @@ async function loadArticle(id: number) {
   try {
     const res = await getArticle(id) as any
     article.value = res.data
-    prevArticle.value = res.data?.prev || null
-    nextArticle.value = res.data?.next || null
 
     // Load comments
     const commentRes = await getComments(id) as any
@@ -209,16 +217,36 @@ watch(() => route.params.id, (newId) => {
 <style scoped lang="scss">
 .article-page {
   animation: fadeInUp 0.5s ease;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 32px;
+
+  @media (max-width: 640px) {
+    padding: 0 20px;
+  }
 }
 
 .article-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 50px 40px 60px;
+  background: linear-gradient(135deg, #0a0a0a 0%, #2a2a2a 100%);
+  padding: 0;
   border-radius: var(--radius-lg);
   margin-bottom: 30px;
   color: white;
   position: relative;
   overflow: hidden;
+
+  .cover-image {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .header-content {
+    padding: 50px 40px 60px;
+    position: relative;
+    z-index: 1;
+  }
 
   &::before {
     content: '';
@@ -243,13 +271,13 @@ watch(() => route.params.id, (newId) => {
   }
 
   @media (max-width: 640px) {
-    padding: 30px 20px 40px;
+    .header-content {
+      padding: 30px 20px 40px;
+    }
+    .cover-image {
+      height: 180px;
+    }
   }
-}
-
-.header-content {
-  position: relative;
-  z-index: 1;
 }
 
 .header-meta {
@@ -303,7 +331,7 @@ watch(() => route.params.id, (newId) => {
 }
 
 .article-body {
-  max-width: 860px;
+  max-width: 1060px;
   margin: 0 auto;
 }
 
@@ -342,12 +370,12 @@ watch(() => route.params.id, (newId) => {
 .nav-item {
   padding: 16px;
   border-radius: var(--radius-sm);
-  background: rgba(233, 84, 107, 0.03);
+  background: rgba(0, 0, 0, 0.02);
   cursor: pointer;
   transition: all var(--transition-fast);
 
   &:hover {
-    background: rgba(233, 84, 107, 0.08);
+    background: rgba(0, 0, 0, 0.05);
   }
 
   &.next {
@@ -397,7 +425,7 @@ watch(() => route.params.id, (newId) => {
   transition: background-color var(--transition-fast);
 
   &:hover {
-    background: rgba(233, 84, 107, 0.03);
+    background: rgba(0, 0, 0, 0.02);
   }
 }
 
@@ -405,8 +433,8 @@ watch(() => route.params.id, (newId) => {
   flex-shrink: 0;
 
   :deep(.n-avatar) {
-    background: var(--accent-gradient);
-    color: white;
+    background: var(--text-primary);
+    color: var(--bg-card);
     font-weight: 600;
   }
 }

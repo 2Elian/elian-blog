@@ -2,7 +2,8 @@
   <header class="app-header" :class="{ dark: isDark }">
     <div class="header-container">
       <router-link to="/" class="logo">
-        <span class="logo-text gradient-text">Elian Blog</span>
+        <img :src="logo" class="logo-img" alt="logo" />
+        <span class="logo-text">{{ siteName }}</span>
       </router-link>
 
       <nav class="nav-links" :class="{ active: menuActive }">
@@ -13,7 +14,7 @@
           class="nav-link"
           @click="menuActive = false"
         >
-          <component :is="link.icon" class="nav-icon" />
+          <n-icon size="18"><component :is="link.icon" /></n-icon>
           <span>{{ link.text }}</span>
         </router-link>
       </nav>
@@ -33,8 +34,6 @@
 
         <n-button
           v-if="!isLoggedIn"
-          type="primary"
-          round
           class="login-btn"
           @click="$router.push('/login')"
         >
@@ -71,12 +70,12 @@
           搜索
         </n-button>
       </div>
-    </n-modal>
+	    </n-modal>
   </header>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, h } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   NButton,
@@ -93,18 +92,27 @@ import {
   HomeOutline,
   BookOutline,
   TimeOutline,
-  PricetagOutline,
-  PersonOutline,
-  ChatbubblesOutline,
-  MenuOutline
+  CubeOutline,
+  RocketOutline,
+  MenuOutline,
+  PersonOutline
 } from '@vicons/ionicons5'
 import { useUserStore } from '@/stores/user'
+import { useSiteConfigStore } from '@/stores/siteConfig'
+import logo from '@/assets/logo.svg'
 
 const router = useRouter()
 const userStore = useUserStore()
+const siteConfig = useSiteConfigStore()
 const isDark = computed(() => userStore.isDark)
 const isLoggedIn = computed(() => userStore.isLoggedIn)
 const username = computed(() => userStore.username)
+const siteName = computed(() => siteConfig.siteName)
+const siteAvatar = computed(() => siteConfig.siteAvatar)
+
+onMounted(() => {
+  siteConfig.fetchConfig()
+})
 
 const menuActive = ref(false)
 const showSearch = ref(false)
@@ -114,9 +122,8 @@ const navLinks = [
   { path: '/', text: '首页', icon: HomeOutline },
   { path: '/blog', text: '博客', icon: BookOutline },
   { path: '/archive', text: '归档', icon: TimeOutline },
-  { path: '/tags', text: '标签', icon: PricetagOutline },
-  { path: '/friends', text: '友链', icon: PersonOutline },
-  { path: '/messages', text: '留言', icon: ChatbubblesOutline }
+  { path: '/products', text: '产品', icon: RocketOutline },
+  { path: '/about', text: '关于作者', icon: PersonOutline }
 ]
 
 const userOptions = [
@@ -167,29 +174,40 @@ function handleUserAction(key: string) {
 }
 
 .header-container {
-  max-width: var(--max-width);
+  max-width: 1400px;
   margin: 0 auto;
   height: var(--header-height);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 32px;
 }
 
 .logo {
   text-decoration: none;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
 }
 
 .logo-text {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.5px;
+  color: var(--text-primary);
 }
 
 .nav-links {
   display: flex;
-  gap: 8px;
+  gap: 4px;
+  flex-wrap: nowrap;
 
   @media (max-width: 768px) {
     position: fixed;
@@ -215,23 +233,21 @@ function handleUserAction(key: string) {
 }
 
 .nav-link {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 8px 14px;
   color: var(--text-secondary);
-  font-size: 15px;
-  border-radius: 20px;
+  font-size: 14px;
+  border-radius: 8px;
   transition: all var(--transition-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
 
   &:hover,
   &.router-link-active {
-    color: var(--primary-color);
-    background: rgba(233, 84, 107, 0.08);
-  }
-
-  .nav-icon {
-    font-size: 18px;
+    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.06);
   }
 }
 
@@ -245,8 +261,8 @@ function handleUserAction(key: string) {
   color: var(--text-secondary);
 
   &:hover {
-    color: var(--primary-color);
-    background: rgba(233, 84, 107, 0.08);
+    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.06);
   }
 }
 

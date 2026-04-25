@@ -1,6 +1,27 @@
 <template>
   <div class="blog-page">
     <div class="blog-layout">
+      <!-- Left Sidebar: Categories -->
+      <aside class="blog-sidebar-left">
+        <div class="sidebar-section">
+          <h4 class="sidebar-title">分类</h4>
+          <div class="sidebar-cat-list">
+            <div
+              class="sidebar-cat-item"
+              :class="{ active: !selectedCategory }"
+              @click="selectCategory(null)"
+            >全部</div>
+            <div
+              v-for="cat in categories"
+              :key="cat.id"
+              class="sidebar-cat-item"
+              :class="{ active: selectedCategory === cat.id }"
+              @click="selectCategory(cat.id)"
+            >{{ cat.name }}</div>
+          </div>
+        </div>
+      </aside>
+
       <!-- Main Content -->
       <div class="blog-main">
         <!-- Search Bar -->
@@ -17,28 +38,6 @@
               <n-icon><SearchOutline /></n-icon>
             </template>
           </n-input>
-        </div>
-
-        <!-- Category Filter -->
-        <div class="category-filter" v-if="categories.length">
-          <n-button
-            :type="!selectedCategory ? 'primary' : 'default'"
-            size="small"
-            round
-            @click="selectCategory(null)"
-          >
-            全部
-          </n-button>
-          <n-button
-            v-for="cat in categories"
-            :key="cat.id"
-            :type="selectedCategory === cat.id ? 'primary' : 'default'"
-            size="small"
-            round
-            @click="selectCategory(cat.id)"
-          >
-            {{ cat.name }}
-          </n-button>
         </div>
 
         <!-- Article List -->
@@ -64,9 +63,6 @@
           />
         </div>
       </div>
-
-      <!-- Sidebar -->
-      <Sidebar />
     </div>
   </div>
 </template>
@@ -74,10 +70,9 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { NInput, NIcon, NButton, NEmpty, NPagination } from 'naive-ui'
+import { NInput, NIcon, NEmpty, NPagination } from 'naive-ui'
 import { SearchOutline } from '@vicons/ionicons5'
 import ArticleCard from '@/components/ArticleCard.vue'
-import Sidebar from '@/components/Sidebar.vue'
 import { getArticles, searchArticles, getCategories } from '@/api'
 
 interface Article {
@@ -158,7 +153,7 @@ onMounted(async () => {
 
   try {
     const catRes = await getCategories() as any
-    categories.value = catRes.data || []
+    categories.value = (catRes.data || []).map((c: any) => ({ id: c.id, name: c.name }))
   } catch (e) {
     console.error('Failed to load categories:', e)
   }
@@ -176,16 +171,79 @@ watch(() => route.query, () => {
 <style scoped lang="scss">
 .blog-page {
   animation: fadeInUp 0.5s ease;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 32px;
+
+  @media (max-width: 1024px) {
+    padding: 0 20px;
+  }
 }
 
 .blog-layout {
   display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 24px;
+  grid-template-columns: 180px 1fr;
+  gap: 28px;
 
-  @media (max-width: 1024px) {
+  @media (max-width: 900px) {
     grid-template-columns: 1fr;
   }
+}
+
+.blog-sidebar-left {
+  position: sticky;
+  top: calc(var(--header-height, 64px) + 20px);
+  height: fit-content;
+
+  @media (max-width: 900px) {
+    position: static;
+  }
+}
+
+.sidebar-section {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-cat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar-cat-item {
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--text-primary);
+  }
+
+  &.active {
+    background: var(--primary-color);
+    color: white;
+    font-weight: 500;
+  }
+}
+
+html.dark .sidebar-cat-item:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .blog-main {
@@ -200,41 +258,54 @@ watch(() => route.query, () => {
   }
 }
 
-.category-filter {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 24px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--border-color);
-}
-
 .article-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .article-list-card {
   :deep(.article-card) {
+    --card-cover-height: 100%;
     display: grid;
-    grid-template-columns: 240px 1fr;
+    grid-template-columns: 180px 1fr;
     border-radius: var(--radius-md);
 
     @media (max-width: 640px) {
       grid-template-columns: 1fr;
+      --card-cover-height: 140px;
     }
   }
 
   :deep(.card-cover) {
-    height: 100%;
-    min-height: 180px;
+    min-height: 80px;
     border-radius: var(--radius-md) 0 0 var(--radius-md);
 
     @media (max-width: 640px) {
       border-radius: var(--radius-md) var(--radius-md) 0 0;
-      height: 180px;
     }
+  }
+
+  :deep(.card-content) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 14px 16px;
+  }
+
+  :deep(.card-desc) {
+    -webkit-line-clamp: 1;
+    margin-bottom: 8px;
+  }
+
+  :deep(.card-title) {
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+
+  :deep(.card-meta) {
+    font-size: 12px;
+    gap: 12px;
   }
 }
 

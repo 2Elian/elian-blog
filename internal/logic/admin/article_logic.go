@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"strings"
 
 	"elian-blog/internal/model"
 	"elian-blog/internal/svc"
@@ -16,18 +17,31 @@ func NewArticleLogic(svcCtx *svc.ServiceContext) *ArticleLogic {
 	return &ArticleLogic{svcCtx: svcCtx}
 }
 
-func (l *ArticleLogic) Create(ctx context.Context, req *types.CreateArticleReq) (interface{}, error) {
+func (l *ArticleLogic) Create(ctx context.Context, req *types.CreateArticleReq, userID uint) (interface{}, error) {
 	article := &model.Article{
-		Title:      req.Title,
-		Summary:    req.Summary,
-		Content:    req.Content,
-		Cover:      req.Cover,
-		CategoryID: req.CategoryID,
-		Status:     req.Status,
-		IsTop:      req.IsTop,
-		IsOriginal: req.IsOriginal,
-		Type:       req.Type,
-		Password:   req.Password,
+		Title:     req.ArticleTitle,
+		Content:   req.ArticleContent,
+		Cover:     req.ArticleCover,
+		Summary:   req.ArticleSummary,
+		Type:      req.ArticleType,
+		SourceURL: req.OriginalURL,
+		Status:    req.Status,
+		IsTop:     req.IsTop,
+		AuthorID:  userID,
+	}
+
+	// Resolve category by name
+	if req.CategoryName != "" {
+		var cat model.Category
+		l.svcCtx.DB.Where("name = ?", req.CategoryName).First(&cat)
+		if cat.ID > 0 {
+			article.CategoryID = &cat.ID
+		} else {
+			// Create category if not exists
+			cat = model.Category{Name: req.CategoryName}
+			l.svcCtx.CategoryDao.Create(&cat)
+			article.CategoryID = &cat.ID
+		}
 	}
 
 	if err := l.svcCtx.ArticleDao.Create(article); err != nil {
@@ -35,8 +49,8 @@ func (l *ArticleLogic) Create(ctx context.Context, req *types.CreateArticleReq) 
 	}
 
 	// Handle tags
-	if len(req.TagNames) > 0 {
-		tags, err := l.findOrCreateTags(req.TagNames)
+	if len(req.TagNameList) > 0 {
+		tags, err := l.findOrCreateTags(req.TagNameList)
 		if err != nil {
 			return nil, err
 		}
@@ -46,7 +60,11 @@ func (l *ArticleLogic) Create(ctx context.Context, req *types.CreateArticleReq) 
 	}
 
 	// Reload article with associations
-	return l.svcCtx.ArticleDao.GetByID(article.ID)
+	loaded, err := l.svcCtx.ArticleDao.GetByID(article.ID)
+	if err != nil {
+		return nil, err
+	}
+	return toArticleBackVO(loaded), nil
 }
 
 func (l *ArticleLogic) Update(ctx context.Context, req *types.UpdateArticleReq) error {
@@ -55,21 +73,23 @@ func (l *ArticleLogic) Update(ctx context.Context, req *types.UpdateArticleReq) 
 		return err
 	}
 
-	// Update fields
-	if req.Title != "" {
-		article.Title = req.Title
+	if req.ArticleTitle != "" {
+		article.Title = req.ArticleTitle
 	}
-	if req.Summary != "" {
-		article.Summary = req.Summary
+	if req.ArticleContent != "" {
+		article.Content = req.ArticleContent
 	}
-	if req.Content != "" {
-		article.Content = req.Content
+	if req.ArticleCover != "" {
+		article.Cover = req.ArticleCover
 	}
-	if req.Cover != "" {
-		article.Cover = req.Cover
+	if req.ArticleSummary != "" {
+		article.Summary = req.ArticleSummary
 	}
-	if req.CategoryID != 0 {
-		article.CategoryID = req.CategoryID
+	if req.ArticleType != 0 {
+		article.Type = req.ArticleType
+	}
+	if req.OriginalURL != "" {
+		article.SourceURL = req.OriginalURL
 	}
 	if req.Status != 0 {
 		article.Status = req.Status
@@ -77,14 +97,12 @@ func (l *ArticleLogic) Update(ctx context.Context, req *types.UpdateArticleReq) 
 	if req.IsTop != 0 {
 		article.IsTop = req.IsTop
 	}
-	if req.IsOriginal != 0 {
-		article.IsOriginal = req.IsOriginal
-	}
-	if req.Type != 0 {
-		article.Type = req.Type
-	}
-	if req.Password != "" {
-		article.Password = req.Password
+	if req.CategoryName != "" {
+		var cat model.Category
+		l.svcCtx.DB.Where("name = ?", req.CategoryName).First(&cat)
+		if cat.ID > 0 {
+			article.CategoryID = &cat.ID
+		}
 	}
 
 	if err := l.svcCtx.ArticleDao.Update(article); err != nil {
@@ -92,8 +110,8 @@ func (l *ArticleLogic) Update(ctx context.Context, req *types.UpdateArticleReq) 
 	}
 
 	// Update tags if provided
-	if req.TagNames != nil {
-		tags, err := l.findOrCreateTags(req.TagNames)
+	if req.TagNameList != nil {
+		tags, err := l.findOrCreateTags(req.TagNameList)
 		if err != nil {
 			return err
 		}
@@ -119,16 +137,36 @@ func (l *ArticleLogic) List(ctx context.Context, req *types.QueryArticleHomeReq)
 		pageSize = 10
 	}
 
-	articles, total, err := l.svcCtx.ArticleDao.List(page, pageSize, req.Status, req.CategoryID, req.TagID)
+	// Handle category_name filter
+	categoryID := req.CategoryID
+	if req.CategoryName != "" && categoryID == 0 {
+		var cat model.Category
+		l.svcCtx.DB.Where("name = ?", req.CategoryName).First(&cat)
+		if cat.ID > 0 {
+			categoryID = cat.ID
+		}
+	}
+
+	articles, total, err := l.svcCtx.ArticleDao.List(page, pageSize, req.Status, categoryID, req.TagID, req.IsDelete)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	return articles, total, nil
+	// Convert to ArticleBackVO
+	voList := make([]types.ArticleBackVO, 0, len(articles))
+	for _, a := range articles {
+		voList = append(voList, toArticleBackVO(&a))
+	}
+
+	return voList, total, nil
 }
 
 func (l *ArticleLogic) Get(ctx context.Context, id uint) (interface{}, error) {
-	return l.svcCtx.ArticleDao.GetByID(id)
+	article, err := l.svcCtx.ArticleDao.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+	return toArticleBackVO(article), nil
 }
 
 // findOrCreateTags resolves tag names to Tag models, creating them if necessary.
@@ -144,3 +182,46 @@ func (l *ArticleLogic) findOrCreateTags(names []string) ([]model.Tag, error) {
 	return tags, nil
 }
 
+func toArticleBackVO(a *model.Article) types.ArticleBackVO {
+	cover := a.Cover
+	if cover != "" && !strings.HasPrefix(cover, "http") {
+		if !strings.HasPrefix(cover, "/") {
+			cover = "/" + cover
+		}
+		cover = "http://localhost:8080" + cover
+	}
+
+	vo := types.ArticleBackVO{
+		ID:             a.ID,
+		ArticleTitle:   a.Title,
+		ArticleContent: a.Content,
+		ArticleCover:   cover,
+		ArticleSummary: a.Summary,
+		ArticleType:    a.Type,
+		OriginalURL:    a.SourceURL,
+		IsTop:          a.IsTop,
+		IsDelete: func() int {
+			if a.DeletedAt.Valid {
+				return 1
+			}
+			return 0
+		}(),
+		Status:     a.Status,
+		ViewsCount: a.ViewCount,
+		LikeCount:  a.LikeCount,
+		CreatedAt:  formatTime(a.CreatedAt),
+		UpdatedAt:  formatTime(a.UpdatedAt),
+	}
+
+	if a.Category.ID > 0 {
+		vo.CategoryName = a.Category.Name
+	}
+
+	tagNames := make([]string, 0, len(a.Tags))
+	for _, t := range a.Tags {
+		tagNames = append(tagNames, t.Name)
+	}
+	vo.TagNameList = tagNames
+
+	return vo
+}

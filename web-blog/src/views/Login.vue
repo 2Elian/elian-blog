@@ -6,10 +6,10 @@
       <div class="bg-shape shape-3"></div>
     </div>
 
-    <n-card class="login-card">
+    <n-card class="login-card" :class="{ 'register-mode': !isLogin }">
       <div class="card-header">
-        <h1 class="card-title">Elian Blog</h1>
-        <p class="card-subtitle">{{ isLogin ? '欢迎回来' : '创建账号' }}</p>
+        <h1 class="card-title">{{ siteName }}</h1>
+        <p class="card-subtitle">{{ isLogin ? `欢迎来到${siteName}` : '创建账号' }}</p>
       </div>
 
       <n-form ref="formRef" :model="formValue" :rules="rules">
@@ -55,6 +55,58 @@
             </template>
           </n-input>
         </n-form-item>
+
+        <template v-if="!isLogin">
+          <n-form-item label="邮箱" path="email">
+            <n-input
+              v-model:value="formValue.email"
+              placeholder="请输入邮箱"
+              round
+              size="large"
+            >
+              <template #prefix>
+                <n-icon><MailOutline /></n-icon>
+              </template>
+            </n-input>
+          </n-form-item>
+
+          <n-form-item label="头像链接" path="avatar">
+            <n-input
+              v-model:value="formValue.avatar"
+              placeholder="头像图片URL（可选）"
+              round
+              size="large"
+            >
+              <template #prefix>
+                <n-icon><ImageOutline /></n-icon>
+              </template>
+            </n-input>
+          </n-form-item>
+
+          <n-form-item label="个人介绍" path="intro">
+            <n-input
+              v-model:value="formValue.intro"
+              type="textarea"
+              placeholder="介绍一下自己（可选，最多500字）"
+              :maxlength="500"
+              show-count
+              :rows="3"
+            />
+          </n-form-item>
+
+          <n-form-item label="个人网站" path="website">
+            <n-input
+              v-model:value="formValue.website"
+              placeholder="个人网站URL（可选）"
+              round
+              size="large"
+            >
+              <template #prefix>
+                <n-icon><GlobeOutline /></n-icon>
+              </template>
+            </n-input>
+          </n-form-item>
+        </template>
       </n-form>
 
       <n-button
@@ -80,7 +132,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   NCard,
@@ -93,13 +145,20 @@ import {
   type FormRules,
   type FormInst
 } from 'naive-ui'
-import { PersonOutline, LockClosedOutline } from '@vicons/ionicons5'
+import { PersonOutline, LockClosedOutline, MailOutline, ImageOutline, GlobeOutline } from '@vicons/ionicons5'
 import { login, register } from '@/api'
 import { useUserStore } from '@/stores/user'
+import { useSiteConfigStore } from '@/stores/siteConfig'
 
 const router = useRouter()
 const message = useMessage()
 const userStore = useUserStore()
+const siteConfig = useSiteConfigStore()
+const siteName = computed(() => siteConfig.siteName)
+
+onMounted(() => {
+  siteConfig.fetchConfig()
+})
 
 const isLogin = ref(true)
 const loading = ref(false)
@@ -108,7 +167,11 @@ const formRef = ref<FormInst | null>(null)
 const formValue = reactive({
   username: '',
   password: '',
-  confirmPassword: ''
+  confirmPassword: '',
+  email: '',
+  avatar: '',
+  intro: '',
+  website: ''
 })
 
 const rules: FormRules = {
@@ -131,12 +194,20 @@ const rules: FormRules = {
       },
       trigger: 'blur'
     }
+  ],
+  email: [
+    { required: true, message: '请输入邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入有效的邮箱地址', trigger: 'blur' }
   ]
 }
 
 function toggleMode() {
   isLogin.value = !isLogin.value
   formValue.confirmPassword = ''
+  formValue.email = ''
+  formValue.avatar = ''
+  formValue.intro = ''
+  formValue.website = ''
 }
 
 async function handleSubmit() {
@@ -160,7 +231,10 @@ async function handleSubmit() {
       await register({
         username: formValue.username,
         password: formValue.password,
-        email: '' // Or add email field to form
+        email: formValue.email,
+        avatar: formValue.avatar || undefined,
+        intro: formValue.intro || undefined,
+        website: formValue.website || undefined
       })
       message.success('注册成功，请登录')
       isLogin.value = true
@@ -187,7 +261,7 @@ async function handleSubmit() {
 .login-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
   z-index: 0;
 }
 
@@ -229,6 +303,10 @@ async function handleSubmit() {
   position: relative;
   z-index: 1;
   animation: fadeInUp 0.5s ease;
+
+  &.register-mode {
+    max-width: 480px;
+  }
 
   :deep(.n-card__content) {
     padding: 32px;

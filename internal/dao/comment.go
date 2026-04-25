@@ -15,7 +15,7 @@ func NewCommentDao(db *gorm.DB) *CommentDao {
 }
 
 func (d *CommentDao) Create(comment *model.Comment) error {
-	return d.db.Create(comment).Error
+	return d.db.Omit("User", "Children").Create(comment).Error
 }
 
 func (d *CommentDao) Delete(id uint) error {
@@ -33,7 +33,7 @@ func (d *CommentDao) ListByArticle(articleID uint, page, pageSize int) ([]model.
 	query := d.db.Model(&model.Comment{}).Where("article_id = ? AND status = 1", articleID)
 	query.Count(&total)
 
-	err := query.Preload("User").Preload("ReplyUser").
+	err := query.Preload("User").
 		Order("created_at DESC").
 		Offset((page - 1) * pageSize).Limit(pageSize).
 		Find(&comments).Error
@@ -51,7 +51,8 @@ func (d *CommentDao) ListAdmin(page, pageSize int) ([]model.Comment, int64, erro
 	var comments []model.Comment
 	var total int64
 	d.db.Model(&model.Comment{}).Count(&total)
-	err := d.db.Preload("User").Offset((page - 1) * pageSize).Limit(pageSize).
+	err := d.db.Preload("User").Preload("Article").
+		Offset((page - 1) * pageSize).Limit(pageSize).
 		Order("created_at DESC").Find(&comments).Error
 	return comments, total, err
 }

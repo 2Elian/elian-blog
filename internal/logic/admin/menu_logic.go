@@ -21,17 +21,20 @@ func (l *MenuLogic) List(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return buildMenuTree(menus), nil
 }
 
 func (l *MenuLogic) Create(ctx context.Context, req *types.CreateMenuReq) (interface{}, error) {
 	menu := &model.Menu{
-		Name:     req.Name,
-		Path:     req.Path,
-		Icon:     req.Icon,
-		ParentID: req.ParentID,
-		Sort:     req.Sort,
+		Name:      req.Name,
+		Title:     req.Title,
+		Path:      req.Path,
+		Component: req.Component,
+		Redirect:  req.Redirect,
+		Icon:      req.Icon,
+		ParentID:  req.ParentID,
+		Sort:      req.Sort,
+		Type:      req.Type,
 	}
 	if err := l.svcCtx.MenuDao.Create(menu); err != nil {
 		return nil, err
@@ -48,8 +51,17 @@ func (l *MenuLogic) Update(ctx context.Context, req *types.UpdateMenuReq) error 
 	if req.Name != "" {
 		menu.Name = req.Name
 	}
+	if req.Title != "" {
+		menu.Title = req.Title
+	}
 	if req.Path != "" {
 		menu.Path = req.Path
+	}
+	if req.Component != "" {
+		menu.Component = req.Component
+	}
+	if req.Redirect != "" {
+		menu.Redirect = req.Redirect
 	}
 	if req.Icon != "" {
 		menu.Icon = req.Icon
@@ -65,13 +77,16 @@ func (l *MenuLogic) Delete(ctx context.Context, id uint) error {
 	return l.svcCtx.MenuDao.Delete(id)
 }
 
-// buildMenuTree converts a flat menu list into a tree structure.
+// buildMenuTree converts a flat menu list into a tree structure with meta.
 func buildMenuTree(menus []model.Menu) []types.MenuVO {
 	nodeMap := make(map[uint]*types.MenuVO)
 	roots := make([]types.MenuVO, 0)
 
-	// First pass: create all nodes
 	for _, m := range menus {
+		title := m.Title
+		if title == "" {
+			title = m.Name
+		}
 		nodeMap[m.ID] = &types.MenuVO{
 			ID:       m.ID,
 			ParentID: m.ParentID,
@@ -79,11 +94,17 @@ func buildMenuTree(menus []model.Menu) []types.MenuVO {
 			Path:     m.Path,
 			Icon:     m.Icon,
 			Sort:     m.Sort,
+			Meta: types.MenuMetaVO{
+				Title:      title,
+				Icon:       m.Icon,
+				Hidden:     m.IsHidden == 1,
+				AlwaysShow: m.AlwaysShow == 1,
+				KeepAlive:  m.KeepAlive != 0,
+			},
 			Children: make([]types.MenuVO, 0),
 		}
 	}
 
-	// Second pass: build tree
 	for _, m := range menus {
 		node := nodeMap[m.ID]
 		if m.ParentID == 0 {

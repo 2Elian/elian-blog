@@ -3,6 +3,7 @@ package blog
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"elian-blog/internal/model"
@@ -20,7 +21,6 @@ func NewArticleLogic(svcCtx *svc.ServiceContext) *ArticleLogic {
 	return &ArticleLogic{svcCtx: svcCtx}
 }
 
-// ListArticles 获取文章列表
 func (l *ArticleLogic) ListArticles(ctx context.Context, req *types.QueryArticleHomeReq) (list interface{}, total int64, err error) {
 	page := req.Page
 	if page <= 0 {
@@ -31,23 +31,20 @@ func (l *ArticleLogic) ListArticles(ctx context.Context, req *types.QueryArticle
 		pageSize = 10
 	}
 
-	// 默认查询已发布的文章
 	status := req.Status
 	if status < 0 {
-		status = 1 // 默认只显示已发布
+		status = 1
 	}
 
-	articles, total, err := l.svcCtx.ArticleDao.List(page, pageSize, status, req.CategoryID, req.TagID)
+	articles, total, err := l.svcCtx.ArticleDao.List(page, pageSize, status, req.CategoryID, req.TagID, 0)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	// 转换为 ArticleHome 列表
 	list = l.convertToArticleHomeList(articles)
 	return list, total, nil
 }
 
-// GetArticle 获取文章详情
 func (l *ArticleLogic) GetArticle(ctx context.Context, id uint) (interface{}, error) {
 	article, err := l.svcCtx.ArticleDao.GetByID(id)
 	if err != nil {
@@ -57,71 +54,81 @@ func (l *ArticleLogic) GetArticle(ctx context.Context, id uint) (interface{}, er
 		return nil, err
 	}
 
-	// 增加浏览量
 	go l.svcCtx.ArticleDao.IncrementViewCount(id)
 
-	// 转换为 ArticleDetails
 	details := l.convertToArticleDetails(article)
 	return details, nil
 }
 
-// convertToArticleHomeList 转换文章列表
 func (l *ArticleLogic) convertToArticleHomeList(articles []model.Article) []types.ArticleHome {
 	result := make([]types.ArticleHome, 0, len(articles))
 	for _, article := range articles {
-		item := types.ArticleHome{
-			ID:           article.ID,
-			Title:        article.Title,
-			Summary:      article.Summary,
-			Content:      article.Content,
-			Cover:        article.Cover,
-			CategoryID:   article.CategoryID,
-			CategoryName: article.Category.Name,
-			AuthorID:     article.AuthorID,
-			Status:       article.Status,
-			IsTop:        article.IsTop,
-			IsOriginal:   article.IsOriginal,
-			Type:         article.Type,
-			ViewCount:    article.ViewCount,
-			LikeCount:    article.LikeCount,
-			TagNameList:  l.getTagNames(article.Tags),
-			CreatedAt:    article.CreatedAt.Format(time.DateTime),
-			UpdatedAt:    article.UpdatedAt.Format(time.DateTime),
-		}
-		result = append(result, item)
+		result = append(result, l.articleToHome(&article))
 	}
 	return result
 }
 
-// convertToArticleDetails 转换文章详情
 func (l *ArticleLogic) convertToArticleDetails(article *model.Article) *types.ArticleDetails {
-	details := &types.ArticleDetails{
-		ArticleHome: types.ArticleHome{
-			ID:           article.ID,
-			Title:        article.Title,
-			Summary:      article.Summary,
-			Content:      article.Content,
-			Cover:        article.Cover,
-			CategoryID:   article.CategoryID,
-			CategoryName: article.Category.Name,
-			AuthorID:     article.AuthorID,
-			Status:       article.Status,
-			IsTop:        article.IsTop,
-			IsOriginal:   article.IsOriginal,
-			Type:         article.Type,
-			ViewCount:    article.ViewCount,
-			LikeCount:    article.LikeCount,
-			TagNameList:  l.getTagNames(article.Tags),
-			CreatedAt:    article.CreatedAt.Format(time.DateTime),
-			UpdatedAt:    article.UpdatedAt.Format(time.DateTime),
-		},
-		PrevArticle: nil,
-		NextArticle: nil,
+	// Get prev/next articles
+	var prevArticle, nextArticle *types.ArticlePreview
+	var prev model.Article
+	if l.svcCtx.DB.Where("id < ? AND status = 1 AND deleted_at IS NULL", article.ID).Order("id DESC").First(&prev).Error == nil {
+		prevArticle = &types.ArticlePreview{ID: prev.ID, Title: prev.Title}
 	}
-	return details
+	var next model.Article
+	if l.svcCtx.DB.Where("id > ? AND status = 1 AND deleted_at IS NULL", article.ID).Order("id ASC").First(&next).Error == nil {
+		nextArticle = &types.ArticlePreview{ID: next.ID, Title: next.Title}
+	}
+
+	return &types.ArticleDetails{
+		ArticleHome: l.articleToHome(article),
+		PrevArticle: prevArticle,
+		NextArticle: nextArticle,
+	}
 }
 
-// getTagNames 获取标签名称列表
+func (l *ArticleLogic) articleToHome(article *model.Article) types.ArticleHome {
+	var catID uint
+	if article.CategoryID != nil {
+		catID = *article.CategoryID
+	}
+	cover := article.Cover
+	if cover != "" && !strings.HasPrefix(cover, "http") {
+		if !strings.HasPrefix(cover, "/") {
+			cover = "/" + cover
+		}
+		cover = "http://localhost:8080" + cover
+	}
+
+	tags := make([]types.TagInfo, 0, len(article.Tags))
+	for _, t := range article.Tags {
+		tags = append(tags, types.TagInfo{ID: t.ID, Name: t.Name})
+	}
+
+	return types.ArticleHome{
+		ID:           article.ID,
+		Title:        article.Title,
+		Summary:      article.Summary,
+		Content:      article.Content,
+		Cover:        cover,
+		CategoryID:   catID,
+		CategoryName: article.Category.Name,
+		Category:     types.CategoryInfo{ID: article.Category.ID, Name: article.Category.Name},
+		AuthorID:     article.AuthorID,
+		Status:       article.Status,
+		IsTop:        article.IsTop,
+		IsOriginal:   article.IsOriginal,
+		Type:         article.Type,
+		ViewCount:    article.ViewCount,
+		Views:        article.ViewCount,
+		LikeCount:    article.LikeCount,
+		TagNameList:  l.getTagNames(article.Tags),
+		Tags:         tags,
+		CreatedAt:    article.CreatedAt.Format(time.DateTime),
+		UpdatedAt:    article.UpdatedAt.Format(time.DateTime),
+	}
+}
+
 func (l *ArticleLogic) getTagNames(tags []model.Tag) []string {
 	names := make([]string, 0, len(tags))
 	for _, tag := range tags {

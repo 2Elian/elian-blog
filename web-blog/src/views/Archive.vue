@@ -104,6 +104,13 @@ onMounted(async () => {
 <style scoped lang="scss">
 .archive-page {
   animation: fadeInUp 0.5s ease;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 32px;
+
+  @media (max-width: 640px) {
+    padding: 0 20px;
+  }
 }
 
 .page-header {
@@ -142,8 +149,8 @@ onMounted(async () => {
     top: 0;
     bottom: 0;
     width: 2px;
-    background: linear-gradient(to bottom, var(--primary-color), #764ba2);
-    opacity: 0.3;
+    background: linear-gradient(to bottom, #1a1a1a, #666666);
+    opacity: 0.4;
   }
 }
 
@@ -168,17 +175,17 @@ onMounted(async () => {
   position: relative;
   width: 14px;
   height: 14px;
-  background: var(--primary-color);
+  background: var(--text-primary);
   border-radius: 50%;
   z-index: 1;
-  box-shadow: 0 0 0 4px var(--bg-card), 0 0 0 6px rgba(233, 84, 107, 0.2);
+  box-shadow: 0 0 0 4px var(--bg-card), 0 0 0 6px rgba(0, 0, 0, 0.15);
 
   &::before {
     content: '';
     position: absolute;
     inset: -4px;
     border-radius: 50%;
-    border: 2px solid var(--primary-color);
+    border: 2px solid var(--text-primary);
     animation: pulse 2s infinite;
   }
 }
@@ -193,7 +200,7 @@ onMounted(async () => {
 .year-count {
   font-size: 14px;
   color: var(--text-muted);
-  background: rgba(233, 84, 107, 0.08);
+  background: rgba(0, 0, 0, 0.05);
   padding: 2px 10px;
   border-radius: 10px;
 }
@@ -214,11 +221,11 @@ onMounted(async () => {
   border-left: 2px solid transparent;
 
   &:hover {
-    background: rgba(233, 84, 107, 0.05);
-    border-left-color: var(--primary-color);
+    background: rgba(0, 0, 0, 0.03);
+    border-left-color: var(--text-primary);
 
     .article-title {
-      color: var(--primary-color);
+      color: var(--text-primary);
     }
   }
 
@@ -243,8 +250,8 @@ onMounted(async () => {
 
 .article-category {
   font-size: 12px;
-  color: var(--primary-color);
-  background: rgba(233, 84, 107, 0.1);
+  color: var(--text-secondary);
+  background: rgba(0, 0, 0, 0.06);
   padding: 2px 10px;
   border-radius: 10px;
 }
