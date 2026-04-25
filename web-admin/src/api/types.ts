@@ -50,6 +50,7 @@ export interface ArticleBackVO {
   article_cover: string; // 文章缩略图
   article_title: string; // 标题
   article_content: string; // 内容
+  article_summary: string; // 摘要
   article_type: number; // 文章类型 1原创 2转载 3翻译
   original_url: string; // 原文链接
   is_top: number; // 是否置顶

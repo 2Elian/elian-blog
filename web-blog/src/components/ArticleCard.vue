@@ -9,7 +9,7 @@
       <div class="card-category" v-if="article.category">
         <span>{{ article.category.name }}</span>
       </div>
-      <div class="card-top-badge" v-if="article.is_top">置顶</div>
+      <div class="card-top-badge" v-if="article.is_top === 1">置顶</div>
     </div>
 
     <div class="card-content">
@@ -85,6 +85,7 @@ function formatDate(date: string) {
 
 <style scoped lang="scss">
 .article-card {
+  --card-cover-height: 180px;
   background: var(--bg-card);
   border-radius: var(--radius-md);
   overflow: hidden;
@@ -108,7 +109,7 @@ function formatDate(date: string) {
 
 .card-cover {
   position: relative;
-  height: 180px;
+  height: var(--card-cover-height);
   overflow: hidden;
   background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
 

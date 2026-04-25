@@ -13,7 +13,7 @@ type Comment struct {
 	Status    int       `json:"status" gorm:"default:1;comment:0-审核中 1-通过 2-拒绝"`
 	IPAddress string    `json:"ip_address" gorm:"size:50"`
 	User      User      `json:"user" gorm:"foreignKey:UserID"`
-	ReplyUser *User     `json:"reply_user" gorm:"foreignKey:ReplyID"`
+	Article   *Article  `json:"article" gorm:"foreignKey:ArticleID"`
 	Children  []Comment `json:"children" gorm:"-"`
 }
 

@@ -64,23 +64,9 @@ const contentConfig: IContentConfig<QueryCommentReq> = {
       templet: "custom",
     },
     {
-      label: "客户端信息",
-      prop: "client_info",
-      width: 150,
-      align: "center",
-      templet: "custom",
-    },
-    {
-      label: "回复人",
-      prop: "reply_user",
-      width: 150,
-      align: "center",
-      templet: "custom",
-    },
-    {
       label: "文章标题",
       prop: "topic_title",
-      width: 160,
+      width: 180,
       align: "center",
     },
     {
@@ -112,16 +98,6 @@ const contentConfig: IContentConfig<QueryCommentReq> = {
       sortable: true,
       templet: "date",
       dateFormat: "YYYY/MM/DD HH:mm:ss",
-    },
-    {
-      label: "更新时间",
-      prop: "updated_at",
-      width: 170,
-      align: "center",
-      sortable: true,
-      templet: "date",
-      dateFormat: "YYYY/MM/DD HH:mm:ss",
-      show: false,
     },
     {
       label: "操作栏",

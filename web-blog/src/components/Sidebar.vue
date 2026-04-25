@@ -1,70 +1,50 @@
 <template>
   <aside class="sidebar">
-    <!-- Author Card (Commented out per user request)
-    <div class="widget author-card">
-      <div class="author-avatar">
-        <n-avatar round :size="80" class="avatar">
-          E
-        </n-avatar>
-      </div>
-      <h3 class="author-name">Elian</h3>
-      <p class="author-bio">热爱编程，热爱生活</p>
-      <div class="author-stats">
-        <div class="stat-item">
-          <span class="stat-value">{{ stats.articles }}</span>
-          <span class="stat-label">文章</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-value">{{ stats.categories }}</span>
-          <span class="stat-label">分类</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-value">{{ stats.tags }}</span>
-          <span class="stat-label">标签</span>
-        </div>
-      </div>
-    </div>
-    -->
-
     <!-- Categories Widget -->
-    <div class="widget categories-widget" v-if="categories.length">
-      <h4 class="widget-title">分类</h4>
+    <div class="widget categories-widget" v-if="categories && categories.length">
+      <h4 class="widget-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+        分类
+      </h4>
       <div class="category-list">
         <div
-          v-for="category in categories"
-          :key="category.id"
           class="category-item"
-          @click="filterByCategory(category.id)"
+          :class="{ active: selectedCategory === null }"
+          @click="$emit('selectCategory', null)"
         >
-          <span class="category-name">{{ category.name }}</span>
-          <span class="category-count">{{ category.count || 0 }}</span>
+          <span class="category-name">全部</span>
+        </div>
+        <div
+          v-for="cat in categories"
+          :key="cat.id"
+          class="category-item"
+          :class="{ active: selectedCategory === cat.id }"
+          @click="$emit('selectCategory', cat.id)"
+        >
+          <span class="category-name">{{ cat.name }}</span>
         </div>
       </div>
     </div>
 
-    <!-- Tags Cloud Widget -->
-    <div class="widget tags-widget" v-if="tags.length">
-      <h4 class="widget-title">标签云</h4>
-      <div class="tags-cloud">
-        <n-tag
-          v-for="tag in tags"
-          :key="tag.id"
-          :bordered="false"
-          class="tag-item"
-          @click="filterByTag(tag.id)"
-        >
-          {{ tag.name }}
-        </n-tag>
+    <!-- Notice Widget -->
+    <div class="widget notice-widget" v-if="notices.length">
+      <h4 class="widget-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        通知公告
+      </h4>
+      <div class="notice-list">
+        <div v-for="(notice, idx) in notices" :key="idx" class="notice-item">
+          <span class="notice-dot"></span>
+          <span class="notice-text">{{ notice }}</span>
+        </div>
       </div>
     </div>
   </aside>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { NTag } from 'naive-ui'
-import { getCategories, getTags } from '@/api'
+import { computed } from 'vue'
+import { useSiteConfigStore } from '@/stores/siteConfig'
 
 interface Category {
   id: number
@@ -72,44 +52,17 @@ interface Category {
   count?: number
 }
 
-interface Tag {
-  id: number
-  name: string
-  count?: number
-}
+const props = defineProps<{
+  categories?: Category[]
+  selectedCategory?: number | null
+}>()
 
-const router = useRouter()
+defineEmits<{
+  selectCategory: [id: number | null]
+}>()
 
-const categories = ref<Category[]>([])
-const tags = ref<Tag[]>([])
-const stats = ref({
-  articles: 0,
-  categories: 0,
-  tags: 0
-})
-
-onMounted(async () => {
-  try {
-    const [catRes, tagRes] = await Promise.all([
-      getCategories() as any,
-      getTags() as any
-    ])
-    categories.value = (catRes.data || []).map((c: any) => ({ id: c.id, name: c.name, count: c.article_count }))
-    tags.value = (tagRes.data || []).map((t: any) => ({ id: t.id, name: t.name, count: t.article_count }))
-    stats.value.categories = categories.value.length
-    stats.value.tags = tags.value.length
-  } catch (e) {
-    console.error('Failed to load sidebar data:', e)
-  }
-})
-
-function filterByCategory(id: number) {
-  router.push({ path: '/blog', query: { category: String(id) } })
-}
-
-function filterByTag(id: number) {
-  router.push({ path: '/blog', query: { tag: String(id) } })
-}
+const siteConfig = useSiteConfigStore()
+const notices = computed(() => siteConfig.siteNotice)
 </script>
 
 <style scoped lang="scss">
@@ -143,57 +96,64 @@ function filterByTag(id: number) {
   border-bottom: 1px solid var(--border-color);
 }
 
-// Categories
+.notice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notice-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.notice-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  margin-top: 7px;
+  flex-shrink: 0;
+}
+
+.notice-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
 .category-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .category-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 10px 12px;
+  gap: 8px;
+  padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color var(--transition-fast);
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.04);
-  }
-
-  .category-name {
-    color: var(--text-secondary);
-    font-size: 14px;
-  }
-
-  .category-count {
-    background: rgba(0, 0, 0, 0.06);
-    color: var(--text-secondary);
-    font-size: 12px;
-    padding: 2px 8px;
-    border-radius: 10px;
-  }
-}
-
-// Tags Cloud
-.tags-cloud {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.tag-item {
-  background: rgba(0, 0, 0, 0.04);
+  font-size: 14px;
   color: var(--text-secondary);
-  cursor: pointer;
   transition: all var(--transition-fast);
 
   &:hover {
-    background: rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.04);
     color: var(--text-primary);
   }
+
+  &.active {
+    background: var(--primary-color);
+    color: white;
+    font-weight: 500;
+  }
+}
+
+html.dark .category-item:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 @media (max-width: 1024px) {

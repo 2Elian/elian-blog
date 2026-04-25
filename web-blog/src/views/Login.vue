@@ -8,8 +8,8 @@
 
     <n-card class="login-card" :class="{ 'register-mode': !isLogin }">
       <div class="card-header">
-        <h1 class="card-title">Elian Blog</h1>
-        <p class="card-subtitle">{{ isLogin ? '欢迎来到Elian的博客' : '创建账号' }}</p>
+        <h1 class="card-title">{{ siteName }}</h1>
+        <p class="card-subtitle">{{ isLogin ? `欢迎来到${siteName}` : '创建账号' }}</p>
       </div>
 
       <n-form ref="formRef" :model="formValue" :rules="rules">
@@ -132,7 +132,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   NCard,
@@ -148,10 +148,17 @@ import {
 import { PersonOutline, LockClosedOutline, MailOutline, ImageOutline, GlobeOutline } from '@vicons/ionicons5'
 import { login, register } from '@/api'
 import { useUserStore } from '@/stores/user'
+import { useSiteConfigStore } from '@/stores/siteConfig'
 
 const router = useRouter()
 const message = useMessage()
 const userStore = useUserStore()
+const siteConfig = useSiteConfigStore()
+const siteName = computed(() => siteConfig.siteName)
+
+onMounted(() => {
+  siteConfig.fetchConfig()
+})
 
 const isLogin = ref(true)
 const loading = ref(false)

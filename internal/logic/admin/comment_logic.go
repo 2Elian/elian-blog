@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"time"
 
 	"elian-blog/internal/svc"
 	"elian-blog/internal/types"
@@ -30,8 +31,37 @@ func (l *CommentLogic) List(ctx context.Context, req *types.QueryCommentReq) (in
 		return nil, err
 	}
 
+	list := make([]types.CommentBackVO, 0, len(comments))
+	for _, c := range comments {
+		vo := types.CommentBackVO{
+			ID:             c.ID,
+			UserID:         c.UserID,
+			Type:           c.Type,
+			CommentContent: c.Content,
+			Status:         c.Status,
+			CreatedAt:      c.CreatedAt.Format(time.DateTime),
+		}
+
+		// User info
+		if c.User.ID != 0 {
+			vo.UserInfo = &types.CommentUser{
+				UserID:   c.User.ID,
+				Username: c.User.Username,
+				Avatar:   c.User.Avatar,
+				Nickname: c.User.Nickname,
+			}
+		}
+
+		// Article title
+		if c.Article != nil && c.Article.ID != 0 {
+			vo.TopicTitle = c.Article.Title
+		}
+
+		list = append(list, vo)
+	}
+
 	return types.PageResp{
-		List:     comments,
+		List:     list,
 		Total:    total,
 		Page:     page,
 		PageSize: pageSize,

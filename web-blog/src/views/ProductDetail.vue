@@ -2,13 +2,13 @@
   <div class="product-detail-page" v-if="product">
     <div class="detail-header">
       <div class="header-cover" v-if="product.cover">
-        <img :src="product.cover" :alt="product.name" />
+        <img :src="getImageUrl(product.cover)" :alt="product.name" />
       </div>
       <div class="header-overlay">
         <div class="header-content">
           <button class="back-btn" @click="router.back()">&larr; 返回产品列表</button>
           <div class="product-type">
-            <span :class="getTypeClass(product.type)">{{ getTypeName(product.type) }}</span>
+            <span class="type-badge">{{ product.type || '其他' }}</span>
           </div>
           <h1 class="product-name">{{ product.name }}</h1>
           <div class="product-meta">
@@ -22,18 +22,11 @@
 
     <div class="detail-body">
       <div class="body-card">
-        <div class="description-content" v-if="product.description">
-          <h2 class="desc-title">产品介绍</h2>
-          <div class="desc-text" v-html="renderedDescription"></div>
+        <div class="content-section" v-if="product.content" v-html="renderedContent"></div>
+        <div class="content-section" v-else-if="product.description">
+          <p>{{ product.description }}</p>
         </div>
         <n-empty v-else description="暂无详细介绍" style="padding: 40px 0;" />
-
-        <div class="action-bar" v-if="product.link">
-          <a :href="product.link" target="_blank" rel="noopener noreferrer" class="action-btn">
-            访问链接
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </a>
-        </div>
       </div>
     </div>
   </div>
@@ -54,12 +47,12 @@ interface Product {
   id: number
   name: string
   description: string
+  content: string
   price: number
   cover: string
   status: number
   sort: number
-  type: number
-  link: string
+  type: string
   created_at: string
 }
 
@@ -67,19 +60,15 @@ const route = useRoute()
 const router = useRouter()
 const product = ref<Product | null>(null)
 
-const renderedDescription = computed(() => {
-  if (!product.value?.description) return ''
-  return marked(product.value.description)
+const renderedContent = computed(() => {
+  if (!product.value?.content) return ''
+  return marked(product.value.content)
 })
 
-function getTypeName(type: number): string {
-  const types: Record<number, string> = { 1: 'AI产品', 2: '工具', 3: '其他' }
-  return types[type] || '其他'
-}
-
-function getTypeClass(type: number): string {
-  const classes: Record<number, string> = { 1: 'type-ai', 2: 'type-tool', 3: 'type-other' }
-  return classes[type] || 'type-other'
+function getImageUrl(path: string): string {
+  if (!path) return ''
+  if (path.startsWith('http')) return path
+  return `http://localhost:8080${path.startsWith('/') ? '' : '/'}${path}`
 }
 
 async function loadProduct(id: number) {
@@ -107,7 +96,7 @@ watch(() => route.params.id, (newId) => {
 <style scoped lang="scss">
 .product-detail-page {
   animation: fadeInUp 0.5s ease;
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 0 32px;
 
@@ -163,27 +152,14 @@ watch(() => route.params.id, (newId) => {
 .product-type {
   margin-bottom: 12px;
 
-  span {
+  .type-badge {
     display: inline-block;
     padding: 4px 12px;
     border-radius: 4px;
     font-size: 13px;
     font-weight: 500;
-  }
-
-  .type-ai {
-    background: rgba(102, 126, 234, 0.3);
-    color: #a0b0ff;
-  }
-
-  .type-tool {
-    background: rgba(72, 187, 120, 0.3);
-    color: #8eeca8;
-  }
-
-  .type-other {
-    background: rgba(237, 137, 54, 0.3);
-    color: #f0b060;
+    background: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.9);
   }
 }
 
@@ -220,7 +196,7 @@ watch(() => route.params.id, (newId) => {
 }
 
 .detail-body {
-  max-width: 860px;
+  max-width: 1060px;
   margin: 0 auto;
 }
 
@@ -235,16 +211,7 @@ watch(() => route.params.id, (newId) => {
   }
 }
 
-.desc-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 20px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.desc-text {
+.content-section {
   font-size: 15px;
   line-height: 1.8;
   color: var(--text-secondary);
@@ -276,29 +243,10 @@ watch(() => route.params.id, (newId) => {
     padding-left: 24px;
     margin-bottom: 12px;
   }
-}
 
-.action-bar {
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border-color);
-}
-
-.action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background: var(--text-primary);
-  color: var(--bg-card);
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: opacity var(--transition-fast);
-
-  &:hover {
-    opacity: 0.85;
+  :deep(img) {
+    max-width: 100%;
+    border-radius: 8px;
   }
 }
 

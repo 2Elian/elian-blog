@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { useSiteConfigStore } from '@/stores/siteConfig'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -73,9 +74,12 @@ const router = createRouter({
   }
 })
 
-router.beforeEach((to, _from, next) => {
-  const title = (to.meta.title as string) || 'Elian Blog'
-  document.title = `${title} - Elian Blog`
+router.beforeEach(async (to, _from, next) => {
+  const siteConfig = useSiteConfigStore()
+  await siteConfig.fetchConfig()
+  const siteName = siteConfig.siteName
+  const title = (to.meta.title as string) || siteName
+  document.title = `${title} - ${siteName}`
 
   // 公开页面不需要认证
   const publicPages = ['/', '/login', '/blog', '/archive', '/tags', '/products', '/about']

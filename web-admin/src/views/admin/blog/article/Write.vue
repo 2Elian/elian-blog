@@ -158,6 +158,14 @@
             :upload-type="uploadType"
             upload-path="blog/article/"
           />
+          <el-form-item label="文章摘要">
+            <el-input
+              v-model="article.article_summary"
+              type="textarea"
+              :rows="3"
+              placeholder="请输入文章摘要（用于列表展示）"
+            />
+          </el-form-item>
           <el-form-item label="置顶">
             <el-switch
               v-model="article.is_top"
@@ -204,6 +212,7 @@ const article = ref<ArticleBackVO>({
   id: 0,
   article_title: useDateFormat(new Date(), "YYYY-MM-DD").value,
   article_content: "",
+  article_summary: "",
   article_cover: "",
   category_name: null,
   tag_name_list: [],

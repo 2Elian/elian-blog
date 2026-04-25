@@ -1,6 +1,31 @@
 # Elian Blog
 
-基于 Go-Zero + Vue3 的全栈个人博客系统，采用前后端分离架构。
+基于 Go-Zero + Vue3 的全栈个人博客系统，前后端分离架构。
+
+## 功能概览
+
+### 前台 (web-blog)
+- 首页 Hero 展示（打字效果、动态站名）
+- 文章列表/详情，Markdown 渲染
+- 分类筛选（左侧边栏）
+- 产品展示/详情页
+- 关于作者页面（技术栈、项目、竞赛）
+- 评论系统
+- 响应式布局 + 暗黑模式
+
+### 后台 (web-admin)
+- Dashboard 统计面板
+- 文章管理（Markdown 编辑器、分类/标签、摘要、置顶、封面）
+- 分类/标签管理
+- 评论管理（评论人、文章标题、内容、状态）
+- 产品管理（封面、类型、详情 Markdown 编辑）
+- 友链/留言/页面管理
+- 站点设置（站名、公告、备案号、Hero 配置、社交链接、功能开关）
+- 关于页面编辑（结构化 JSON 编辑器）
+- 用户/角色/菜单 RBAC 权限系统
+- 文件上传（OSS / 本地）
+
+---
 
 ## 项目结构
 
@@ -8,50 +33,51 @@
 elian-blog/
 ├── cmd/
 │   └── server/main.go          # 服务入口
+│   └── test/main.go            # 初始化管理员/修复密码
 ├── configs/config.yaml         # 配置文件
 ├── internal/
 │   ├── config/                 # 配置结构体
-│   ├── model/                  # 数据模型 (GORM)
+│   ├── model/                  # GORM 模型 + 自动迁移
 │   ├── dao/                    # 数据访问层
 │   ├── svc/                    # ServiceContext 依赖注入
 │   ├── handler/                # HTTP 处理器
+│   │   ├── admin_handler.go    # 旧版 Admin CRUD
+│   │   ├── blog_handler.go     # 前台 Blog API
+│   │   ├── vecrud_handler.go   # ve-admin CRUD
+│   │   └── response.go         # 响应工具函数
 │   ├── logic/
 │   │   ├── blog/               # 前台业务逻辑
 │   │   └── admin/              # 后台管理逻辑
 │   ├── types/                  # 请求/响应类型
-│   ├── middleware/             # JWT / RBAC / CORS
+│   ├── middleware/             # JWT / RBAC / CORS / RateLimit
 │   ├── routes/                 # 路由注册
-│   └── utils/                  # JWT / 密码加密
+│   └── utils/                  # JWT / 密码加密 (bcrypt)
 ├── pkg/
 │   ├── logger/                 # Zap 日志
-│   └── response/               # 旧版响应格式（blog API 用）
-├── web-blog/                   # 博客前台 (Vue3 + Naive UI)
-└── web-admin/                  # 后台管理 (Vue3 + Element Plus + ve-admin-element)
+│   └── response/               # Blog API 响应格式
+├── web-blog/                   # 前台 (Vue3 + Naive UI + Pinia)
+└── web-admin/                  # 后台 (Vue3 + Element Plus + ve-admin-element)
 ```
 
-## 架构说明
-
-### 后端 (Go-Zero)
+## 架构
 
 ```
-HTTP Request → Router → Middleware → Handler → Logic → DAO → Database
+HTTP Request → Router → Middleware (JWT/RBAC/CORS) → Handler → Logic → DAO → MySQL
 ```
 
 | 层级 | 目录 | 职责 |
 |------|------|------|
 | Handler | `internal/handler/` | 解析请求，调用 Logic，返回响应 |
 | Logic | `internal/logic/` | 业务逻辑，调用 DAO |
-| DAO | `internal/dao/` | 数据库 CRUD |
+| DAO | `internal/dao/` | 数据库 CRUD (GORM) |
 | Model | `internal/model/` | GORM 模型定义 |
 | Types | `internal/types/` | 请求/响应结构体 |
 | Middleware | `internal/middleware/` | JWT 认证、RBAC 鉴权 |
 
-### 前端
-
-| 项目 | 目录 | 技术栈 |
+| 前端 | 目录 | 技术栈 |
 |------|------|--------|
-| 博客前台 | `web-blog/` | Vue3 + Naive UI + Pinia + TypeScript |
-| 后台管理 | `web-admin/` | Vue3 + Element Plus + Pinia + TypeScript (基于 ve-admin-element) |
+| 博客前台 | `web-blog/` | Vue3 + Naive UI + Pinia + TypeScript + Vite |
+| 管理后台 | `web-admin/` | Vue3 + Element Plus + UnoCSS + Pinia + TypeScript + Vite |
 
 ---
 
@@ -60,90 +86,141 @@ HTTP Request → Router → Middleware → Handler → Logic → DAO → Databas
 ### 环境要求
 
 - Go 1.22+
-- Node.js 18+
+- Node.js 18+ / pnpm
 - MySQL 8.0+
 - Redis 7.0+
 
-### 1. 准备数据库
+### 1. 克隆项目
+
+```bash
+git clone https://github.com/2Elian/elian-blog.git
+cd elian-blog
+```
+
+### 2. 准备数据库
 
 ```sql
 CREATE DATABASE elian_blog CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 ```
 
-启动时 GORM `AutoMigrate` 自动建表，`SeedMenus` 自动插入默认菜单。
+启动时 GORM `AutoMigrate` 自动建表，`SeedMenus` 自动插入默认菜单和角色。
 
-### 2. 配置
+### 3. 修改配置
 
-编辑 `configs/config.yaml`，修改数据库密码和 JWT 密钥。
+编辑 `configs/config.yaml`：
 
-### 3. 启动后端
+```yaml
+MySQL:
+  DataSource: "root:your_password@tcp(127.0.0.1:3306)/elian_blog?charset=utf8mb4&parseTime=True&loc=Local"
+
+Auth:
+  AccessSecret: "your-jwt-secret-key"
+```
+
+### 4. 启动后端
 
 ```bash
 go mod tidy
-go run cmd/server/main.go
+go run cmd/server/main.go        # 启动后端 http://localhost:8080
 ```
 
-后端运行在 `http://localhost:8080`。
-
-### 4. 启动前端
+编译：
 
 ```bash
-# 博客前台
-cd web-blog && pnpm install && pnpm dev    # localhost:3000
-
-# 后台管理
-cd web-admin && pnpm install && pnpm dev   # localhost:3001
+go build -o server.exe cmd/server/main.go
 ```
 
-### 5. 创建管理员账号
+### 5. 启动前端
+
+```bash
+# 博客前台 http://localhost:3000
+cd web-blog && pnpm install && pnpm dev
+
+# 管理后台 http://localhost:3001
+cd web-admin && pnpm install && pnpm dev
+```
+
+### 6. 创建管理员
 
 ```bash
 go run cmd/test/main.go
 ```
 
-默认管理员：`admin / admin123`。
+默认管理员：`admin / admin123`
 
 ---
 
-## API 响应格式
+## 站点配置说明
 
-### Admin API（ve-admin-element 格式）
+启动后在管理后台 **站点设置** 页面可配置：
 
-```json
-{
-  "flag": 0,
-  "code": 200,
-  "data": {},
-  "msg": "success",
-  "trace_id": ""
-}
-```
+| 配置项 | 说明 |
+|--------|------|
+| 网站名称/头像/简介 | 前台 Header、Footer、Login 页动态展示 |
+| 网站公告 | 前台侧边栏通知区域 |
+| 备案号 | Footer 显示 |
+| Hero 名称/描述/打字文本 | 首页 Hero 区域动态内容 |
+| 社交链接 | 前台侧边栏展示 |
+| 功能开关 | 评论审核、留言审核、聊天室、音乐播放器、AI 助手、打赏 |
 
-错误响应：
+### 关于页面
 
-```json
-{
-  "flag": 0,
-  "code": 401,
-  "data": null,
-  "msg": "未登录",
-  "trace_id": ""
-}
-```
+后台 **关于页面** 编辑器支持结构化编辑：
+- 作者信息（姓名、角色、简介、链接、信息卡片）
+- 技术栈（分组标签）
+- 代表项目（标题、描述、技术标签、图片、链接、竞赛标签）
+- 科研与竞赛
 
-### Blog API（旧格式）
-
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": {}
-}
-```
+数据以 JSON 存储在 `site_config` 表，前台渲染为展示卡片。
 
 ---
 
-## API 接口一览
+## 关键设计
+
+### 认证
+
+- JWT (HS256)，72小时过期
+- Claims: UserID, Username, Role
+- 密码 bcrypt 加密
+
+### RBAC 权限
+
+- 角色: admin, editor, user
+- 菜单权限绑定角色，用户关联角色
+- 后台 API 通过中间件校验角色
+
+### API 格式
+
+**Admin API** (`/admin-api/v1/`)：
+```json
+{"flag": 0, "code": 200, "data": {}, "msg": "success"}
+```
+
+**Blog API** (`/blog-api/v1/`)：
+```json
+{"code": 0, "message": "success", "data": {}}
+```
+
+### 数据库模型
+
+| 模型 | 说明 |
+|------|------|
+| User | 用户 (username, password, nickname, avatar, roles) |
+| Role | 角色 (menus 多对多) |
+| Menu | 菜单 (树形结构) |
+| Article | 文章 (summary, content markdown) |
+| Category / Tag | 分类/标签 |
+| Comment | 评论 (关联 User, Article) |
+| Product | 产品 (content markdown, type varchar) |
+| FriendLink | 友链 |
+| Message | 留言 |
+| Page | 页面 |
+| SiteConfig | 站点配置 (key-value, JSON) |
+| OperationLog | 操作日志 |
+
+---
+
+## API 接口
 
 ### 博客前台 `/blog-api/v1/`
 
@@ -153,70 +230,20 @@ go run cmd/test/main.go
 | POST | /register | 注册 | 否 |
 | GET | /articles | 文章列表 | 否 |
 | GET | /articles/:id | 文章详情 | 否 |
+| GET | /articles/:id/comments | 文章评论 | 否 |
 | GET | /categories | 分类列表 | 否 |
 | GET | /tags | 标签列表 | 否 |
-| GET | /articles/:id/comments | 文章评论 | 否 |
+| GET | /products | 产品列表 | 否 |
+| GET | /products/:id | 产品详情 | 否 |
 | GET | /friend-links | 友链列表 | 否 |
-| GET | /messages | 留言列表 | 否 |
-| GET | /pages | 页面列表 | 否 |
 | GET | /site/config | 站点配置 | 否 |
+| GET | /site/about | 关于页面 | 否 |
 | GET | /user/info | 用户信息 | JWT |
 | POST | /comments | 发表评论 | JWT |
-| POST | /messages | 发表留言 | JWT |
 
-### 后台管理 `/admin-api/v1/`
+### 管理后台 `/admin-api/v1/`
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| POST | /login | 登录 | 否 |
-| GET | /logout | 登出 | JWT |
-| GET | /user/get_user_info | 用户信息 | JWT |
-| GET | /user/get_user_menus | 用户菜单 | JWT |
-| GET | /user/get_user_roles | 用户角色 | JWT |
-| GET | /user/get_user_apis | 用户权限 | JWT |
-| POST | /article/find_article_list | 文章列表 | JWT |
-| POST | /article/get_article | 文章详情 | JWT |
-| POST | /article/add_article | 新增文章 | JWT |
-| PUT | /article/update_article | 更新文章 | JWT |
-| DELETE | /article/delete_article | 删除文章 | JWT |
-| POST | /category/find_category_list | 分类列表 | JWT |
-| POST | /category/add_category | 新增分类 | JWT |
-| PUT | /category/update_category | 更新分类 | JWT |
-| DELETE | /category/deletes_category | 删除分类 | JWT |
-| POST | /tag/find_tag_list | 标签列表 | JWT |
-| POST | /tag/add_tag | 新增标签 | JWT |
-| PUT | /tag/update_tag | 更新标签 | JWT |
-| DELETE | /tag/deletes_tag | 删除标签 | JWT |
-| POST | /comment/find_comment_back_list | 评论列表 | JWT |
-| PUT | /comment/update_comment_status | 更新评论状态 | JWT |
-| DELETE | /comment/deletes_comment | 删除评论 | JWT |
-| POST | /friend/find_friend_list | 友链列表 | JWT |
-| POST | /friend/add_friend | 新增友链 | JWT |
-| PUT | /friend/update_friend | 更新友链 | JWT |
-| DELETE | /friend/deletes_friend | 删除友链 | JWT |
-| POST | /message/find_message_list | 留言列表 | JWT |
-| PUT | /message/update_message_status | 更新留言状态 | JWT |
-| DELETE | /message/deletes_message | 删除留言 | JWT |
-| POST | /page/find_page_list | 页面列表 | JWT |
-| POST | /page/add_page | 新增页面 | JWT |
-| PUT | /page/update_page | 更新页面 | JWT |
-| DELETE | /page/delete_page | 删除页面 | JWT |
-| POST | /role/find_role_list | 角色列表 | JWT |
-| POST | /role/add_role | 新增角色 | JWT |
-| PUT | /role/update_role | 更新角色 | JWT |
-| DELETE | /role/deletes_role | 删除角色 | JWT |
-| POST | /role/find_role_resources | 角色资源 | JWT |
-| PUT | /role/update_role_menus | 更新角色菜单 | JWT |
-| POST | /menu/find_menu_list | 菜单列表 | JWT |
-| POST | /menu/add_menu | 新增菜单 | JWT |
-| PUT | /menu/update_menu | 更新菜单 | JWT |
-| DELETE | /menu/deletes_menu | 删除菜单 | JWT |
-| POST | /account/find_account_list | 用户列表 | JWT |
-| PUT | /account/update_account_status | 更新用户状态 | JWT |
-| GET | /admin | 首页统计 | JWT |
-| GET | /admin/get_website_config | 网站配置 | JWT |
-| PUT | /admin/update_website_config | 更新配置 | JWT |
-| POST | /upload/upload_file | 文件上传 | JWT |
+完整的 CRUD 接口覆盖：文章、分类、标签、评论、友链、留言、页面、角色、菜单、用户、产品、站点配置。
 
 ---
 
@@ -224,19 +251,20 @@ go run cmd/test/main.go
 
 | 组件 | 技术 |
 |------|------|
-| 后端框架 | Go-Zero rest |
+| 后端框架 | Go-Zero REST |
 | ORM | GORM |
-| 数据库 | MySQL |
-| 缓存 | Redis |
-| 认证 | JWT (golang-jwt/jwt/v5) |
+| 数据库 | MySQL 8.0 |
+| 缓存 | Redis 7.0 |
+| 认证 | JWT (HS256) + bcrypt |
 | 日志 | Zap |
-| 博客前端 | Vue3 + Naive UI + Pinia + TypeScript + Vite |
+| 博客前台 | Vue3 + Naive UI + Pinia + TypeScript + Vite |
 | 管理后台 | Vue3 + Element Plus + UnoCSS + Pinia + TypeScript + Vite |
+| Markdown | md-editor-v3 (后台) / marked (前台) |
 
 ---
 
 ## 参考项目
 
-- [ve-admin-element](https://github.com/ve-weiyi/ve-admin-element) — 后台管理前端基础框架
+- [ve-admin-element](https://github.com/ve-weiyi/ve-admin-element) — 后台管理前端框架
 - [ve-blog-golang](https://github.com/ve-weiyi/ve-blog-golang) — Go-Zero 后端架构参考
 - [ve-blog-naive](https://github.com/ve-weiyi/ve-blog-naive) — 博客前台设计参考

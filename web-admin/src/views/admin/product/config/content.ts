@@ -2,7 +2,7 @@ import type { IContentConfig } from "@/components/CURD/types";
 import { ProductAPI } from "@/api/product";
 
 const contentConfig: IContentConfig<any> = {
-  pageTitle: "产品管理",
+  pageTitle: "产品列表",
   permPrefix: "product",
   table: {
     border: true,
@@ -75,7 +75,7 @@ const contentConfig: IContentConfig<any> = {
     {
       label: "产品名称",
       prop: "name",
-      width: 180,
+      minWidth: 180,
       align: "center",
     },
     {
@@ -92,9 +92,9 @@ const contentConfig: IContentConfig<any> = {
       align: "center",
     },
     {
-      label: "链接",
-      prop: "link",
-      width: 150,
+      label: "简介",
+      prop: "description",
+      minWidth: 200,
       align: "center",
       templet: "custom",
     },
@@ -125,7 +125,7 @@ const contentConfig: IContentConfig<any> = {
       label: "操作栏",
       align: "center",
       fixed: "right",
-      width: 160,
+      width: 220,
       templet: "tool",
       operat: [
         {
@@ -135,6 +135,15 @@ const contentConfig: IContentConfig<any> = {
           attrs: {
             icon: "edit",
             type: "primary",
+          },
+        },
+        {
+          name: "editDetail",
+          text: "编辑详情",
+          perm: "edit",
+          attrs: {
+            icon: "document",
+            type: "warning",
           },
         },
         {

@@ -1,5 +1,5 @@
 {
-  "name": "ve-admin-element",
+  "name": "elian-blog-admin",
   "version": "4.0.0",
   "description": "个人博客管理系统",
   "keywords": [
@@ -13,7 +13,7 @@
     "element-plus"
   ],
   "repository": "https://github.com/ve-weiyi/ve-admin-element.git",
-  "author": "791422171@qq.com",
+  "author": "lizimo@nuist.edu.cn",
   "license": "MIT",
   "private": true,
   "type": "module",

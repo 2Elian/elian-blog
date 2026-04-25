@@ -78,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import logo from "@/assets/images/logo.png";
+import logo from "@/assets/images/logo.svg";
 import { appConfig } from "@/settings";
 import ThemeSwitch from "@/components/ThemeSwitch/index.vue";
 

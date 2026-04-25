@@ -149,11 +149,17 @@ func ListTagsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 func ListCommentsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var pathReq types.IDReq
+		if err := httpx.ParsePath(r, &pathReq); err != nil {
+			fail(w, 400, "参数错误")
+			return
+		}
 		var req types.QueryCommentReq
 		if err := httpx.Parse(r, &req); err != nil {
 			fail(w, 400, "参数错误")
 			return
 		}
+		req.ArticleID = pathReq.ID
 		data, err := blog.NewCommentLogic(svcCtx).ListByArticle(r.Context(), &req)
 		if err != nil {
 			fail(w, 500, "获取评论失败")
@@ -315,8 +321,7 @@ func ListProductsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			Cover       string  `json:"cover"`
 			Status      int     `json:"status"`
 			Sort        int     `json:"sort"`
-			Type        int     `json:"type"`
-			Link        string  `json:"link"`
+			Type        string  `json:"type"`
 		}
 		list := make([]ProductVO, 0, len(products))
 		for _, p := range products {
@@ -332,7 +337,6 @@ func ListProductsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 				Status:      p.Status,
 				Sort:        p.Sort,
 				Type:        p.Type,
-				Link:        p.Link,
 			})
 		}
 		okPage(w, list, total, req.Page, req.PageSize)
@@ -366,12 +370,12 @@ func GetProductHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			"id":          product.ID,
 			"name":        product.Name,
 			"description": product.Description,
+			"content":     product.Content,
 			"price":       product.Price,
 			"cover":       cover,
 			"status":      product.Status,
 			"sort":        product.Sort,
 			"type":        product.Type,
-			"link":        product.Link,
 			"created_at":  product.CreatedAt.Format(time.DateTime),
 		})
 	}

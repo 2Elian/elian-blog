@@ -2,7 +2,8 @@
   <header class="app-header" :class="{ dark: isDark }">
     <div class="header-container">
       <router-link to="/" class="logo">
-        <span class="logo-text">Elian Blog</span>
+        <img :src="logo" class="logo-img" alt="logo" />
+        <span class="logo-text">{{ siteName }}</span>
       </router-link>
 
       <nav class="nav-links" :class="{ active: menuActive }">
@@ -69,12 +70,12 @@
           搜索
         </n-button>
       </div>
-    </n-modal>
+	    </n-modal>
   </header>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   NButton,
@@ -91,17 +92,27 @@ import {
   HomeOutline,
   BookOutline,
   TimeOutline,
-  PricetagOutline,
   CubeOutline,
-  MenuOutline
+  RocketOutline,
+  MenuOutline,
+  PersonOutline
 } from '@vicons/ionicons5'
 import { useUserStore } from '@/stores/user'
+import { useSiteConfigStore } from '@/stores/siteConfig'
+import logo from '@/assets/logo.svg'
 
 const router = useRouter()
 const userStore = useUserStore()
+const siteConfig = useSiteConfigStore()
 const isDark = computed(() => userStore.isDark)
 const isLoggedIn = computed(() => userStore.isLoggedIn)
 const username = computed(() => userStore.username)
+const siteName = computed(() => siteConfig.siteName)
+const siteAvatar = computed(() => siteConfig.siteAvatar)
+
+onMounted(() => {
+  siteConfig.fetchConfig()
+})
 
 const menuActive = ref(false)
 const showSearch = ref(false)
@@ -111,8 +122,8 @@ const navLinks = [
   { path: '/', text: '首页', icon: HomeOutline },
   { path: '/blog', text: '博客', icon: BookOutline },
   { path: '/archive', text: '归档', icon: TimeOutline },
-  { path: '/tags', text: '标签', icon: PricetagOutline },
-  { path: '/products', text: '产品', icon: CubeOutline }
+  { path: '/products', text: '产品', icon: RocketOutline },
+  { path: '/about', text: '关于作者', icon: PersonOutline }
 ]
 
 const userOptions = [
@@ -175,6 +186,15 @@ function handleUserAction(key: string) {
 .logo {
   text-decoration: none;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
 }
 
 .logo-text {

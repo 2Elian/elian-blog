@@ -9,7 +9,7 @@ export default {
   redirect: "/product/list",
   meta: {
     title: "产品管理",
-    icon: "ep:goods",
+    icon: "el-icon-document",
     rank: 9,
   },
   children: [
@@ -17,7 +17,7 @@ export default {
       path: "/product/list",
       component: () => import("@/views/admin/product/Product.vue"),
       name: "ProductList",
-      meta: { title: "产品列表", keepAlive: true },
+      meta: { title: "产品管理", keepAlive: true },
     },
   ],
 } satisfies RouteRecordRaw;

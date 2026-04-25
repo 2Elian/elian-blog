@@ -899,6 +899,20 @@ func VeFindAccountOnlineListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc
 		veOkPage(w, list, int64(len(list)), 1, 10)
 	}
 }
+func VeGetOnlineCountHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		keys, err := svcCtx.RDB.Keys(ctx, "online:*").Result()
+		count := 0
+		if err == nil {
+			count = len(keys)
+		}
+		veOk(w, map[string]interface{}{
+			"online_count": count,
+			"timestamp":    time.Now().Unix(),
+		})
+	}
+}
 
 // --- 首页/网站 ---
 
@@ -1070,10 +1084,14 @@ func VeUploadFileHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		defer file.Close()
 
 		// Determine subdirectory from form param
-		subDir := r.FormValue("path")
+		subDir := r.FormValue("file_path")
+		if subDir == "" {
+			subDir = r.FormValue("path")
+		}
 		if subDir == "" {
 			subDir = "misc"
 		}
+		subDir = strings.TrimSuffix(subDir, "/")
 
 		// Create uploads/subDir/YYYY/MM directory structure
 		now := time.Now()
@@ -1107,10 +1125,14 @@ func VeUploadFileHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 func VeMultiUploadFileHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		r.ParseMultipartForm(32 << 20)
-		subDir := r.FormValue("path")
+		subDir := r.FormValue("file_path")
+		if subDir == "" {
+			subDir = r.FormValue("path")
+		}
 		if subDir == "" {
 			subDir = "misc"
 		}
+		subDir = strings.TrimSuffix(subDir, "/")
 
 		files := r.MultipartForm.File["files"]
 		results := make([]interface{}, 0, len(files))
@@ -1580,7 +1602,6 @@ func VeFindProductListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 				Status:      p.Status,
 				Sort:        p.Sort,
 				Type:        p.Type,
-				Link:        p.Link,
 				CreatedAt:   fmt.Sprintf("%d", p.CreatedAt.Unix()),
 				UpdatedAt:   fmt.Sprintf("%d", p.UpdatedAt.Unix()),
 			})
@@ -1604,7 +1625,6 @@ func VeAddProductHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			Status:      req.Status,
 			Sort:        req.Sort,
 			Type:        req.Type,
-			Link:        req.Link,
 		}
 		if product.Status == 0 {
 			product.Status = 1
@@ -1646,12 +1666,6 @@ func VeUpdateProductHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		if req.Sort != 0 {
 			product.Sort = req.Sort
-		}
-		if req.Type != 0 {
-			product.Type = req.Type
-		}
-		if req.Link != "" {
-			product.Link = req.Link
 		}
 		if err := svcCtx.ProductDao.Update(product); err != nil {
 			veInternalError(w, "更新产品失败")

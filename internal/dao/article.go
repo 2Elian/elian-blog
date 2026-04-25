@@ -55,7 +55,7 @@ func (d *ArticleDao) List(page, pageSize, status int, categoryID, tagID uint, is
 
 	query.Count(&total)
 	err := query.Preload("Category").Preload("Tags").Preload("Author").
-		Order("is_top DESC, created_at DESC").
+		Order("CASE WHEN is_top = 1 THEN 0 ELSE 1 END, created_at DESC").
 		Offset((page - 1) * pageSize).Limit(pageSize).
 		Find(&articles).Error
 	return articles, total, err

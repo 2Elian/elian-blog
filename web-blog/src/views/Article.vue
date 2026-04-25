@@ -217,7 +217,7 @@ watch(() => route.params.id, (newId) => {
 <style scoped lang="scss">
 .article-page {
   animation: fadeInUp 0.5s ease;
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 0 32px;
 
@@ -331,7 +331,7 @@ watch(() => route.params.id, (newId) => {
 }
 
 .article-body {
-  max-width: 860px;
+  max-width: 1060px;
   margin: 0 auto;
 }
 

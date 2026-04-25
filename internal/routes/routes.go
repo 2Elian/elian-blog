@@ -135,6 +135,7 @@ func registerVeAdminHandlers(server *rest.Server, svcCtx *svc.ServiceContext) {
 
 		{Method: http.MethodPost, Path: "/admin-api/v1/account/find_account_list", Handler: handler.VeFindAccountListHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/account/find_account_online_list", Handler: handler.VeFindAccountOnlineListHandler(svcCtx)},
+			{Method: http.MethodGet, Path: "/admin-api/v1/admin/get_online_count", Handler: handler.VeGetOnlineCountHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/account/update_account_status", Handler: handler.VeUpdateAccountStatusHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/account/update_account_roles", Handler: handler.VeUpdateAccountRolesHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/account/update_account_password", Handler: handler.VeUpdateAccountPasswordHandler(svcCtx)},

@@ -51,21 +51,23 @@ func main() {
 	svcCtx := svc.NewServiceContext(c, db, rdb, log)
 	initRoles(svcCtx)
 
-	server := rest.MustNewServer(c.RestConf, rest.WithCors())
+	server := rest.MustNewServer(c.RestConf,
+		rest.WithCors(),
+		rest.WithNotFoundHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if strings.HasPrefix(r.URL.Path, "/uploads/") {
+				w.Header().Set("Cache-Control", "public, max-age=86400")
+				http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))).ServeHTTP(w, r)
+				return
+			}
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("page not found"))
+		})),
+	)
 	defer server.Stop()
 
 	server.Use(corsMiddleware)
 
 	routes.RegisterHandlers(server, svcCtx)
-
-	// Register uploads file server - match /uploads/:subdir/:year/:month/:file
-	// This covers the pattern: /uploads/misc/2026/04/file.jpg
-	uploadsHandler := http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads")))
-	server.AddRoute(rest.Route{
-		Method:  http.MethodGet,
-		Path:    "/uploads/:a/:b/:c/:d",
-		Handler: uploadsHandler.ServeHTTP,
-	})
 
 	server.PrintRoutes()
 

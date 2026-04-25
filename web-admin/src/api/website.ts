@@ -94,4 +94,12 @@ export const WebsiteAPI = {
       data: data,
     });
   },
+
+  /** 获取在线用户数量 */
+  getOnlineCountApi(): Promise<IApiResponse<{ online_count: number; timestamp: number }>> {
+    return request({
+      url: "/admin-api/v1/admin/get_online_count",
+      method: "GET",
+    });
+  },
 };

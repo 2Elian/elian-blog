@@ -7,6 +7,7 @@ type ArticleBackVO struct {
 	ArticleCover   string   `json:"article_cover"`
 	ArticleTitle   string   `json:"article_title"`
 	ArticleContent string   `json:"article_content"`
+	ArticleSummary string   `json:"article_summary"`
 	ArticleType    int      `json:"article_type"`
 	OriginalURL    string   `json:"original_url"`
 	IsTop          int      `json:"is_top"`
@@ -84,6 +85,7 @@ type CreateArticleReq struct {
 	ArticleTitle   string   `json:"article_title"`
 	ArticleContent string   `json:"article_content"`
 	ArticleCover   string   `json:"article_cover,optional"`
+	ArticleSummary string   `json:"article_summary,optional"`
 	ArticleType    int      `json:"article_type,optional"`
 	OriginalURL    string   `json:"original_url,optional"`
 	CategoryName   string   `json:"category_name,optional"`
@@ -97,6 +99,7 @@ type UpdateArticleReq struct {
 	ArticleTitle   string   `json:"article_title,optional"`
 	ArticleContent string   `json:"article_content,optional"`
 	ArticleCover   string   `json:"article_cover,optional"`
+	ArticleSummary string   `json:"article_summary,optional"`
 	ArticleType    int      `json:"article_type,optional"`
 	OriginalURL    string   `json:"original_url,optional"`
 	CategoryName   string   `json:"category_name,optional"`

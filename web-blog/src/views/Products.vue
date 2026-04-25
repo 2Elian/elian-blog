@@ -5,29 +5,29 @@
       <p class="page-desc">我的作品与项目</p>
     </div>
 
-    <div class="products-grid">
+    <div class="showcase-list">
       <div
-        v-for="product in products"
+        v-for="(product, idx) in products"
         :key="product.id"
-        class="product-card"
-        @click="router.push(`/product/${product.id}`)"
+        class="showcase-card"
+        :class="{ 'showcase-reverse': idx % 2 === 1 }"
+        @click="handleClick(product)"
       >
-        <div class="card-cover">
-          <img v-if="product.cover" :src="getImageUrl(product.cover)" :alt="product.name" />
-          <div v-else class="cover-placeholder">
-            <n-icon size="48"><CubeOutline /></n-icon>
-          </div>
+        <div v-if="product.cover" class="showcase-image">
+          <img :src="getImageUrl(product.cover)" :alt="product.name" />
         </div>
-        <div class="card-content">
-          <div class="product-type">
-            <span :class="getTypeClass(product.type)">{{ getTypeName(product.type) }}</span>
+        <div v-else class="showcase-visual">
+          <div class="showcase-number">{{ String(idx + 1).padStart(2, '0') }}</div>
+        </div>
+        <div class="showcase-info">
+          <div class="showcase-meta">
+            <span class="showcase-badge" :class="getTypeClass(product.type)">{{ getTypeName(product.type) }}</span>
+            <span v-if="product.price > 0" class="showcase-price">{{ product.price }} 元</span>
           </div>
-          <h3 class="product-name">{{ product.name }}</h3>
-          <p class="product-desc" v-if="product.description">{{ product.description }}</p>
-          <div class="product-footer">
-            <span class="product-price" v-if="product.price > 0">{{ product.price }} 元</span>
-            <span class="product-price free" v-else>免费</span>
-            <n-icon v-if="product.link" size="16"><OpenOutline /></n-icon>
+          <h3 class="showcase-title">{{ product.name }}</h3>
+          <p class="showcase-desc" v-if="product.description">{{ product.description }}</p>
+          <div class="showcase-footer">
+            <span class="showcase-link-text">了解更多 →</span>
           </div>
         </div>
       </div>
@@ -40,8 +40,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { NIcon, NEmpty } from 'naive-ui'
-import { CubeOutline, OpenOutline } from '@vicons/ionicons5'
+import { NEmpty } from 'naive-ui'
 import { getProducts } from '@/api'
 
 interface Product {
@@ -52,8 +51,7 @@ interface Product {
   cover?: string
   status: number
   sort: number
-  type: number
-  link?: string
+  type: string
   created_at: string
 }
 
@@ -61,32 +59,23 @@ const products = ref<Product[]>([])
 const loading = ref(true)
 const router = useRouter()
 
+function handleClick(product: Product) {
+  router.push(`/product/${product.id}`)
+}
+
 function getImageUrl(path: string): string {
   if (!path) return ''
   if (path.startsWith('http')) return path
   return `http://localhost:8080${path.startsWith('/') ? '' : '/'}${path}`
 }
 
-function getTypeName(type: number): string {
-  const types: Record<number, string> = {
-    1: 'AI产品',
-    2: '工具',
-    3: '其他'
-  }
-  return types[type] || '其他'
+function getTypeName(type: string): string {
+  return type || '其他'
 }
 
-function getTypeClass(type: number): string {
-  const classes: Record<number, string> = {
-    1: 'type-ai',
-    2: 'type-tool',
-    3: 'type-other'
-  }
-  return classes[type] || 'type-other'
-}
-
-function openLink(url: string) {
-  window.open(url, '_blank', 'noopener,noreferrer')
+function getTypeClass(type: string): string {
+  const map: Record<string, string> = { 'AI产品': 'badge-ai', '工具': 'badge-tool' }
+  return map[type] || 'badge-other'
 }
 
 async function loadProducts() {
@@ -108,7 +97,7 @@ onMounted(() => {
 <style scoped lang="scss">
 .products-page {
   animation: fadeInUp 0.5s ease;
-  max-width: 1100px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 0 32px;
 
@@ -133,124 +122,150 @@ onMounted(() => {
   font-size: 16px;
 }
 
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+// ===== Showcase Cards (same as About page) =====
+.showcase-list {
+  display: flex;
+  flex-direction: column;
   gap: 24px;
 }
 
-.product-card {
-  background: var(--bg-card);
-  border-radius: var(--radius-md);
+.showcase-card {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
   overflow: hidden;
-  text-decoration: none;
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-normal);
-  display: flex;
-  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--bg-card);
+  cursor: pointer;
 
   &:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transform: translateY(-4px);
 
-    .product-name {
-      color: var(--primary-color);
-    }
-
-    .card-cover img {
+    .showcase-image img {
       transform: scale(1.05);
     }
   }
+
+  &.showcase-reverse {
+    grid-template-columns: 1fr 180px;
+
+    .showcase-visual { order: 2; }
+    .showcase-image { order: 2; }
+    .showcase-info { order: 1; }
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr !important;
+
+    .showcase-visual,
+    .showcase-image { order: 0 !important; min-height: 120px; }
+    .showcase-info { order: 0 !important; }
+  }
 }
 
-.card-cover {
-  height: 180px;
-  background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+.showcase-image {
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform var(--transition-slow);
-  }
-
-  .cover-placeholder {
-    color: rgba(255, 255, 255, 0.3);
+    transition: transform 0.5s ease;
   }
 }
 
-.card-content {
-  padding: 20px;
-  flex: 1;
+.showcase-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary-color), #7c3aed);
+  min-height: 160px;
+}
+
+.showcase-number {
+  font-size: 48px;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.2);
+  letter-spacing: -2px;
+}
+
+.showcase-info {
+  padding: 24px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
-.product-type {
-  margin-bottom: 12px;
+.showcase-meta {
+  margin-bottom: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
 
-  span {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-  }
+.showcase-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
 
-  .type-ai {
-    background: rgba(102, 126, 234, 0.15);
+  &.badge-ai {
+    background: rgba(102, 126, 234, 0.1);
+    border: 1px solid rgba(102, 126, 234, 0.15);
     color: #667eea;
   }
 
-  .type-tool {
-    background: rgba(72, 187, 120, 0.15);
+  &.badge-tool {
+    background: rgba(72, 187, 120, 0.1);
+    border: 1px solid rgba(72, 187, 120, 0.15);
     color: #48bb78;
   }
 
-  .type-other {
-    background: rgba(237, 137, 54, 0.15);
-    color: #ed8936;
+  &.badge-other {
+    background: rgba(237, 137, 54, 0.08);
+    border: 1px solid rgba(237, 137, 54, 0.15);
+    color: #d97706;
   }
 }
 
-.product-name {
-  font-size: 18px;
+.showcase-price {
+  font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 8px;
-  transition: color var(--transition-fast);
+  color: var(--primary-color);
 }
 
-.product-desc {
+.showcase-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.showcase-desc {
   font-size: 14px;
-  color: var(--text-muted);
-  line-height: 1.6;
-  margin-bottom: 16px;
-  flex: 1;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.product-footer {
+.showcase-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
 }
 
-.product-price {
-  font-size: 16px;
-  font-weight: 600;
+.showcase-link-text {
+  font-size: 13px;
   color: var(--primary-color);
-
-  &.free {
-    color: var(--text-secondary);
-    font-weight: 500;
-  }
+  font-weight: 500;
 }
 </style>

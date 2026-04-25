@@ -22,6 +22,7 @@ func (l *ArticleLogic) Create(ctx context.Context, req *types.CreateArticleReq, 
 		Title:     req.ArticleTitle,
 		Content:   req.ArticleContent,
 		Cover:     req.ArticleCover,
+		Summary:   req.ArticleSummary,
 		Type:      req.ArticleType,
 		SourceURL: req.OriginalURL,
 		Status:    req.Status,
@@ -80,6 +81,9 @@ func (l *ArticleLogic) Update(ctx context.Context, req *types.UpdateArticleReq) 
 	}
 	if req.ArticleCover != "" {
 		article.Cover = req.ArticleCover
+	}
+	if req.ArticleSummary != "" {
+		article.Summary = req.ArticleSummary
 	}
 	if req.ArticleType != 0 {
 		article.Type = req.ArticleType
@@ -192,6 +196,7 @@ func toArticleBackVO(a *model.Article) types.ArticleBackVO {
 		ArticleTitle:   a.Title,
 		ArticleContent: a.Content,
 		ArticleCover:   cover,
+		ArticleSummary: a.Summary,
 		ArticleType:    a.Type,
 		OriginalURL:    a.SourceURL,
 		IsTop:          a.IsTop,

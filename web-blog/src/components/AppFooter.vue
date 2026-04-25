@@ -4,8 +4,8 @@
       <div class="footer-gradient"></div>
       <div class="footer-main">
         <div class="footer-brand">
-          <span class="brand-name">Elian Blog</span>
-          <p class="brand-desc">记录生活，分享技术</p>
+          <span class="brand-name">{{ siteName }}</span>
+          <p class="brand-desc">{{ siteIntro }}</p>
         </div>
 
         <div class="footer-links">
@@ -17,7 +17,6 @@
           </div>
           <div class="link-group">
             <h4>更多</h4>
-            <router-link to="/tags">标签</router-link>
             <router-link to="/products">产品</router-link>
             <router-link to="/about">关于</router-link>
           </div>
@@ -25,7 +24,8 @@
       </div>
 
       <div class="footer-bottom">
-        <p>&copy; {{ currentYear }} Elian Blog. All rights reserved.</p>
+        <p>&copy; {{ currentYear }} {{ siteName }}. All rights reserved.</p>
+        <p v-if="siteRecordNo">{{ siteRecordNo }}</p>
         <p>Powered by Vue 3 + Naive UI</p>
       </div>
     </div>
@@ -33,9 +33,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
+import { useSiteConfigStore } from '@/stores/siteConfig'
 
+const siteConfig = useSiteConfigStore()
+const siteName = computed(() => siteConfig.siteName)
+const siteIntro = computed(() => siteConfig.siteIntro)
+const siteRecordNo = computed(() => siteConfig.siteRecordNo)
 const currentYear = computed(() => new Date().getFullYear())
+
+onMounted(() => {
+  siteConfig.fetchConfig()
+})
 </script>
 
 <style scoped lang="scss">

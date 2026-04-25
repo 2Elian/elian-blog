@@ -28,20 +28,15 @@ const modalConfig: IModalConfig<any> = {
     {
       label: "产品类型",
       prop: "type",
-      type: "select",
+      type: "input",
       attrs: {
-        placeholder: "请选择类型",
+        placeholder: "如: AI产品、工具、其他",
       },
-      options: [
-        { label: "AI产品", value: 1 },
-        { label: "工具", value: 2 },
-        { label: "其他", value: 3 },
-      ],
     },
     {
       label: "价格",
       prop: "price",
-      type: "number",
+      type: "input-number" as any,
       attrs: {
         placeholder: "请输入价格",
         min: 0,
@@ -51,32 +46,23 @@ const modalConfig: IModalConfig<any> = {
     {
       label: "封面图",
       prop: "cover",
-      type: "input",
-      attrs: {
-        placeholder: "封面图URL",
-      },
+      type: "custom",
+      slotName: "cover",
     },
     {
-      label: "产品链接",
-      prop: "link",
-      type: "input",
-      attrs: {
-        placeholder: "请输入产品链接",
-      },
-    },
-    {
-      label: "描述",
+      label: "简介",
       prop: "description",
-      type: "textarea",
+      type: "input" as any,
       attrs: {
-        placeholder: "请输入产品描述",
-        rows: 4,
+        type: "textarea",
+        placeholder: "请输入产品简介",
+        rows: 3,
       },
     },
     {
       label: "排序",
       prop: "sort",
-      type: "number",
+      type: "input-number" as any,
       attrs: {
         placeholder: "排序值",
         min: 0,

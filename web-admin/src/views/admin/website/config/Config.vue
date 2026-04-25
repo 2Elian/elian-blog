@@ -28,13 +28,6 @@
               style="width: 400px"
             />
           </el-form-item>
-          <el-form-item label="网站作者">
-            <el-input
-              v-model="websiteConfigForm.website_info.website_author"
-              size="small"
-              style="width: 400px"
-            />
-          </el-form-item>
           <el-form-item label="网站简介">
             <el-input
               v-model="websiteConfigForm.website_info.website_intro"
@@ -42,23 +35,14 @@
               style="width: 400px"
             />
           </el-form-item>
-          <el-form-item label="网站创建日期">
-            <el-date-picker
-              v-model="websiteConfigForm.website_info.website_create_time"
-              placeholder="选择日期"
-              style="width: 400px"
-              type="date"
-              value-format="YYYY-MM-DD"
-            />
-          </el-form-item>
           <el-form-item label="网站公告">
-            <el-input
-              v-model="websiteConfigForm.website_info.website_notice"
-              :rows="5"
-              placeholder="请输入公告内容"
-              style="width: 400px"
-              type="textarea"
-            />
+            <div style="width: 400px">
+              <div v-for="(n, idx) in noticeList" :key="idx" style="display: flex; gap: 6px; margin-bottom: 6px; align-items: center">
+                <el-input v-model="noticeList[idx]" size="small" style="flex: 1" placeholder="公告内容" />
+                <el-button size="small" type="danger" @click="noticeList.splice(idx, 1)">删除</el-button>
+              </div>
+              <el-button size="small" @click="noticeList.push('')">+ 添加公告</el-button>
+            </div>
           </el-form-item>
           <el-form-item label="备案号">
             <el-input
@@ -66,6 +50,32 @@
               size="small"
               style="width: 400px"
             />
+          </el-form-item>
+          <el-divider content-position="left">首页 Hero</el-divider>
+          <el-form-item label="Hero名称">
+            <el-input
+              v-model="websiteConfigForm.website_info.website_hero_name"
+              size="small"
+              style="width: 400px"
+              placeholder="如: Elian"
+            />
+          </el-form-item>
+          <el-form-item label="Hero描述">
+            <el-input
+              v-model="websiteConfigForm.website_info.website_hero_desc"
+              size="small"
+              style="width: 400px"
+              placeholder="如: Agent算法工程师 / LLM后训练工程师 / 后端开发爱好者"
+            />
+          </el-form-item>
+          <el-form-item label="打字文本">
+            <div style="width: 400px">
+              <div v-for="(t, idx) in heroSubtitleList" :key="idx" style="display: flex; gap: 6px; margin-bottom: 6px; align-items: center">
+                <el-input v-model="heroSubtitleList[idx]" size="small" style="flex: 1" placeholder="打字效果文本" />
+                <el-button size="small" type="danger" @click="heroSubtitleList.splice(idx, 1)">删除</el-button>
+              </div>
+              <el-button size="small" @click="heroSubtitleList.push('')">+ 添加文本</el-button>
+            </div>
           </el-form-item>
           <el-form-item label="第三方登录">
             <el-checkbox
@@ -276,7 +286,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import type { UploadRawFile, UploadRequestOptions } from "element-plus";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { WebsiteAPI } from "@/api/website";
 import { uploadFile } from "@/utils/file";
 import { WebsiteConfigVO } from "@/api/types";
@@ -313,6 +323,8 @@ const websiteConfigForm = ref<WebsiteConfigVO>({
 });
 
 const activeName = ref("info");
+const noticeList = ref<string[]>([]);
+const heroSubtitleList = ref<string[]>([]);
 
 onMounted(() => {
   getWebsiteConfig();
@@ -321,11 +333,24 @@ onMounted(() => {
 function getWebsiteConfig() {
   WebsiteAPI.getWebsiteConfigApi().then((res) => {
     websiteConfigForm.value = res.data;
+    const raw = res.data?.website_info?.website_notice;
+    if (Array.isArray(raw)) noticeList.value = raw.filter((s: string) => s.trim());
+    else if (typeof raw === 'string' && raw.trim()) noticeList.value = [raw];
+    else noticeList.value = [];
+    const subs = res.data?.website_info?.website_hero_subtitles;
+    if (Array.isArray(subs)) heroSubtitleList.value = subs.filter((s: string) => s.trim());
+    else heroSubtitleList.value = [];
   });
 }
 
 function updateWebsiteConfig() {
-  WebsiteAPI.updateWebsiteConfigApi(websiteConfigForm.value).then((res) => {
+  const data = { ...websiteConfigForm.value };
+  data.website_info = {
+    ...data.website_info,
+    website_notice: noticeList.value.filter((s: string) => s.trim()),
+    website_hero_subtitles: heroSubtitleList.value.filter((s: string) => s.trim()),
+  };
+  WebsiteAPI.updateWebsiteConfigApi(data).then((res) => {
     ElMessage.success(res.msg);
   });
 }

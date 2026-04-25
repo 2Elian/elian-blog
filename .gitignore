@@ -4,7 +4,7 @@
 
 # Binaries
 *.exe
-server
+/server
 
 # Dependencies
 node_modules/
@@ -24,5 +24,15 @@ Thumbs.db
 # Upload directory
 uploads/
 
-# create admin account
+# Debug / temp files
+_debug_*
+tag_response.json
+docs/
+_ve-admin-ref/
+
+# One-off fix scripts (not part of the project)
+/cmd/fixdata/
+/cmd/fixdb/
+/cmd/fixdb2/
+/cmd/fixpw/
 /cmd/create-admin/

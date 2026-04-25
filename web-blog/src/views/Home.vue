@@ -12,13 +12,13 @@
         <div class="hero-badge">Welcome to my blog</div>
         <h1 class="hero-title">
 <!--          <span class="greeting">欢迎来到我的博客</span>-->
-          <span class="name">Elian</span>
+          <span class="name">{{ siteConfig.heroName || 'Elian' }}</span>
         </h1>
         <p class="hero-subtitle">
           {{ typedText }}<span class="cursor">|</span>
         </p>
         <p class="hero-desc">
-          Agent算法工程师 / LLM后训练工程师 / 后端开发爱好者
+          {{ siteConfig.heroDesc || 'Agent算法工程师 / LLM后训练工程师 / 后端开发爱好者' }}
         </p>
         <div class="hero-actions">
           <button class="hero-btn primary" @click="$router.push('/blog')">
@@ -77,11 +77,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { NEmpty } from 'naive-ui'
 import ArticleCard from '@/components/ArticleCard.vue'
 import Sidebar from '@/components/Sidebar.vue'
 import { getArticles, getCategories, getTags } from '@/api'
+import { useSiteConfigStore } from '@/stores/siteConfig'
+
+const siteConfig = useSiteConfigStore()
 
 interface Article {
   id: number
@@ -102,13 +105,17 @@ const categoryCount = ref(0)
 const tagCount = ref(0)
 
 // Typing effect
-const subtitleTexts = [
+const defaultSubtitles = [
   'AutoModelForCauseModel.from_pretrained(elian)',
   'elian-cli init agent',
   'https://github.com/2Elian',
   '欢迎来到Elian博客, 在这里您能看到LLM与Agent相关的技术分享',
   '励志称为一名优秀的Agent算法工程师'
 ]
+const subtitleTexts = computed(() => {
+  const fromConfig = siteConfig.heroSubtitleTexts
+  return fromConfig.length > 0 ? fromConfig : defaultSubtitles
+})
 const typedText = ref('')
 let currentTextIndex = 0
 let charIndex = 0
@@ -116,7 +123,9 @@ let isDeleting = false
 let typingTimer: ReturnType<typeof setTimeout> | null = null
 
 function typeEffect() {
-  const currentText = subtitleTexts[currentTextIndex]
+  const texts = subtitleTexts.value
+  if (!texts.length) return
+  const currentText = texts[currentTextIndex]
 
   if (!isDeleting) {
     typedText.value = currentText.substring(0, charIndex + 1)
@@ -133,7 +142,7 @@ function typeEffect() {
 
     if (charIndex === 0) {
       isDeleting = false
-      currentTextIndex = (currentTextIndex + 1) % subtitleTexts.length
+      currentTextIndex = (currentTextIndex + 1) % texts.length
     }
   }
 
@@ -176,6 +185,7 @@ onUnmounted(() => {
   position: relative;
   width: 100vw;
   margin-left: calc(-50vw + 50%);
+  margin-top: -20px;
   min-height: 520px;
   display: flex;
   align-items: center;
@@ -199,10 +209,33 @@ onUnmounted(() => {
 .hero-grid {
   position: absolute;
   inset: 0;
+  background-color: #0b0c1a; /* 深色宇宙底色 */
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
+      /* 1. 动态光斑（柔和光晕） */
+      radial-gradient(circle at 20% 30%, rgba(18, 194, 233, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(196, 113, 237, 0.12) 0%, transparent 50%),
+      radial-gradient(circle at 50% 90%, rgba(0, 212, 255, 0.1) 0%, transparent 40%),
+        /* 2. 主网格线（白色微透明） */
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        /* 3. 对角装饰线（增加科技感） */
+      linear-gradient(45deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+      linear-gradient(-45deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size:
+      100% 100%, /* 光斑跟随容器尺寸 */
+      100% 100%,
+      100% 100%,
+      60px 60px,  /* 主网格 */
+      60px 60px,
+      120px 120px, /* 对角网格间距稍大，形成错落感 */
+      120px 120px;
+  background-position:
+      0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+
+  /* 可选叠加：微妙的噪点肌理（使用 SVG 滤镜实现） */
+  /* 如果不需要噪点，可删除 mask 相关属性 */
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 60%, transparent 100%);
+  mask-image: radial-gradient(circle at 50% 50%, black 60%, transparent 100%);
 }
 
 .hero-shape {

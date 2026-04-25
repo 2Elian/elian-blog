@@ -3,6 +3,11 @@ package model
 import "gorm.io/gorm"
 
 func AutoMigrate(db *gorm.DB) error {
+	// Migrate product type column from int to varchar + add content/link columns
+	migrateProduct(db)
+	// Drop comment reply_user FK constraint (reply_id=0 causes FK violation)
+	migrateComment(db)
+
 	return db.AutoMigrate(
 		&User{},
 		&Role{},
@@ -20,6 +25,33 @@ func AutoMigrate(db *gorm.DB) error {
 		&Photo{},
 		&Product{},
 	)
+}
+
+func migrateProduct(db *gorm.DB) {
+	// Always ensure type column is VARCHAR
+	var colType string
+	db.Raw("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'product' AND COLUMN_NAME = 'type'").Scan(&colType)
+	if colType != "varchar" && colType != "" {
+		db.Exec("ALTER TABLE product MODIFY COLUMN type VARCHAR(50) DEFAULT '其他'")
+	}
+	// Always convert numeric values to readable names (safe to run repeatedly)
+	db.Exec("UPDATE product SET type = 'AI产品' WHERE type = '1'")
+	db.Exec("UPDATE product SET type = '工具' WHERE type = '2'")
+	db.Exec("UPDATE product SET type = '其他' WHERE type IN ('3', '0') OR type = ''")
+	// Drop link column if it still exists
+	var linkExists string
+	db.Raw("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'product' AND COLUMN_NAME = 'link'").Scan(&linkExists)
+	if linkExists == "link" {
+		db.Exec("ALTER TABLE product DROP COLUMN link")
+	}
+}
+
+func migrateComment(db *gorm.DB) {
+	var fkCount int64
+	db.Raw("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'comment' AND CONSTRAINT_NAME = 'fk_comment_reply_user'").Scan(&fkCount)
+	if fkCount > 0 {
+		db.Exec("ALTER TABLE comment DROP FOREIGN KEY fk_comment_reply_user")
+	}
 }
 
 // SeedMenus inserts default menu data if the menu table is empty.

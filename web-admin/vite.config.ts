@@ -42,6 +42,11 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
           target: "http://localhost:8080",
           rewrite: (path) => path,
         },
+        "/uploads": {
+          changeOrigin: true,
+          target: "http://localhost:8080",
+          rewrite: (path) => path,
+        },
       },
     },
     plugins: [
