@@ -1,13 +1,12 @@
 # Elian Blog: 基于go-zero与gorm的个人博客系统
-<div align="center">
 
-[![简体中文](https://img.shields.io/badge/简体中文-blue?style=for-the-badge&logo=book&logoColor=white)](./README.md)
-[![English](https://img.shields.io/badge/English-orange?style=for-the-badge&logo=language&logoColor=white)](./README.md)
-</div>
+<div align="center">
+在线网址：https://elian.net.cn
 
 <p align="center">
-  <img src="./draw/framework.drawio.svg" alt="https://elian.net.cn" width="800"/>
+  <img src="images/about.png" alt="https://elian.net.cn" width="800"/>
 </p>
+</div>
 
 ---
 
