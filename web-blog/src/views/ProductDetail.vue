@@ -37,11 +37,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NEmpty, NSpin } from 'naive-ui'
-import { marked } from 'marked'
+import mermaid from 'mermaid'
+import { renderMarkdown } from '@/utils/markdown'
 import { getProduct } from '@/api'
+
+mermaid.initialize({ startOnLoad: false, theme: 'default' })
 
 interface Product {
   id: number
@@ -62,7 +65,7 @@ const product = ref<Product | null>(null)
 
 const renderedContent = computed(() => {
   if (!product.value?.content) return ''
-  return marked(product.value.content)
+  return renderMarkdown(product.value.content)
 })
 
 function getImageUrl(path: string): string {
@@ -75,6 +78,8 @@ async function loadProduct(id: number) {
   try {
     const res = await getProduct(id) as any
     product.value = res.data
+    await nextTick()
+    mermaid.run()
   } catch (e) {
     console.error('Failed to load product:', e)
   }

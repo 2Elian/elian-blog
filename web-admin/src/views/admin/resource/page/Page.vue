@@ -5,7 +5,7 @@
       <el-form :inline="true">
         <el-form-item label="页面名称">
           <el-input
-            v-model="queryParams.title"
+            v-model="queryParams.page_name"
             style="width: 200px"
             placeholder="请输入页面名称"
             clearable

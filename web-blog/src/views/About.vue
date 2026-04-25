@@ -121,7 +121,8 @@
           </h2>
           <p class="block-text">
             这个博客使用 Go-Zero + Vue3 构建，后端采用 Go-Zero rest 框架，前端使用 Naive UI 组件库。
-            主要用于记录学习笔记、技术分享和项目经验。如果你对文章内容有任何疑问或建议，欢迎留言交流。
+            本博客的作者是李子茉(Elian)，他擅长Agent算法与应用开发，对LLM后训练技术和go开发技术非常地痴迷。
+            Elian于2026年7月硕士毕业参加工作，2028年之前他都会考虑读博士的机会，如果您看完他的作品和简历并且有相关资源愿意推荐的话，您可以联系他的邮箱:lizimo@nuist.edu.cn。
           </p>
         </section>
       </div>
@@ -224,7 +225,7 @@ onMounted(async () => {
   margin-left: calc(-50vw + 50%);
   margin-top: -20px;
   padding: 80px 32px;
-  background: #020210;
+  background: #000000;
   overflow: hidden;
 
   @media (max-width: 768px) {
@@ -236,6 +237,7 @@ onMounted(async () => {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  z-index: 1;
 }
 
 .hero-inner {
@@ -246,6 +248,7 @@ onMounted(async () => {
   grid-template-columns: 1fr 340px;
   gap: 60px;
   align-items: center;
+  z-index: 2;
 
   @media (max-width: 900px) {
     grid-template-columns: 1fr;

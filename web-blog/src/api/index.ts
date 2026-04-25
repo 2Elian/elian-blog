@@ -45,6 +45,16 @@ export const getProduct = (id: number) => http.get(`/products/${id}`)
 export const getPages = () => http.get('/pages')
 export const getPage = (slug: string) => http.get(`/pages/${slug}`)
 
+// Friend Links
+export const getFriendLinks = () => http.get('/friend-links')
+
+// Messages
+export const getMessages = (params?: { page?: number; page_size?: number }) =>
+  http.get('/messages', { params })
+
+export const postMessage = (data: { content: string }) =>
+  http.post('/messages', data)
+
 // Site Config
 export const getSiteConfig = () => http.get('/site/config')
 

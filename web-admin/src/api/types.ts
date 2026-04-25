@@ -14,6 +14,7 @@ export interface AdminHomeInfo {
   user_count: number; // 用户量
   article_count: number; // 文章量
   message_count: number; // 留言量
+  product_count: number; // 产品量
   category_list: CategoryVO[]; // 分类列表
   tag_list: TagVO[]; // 标签列表
   article_view_ranks: ArticleViewVO[]; // 文章浏览量排行
@@ -1018,6 +1019,9 @@ export interface WebsiteInfo {
   website_create_time: string; // 网站创建时间
   website_intro: string; // 网站介绍
   website_name: string; // 网站名称
-  website_notice: string; // 网站公告
+  website_notice: string | string[]; // 网站公告
   website_record_no: string; // 网站备案号
+  website_hero_name?: string; // Hero名称
+  website_hero_desc?: string; // Hero描述
+  website_hero_subtitles?: string[]; // 打字效果文本列表
 }

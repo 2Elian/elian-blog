@@ -2,7 +2,6 @@
   <div class="logo">
     <transition enter-active-class="animate__animated animate__fadeInLeft">
       <router-link :key="+collapse" class="wh-full flex-center" to="/">
-        <img :src="logo" class="logo-icon" />
         <span v-if="!collapse" class="title">
           {{ appConfig.title }}
         </span>

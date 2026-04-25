@@ -1,29 +1,13 @@
-# Elian Blog
+# Elian Blog: 基于go-zero与gorm的个人博客系统
+<div align="center">
 
-基于 Go-Zero + Vue3 的全栈个人博客系统，前后端分离架构。
+[![简体中文](https://img.shields.io/badge/简体中文-blue?style=for-the-badge&logo=book&logoColor=white)](./README.md)
+[![English](https://img.shields.io/badge/English-orange?style=for-the-badge&logo=language&logoColor=white)](./README.md)
+</div>
 
-## 功能概览
-
-### 前台 (web-blog)
-- 首页 Hero 展示（打字效果、动态站名）
-- 文章列表/详情，Markdown 渲染
-- 分类筛选（左侧边栏）
-- 产品展示/详情页
-- 关于作者页面（技术栈、项目、竞赛）
-- 评论系统
-- 响应式布局 + 暗黑模式
-
-### 后台 (web-admin)
-- Dashboard 统计面板
-- 文章管理（Markdown 编辑器、分类/标签、摘要、置顶、封面）
-- 分类/标签管理
-- 评论管理（评论人、文章标题、内容、状态）
-- 产品管理（封面、类型、详情 Markdown 编辑）
-- 友链/留言/页面管理
-- 站点设置（站名、公告、备案号、Hero 配置、社交链接、功能开关）
-- 关于页面编辑（结构化 JSON 编辑器）
-- 用户/角色/菜单 RBAC 权限系统
-- 文件上传（OSS / 本地）
+<p align="center">
+  <img src="./draw/framework.drawio.svg" alt="https://elian.net.cn" width="800"/>
+</p>
 
 ---
 
@@ -117,27 +101,28 @@ Auth:
   AccessSecret: "your-jwt-secret-key"
 ```
 
-### 4. 启动后端
+### 开发模式
 
 ```bash
+# Backend
 go mod tidy
-go run cmd/server/main.go        # 启动后端 http://localhost:8080
-```
+go run cmd/server/main.go          # 启动后端 (localhost:8080)
+go build -o server.exe cmd/server/main.go  # 编译
 
-编译：
+# 初始化管理员账号 / 修复明文密码
+go run cmd/test/main.go
 
-```bash
-go build -o server.exe cmd/server/main.go
-```
-
-### 5. 启动前端
-
-```bash
-# 博客前台 http://localhost:3000
+# Frontend - 博客前台 (localhost:3000)
 cd web-blog && pnpm install && pnpm dev
 
-# 管理后台 http://localhost:3001
+# Frontend - 管理后台 (localhost:3001)
 cd web-admin && pnpm install && pnpm dev
+```
+
+### 生产模式
+```bash
+bash build.sh
+./server.exe -f configs/config.yaml
 ```
 
 ### 6. 创建管理员
@@ -266,5 +251,6 @@ go run cmd/test/main.go
 ## 参考项目
 
 - [ve-admin-element](https://github.com/ve-weiyi/ve-admin-element) — 后台管理前端框架
+- [md-editor-v3](https://github.com/imzbf/md-editor-v3) — markdown编辑
 - [ve-blog-golang](https://github.com/ve-weiyi/ve-blog-golang) — Go-Zero 后端架构参考
 - [ve-blog-naive](https://github.com/ve-weiyi/ve-blog-naive) — 博客前台设计参考

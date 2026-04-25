@@ -2,6 +2,7 @@ Name: elian-blog-api
 Host: 0.0.0.0
 Port: 8080
 Mode: dev
+MaxBytes: 52428800
 
 Database:
   Host: 127.0.0.1

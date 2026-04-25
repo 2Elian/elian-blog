@@ -71,7 +71,7 @@ export const constantRoutes: RouteRecordRaw[] = [
  */
 const router = createRouter({
   // 使用createWebHashHistory模式会导致第三方授权回调无法识别查询参数
-  history: createWebHistory(),
+  history: createWebHistory("/admin/"),
   routes: constantRoutes,
   // 刷新时，滚动条位置还原
   scrollBehavior: () => ({ left: 0, top: 0 }),

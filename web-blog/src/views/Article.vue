@@ -101,13 +101,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NTag, NInput, NButton, NAvatar, NIcon, NEmpty, NSpin, useMessage } from 'naive-ui'
 import { EyeOutline } from '@vicons/ionicons5'
-import { marked } from 'marked'
+import mermaid from 'mermaid'
+import { renderMarkdown } from '@/utils/markdown'
 import { getArticle, getComments, postComment } from '@/api'
 import { useUserStore } from '@/stores/user'
+
+mermaid.initialize({ startOnLoad: false, theme: 'default' })
 
 interface Article {
   id: number
@@ -141,7 +144,7 @@ const submitting = ref(false)
 
 const renderedContent = computed(() => {
   if (!article.value?.content) return ''
-  return marked(article.value.content)
+  return renderMarkdown(article.value.content)
 })
 
 const prevArticle = computed(() => article.value?.prev_article)
@@ -167,6 +170,10 @@ async function loadArticle(id: number) {
     // Load comments
     const commentRes = await getComments(id) as any
     comments.value = commentRes.data?.list || commentRes.data || []
+
+    // Render mermaid diagrams
+    await nextTick()
+    mermaid.run()
   } catch (e) {
     console.error('Failed to load article:', e)
     message.error('加载文章失败')

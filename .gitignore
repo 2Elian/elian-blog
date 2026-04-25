@@ -4,6 +4,7 @@
 
 # Binaries
 *.exe
+*.exe~
 /server
 
 # Dependencies
@@ -36,3 +37,4 @@ _ve-admin-ref/
 /cmd/fixdb2/
 /cmd/fixpw/
 /cmd/create-admin/
+/cmd/learn/

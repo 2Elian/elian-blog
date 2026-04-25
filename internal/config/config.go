@@ -5,12 +5,12 @@ import (
 )
 
 type Config struct {
-	rest.RestConf
-	Database DatabaseConfig
-	Redis    RedisConfig
-	JWT      JWTConfig
-	AppLog   LogConfig
-	Upload   UploadConfig
+	rest.RestConf // go-zero 的配置类 可以指定: Name/ Host/ Port/ Mode -> 都在configs/config.yaml配置
+	Database      DatabaseConfig
+	Redis         RedisConfig
+	JWT           JWTConfig
+	AppLog        LogConfig
+	Upload        UploadConfig
 }
 
 type DatabaseConfig struct {

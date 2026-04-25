@@ -35,7 +35,7 @@ func (l *ArticleLogic) ListArticles(ctx context.Context, req *types.QueryArticle
 	if status < 0 {
 		status = 1
 	}
-
+	// DAO 层
 	articles, total, err := l.svcCtx.ArticleDao.List(page, pageSize, status, req.CategoryID, req.TagID, 0)
 	if err != nil {
 		return nil, 0, err

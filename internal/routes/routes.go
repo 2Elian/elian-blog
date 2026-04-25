@@ -37,7 +37,7 @@ func registerBlogHandlers(server *rest.Server, svcCtx *svc.ServiceContext) {
 		{Method: http.MethodGet, Path: "/blog-api/v1/messages", Handler: handler.ListMessagesHandler(svcCtx)},
 	})
 
-	// Content routes with visit tracking
+	// Content routes with visit tracking 访问量统计中间件
 	server.AddRoutes(rest.WithMiddlewares([]rest.Middleware{middleware.VisitTrackMiddleware(svcCtx)}, []rest.Route{
 		{Method: http.MethodGet, Path: "/blog-api/v1/articles", Handler: handler.ListArticlesHandler(svcCtx)},
 		{Method: http.MethodGet, Path: "/blog-api/v1/articles/:id", Handler: handler.GetArticleHandler(svcCtx)},
@@ -135,7 +135,7 @@ func registerVeAdminHandlers(server *rest.Server, svcCtx *svc.ServiceContext) {
 
 		{Method: http.MethodPost, Path: "/admin-api/v1/account/find_account_list", Handler: handler.VeFindAccountListHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/account/find_account_online_list", Handler: handler.VeFindAccountOnlineListHandler(svcCtx)},
-			{Method: http.MethodGet, Path: "/admin-api/v1/admin/get_online_count", Handler: handler.VeGetOnlineCountHandler(svcCtx)},
+		{Method: http.MethodGet, Path: "/admin-api/v1/admin/get_online_count", Handler: handler.VeGetOnlineCountHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/account/update_account_status", Handler: handler.VeUpdateAccountStatusHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/account/update_account_roles", Handler: handler.VeUpdateAccountRolesHandler(svcCtx)},
 		{Method: http.MethodPut, Path: "/admin-api/v1/account/update_account_password", Handler: handler.VeUpdateAccountPasswordHandler(svcCtx)},
@@ -181,7 +181,6 @@ func registerVeAdminHandlers(server *rest.Server, svcCtx *svc.ServiceContext) {
 		{Method: http.MethodPost, Path: "/admin-api/v1/talk/add_talk", Handler: stubs["POST /admin-api/v1/talk/add_talk"]},
 		{Method: http.MethodPut, Path: "/admin-api/v1/talk/update_talk", Handler: stubs["PUT /admin-api/v1/talk/update_talk"]},
 		{Method: http.MethodDelete, Path: "/admin-api/v1/talk/delete_talk", Handler: stubs["DELETE /admin-api/v1/talk/delete_talk"]},
-
 
 		{Method: http.MethodPost, Path: "/admin-api/v1/upload/upload_file", Handler: handler.VeUploadFileHandler(svcCtx)},
 		{Method: http.MethodPost, Path: "/admin-api/v1/upload/multi_upload_file", Handler: handler.VeMultiUploadFileHandler(svcCtx)},

@@ -377,7 +377,7 @@ const transitionUvCount = useTransition(
   computed(() => visitStatsData.value.today_uv_count),
   {
     duration: 1000,
-    transition: [0.25, 0.1, 0.25, 1.0], // CSS cubic-bezier
+    transition: [0.25, 0.1, 0.25, 1.0] as [number, number, number, number], // CSS cubic-bezier
   }
 );
 
@@ -385,7 +385,7 @@ const transitionTotalUvCount = useTransition(
   computed(() => visitStatsData.value.total_uv_count),
   {
     duration: 1200,
-    transition: [0.25, 0.1, 0.25, 1.0],
+    transition: [0.25, 0.1, 0.25, 1.0] as [number, number, number, number],
   }
 );
 
@@ -393,7 +393,7 @@ const transitionPvCount = useTransition(
   computed(() => visitStatsData.value.today_pv_count),
   {
     duration: 1000,
-    transition: [0.25, 0.1, 0.25, 1.0],
+    transition: [0.25, 0.1, 0.25, 1.0] as [number, number, number, number],
   }
 );
 
@@ -401,7 +401,7 @@ const transitionTotalPvCount = useTransition(
   computed(() => visitStatsData.value.total_pv_count),
   {
     duration: 1200,
-    transition: [0.25, 0.1, 0.25, 1.0],
+    transition: [0.25, 0.1, 0.25, 1.0] as [number, number, number, number],
   }
 );
 
@@ -563,6 +563,7 @@ const homeInfoData = ref<AdminHomeInfo>({
   user_count: 0,
   article_count: 0,
   message_count: 0,
+  product_count: 0,
   category_list: [],
   tag_list: [],
   article_view_ranks: [],
@@ -574,7 +575,7 @@ const transitionUserCount = useTransition(
   computed(() => homeInfoData.value.user_count),
   {
     duration: 1000,
-    transition: [0.25, 0.1, 0.25, 1.0],
+    transition: [0.25, 0.1, 0.25, 1.0] as [number, number, number, number],
   }
 );
 
@@ -582,7 +583,7 @@ const transitionArticleCount = useTransition(
   computed(() => homeInfoData.value.article_count),
   {
     duration: 1000,
-    transition: [0.25, 0.1, 0.25, 1.0],
+    transition: [0.25, 0.1, 0.25, 1.0] as [number, number, number, number],
   }
 );
 
@@ -590,15 +591,15 @@ const transitionMessageCount = useTransition(
   computed(() => homeInfoData.value.message_count),
   {
     duration: 1000,
-    transition: [0.25, 0.1, 0.25, 1.0],
+    transition: [0.25, 0.1, 0.25, 1.0] as [number, number, number, number],
   }
 );
 
 const transitionProductCount = useTransition(
-  computed(() => homeInfoData.value.product_count ?? 0),
+  computed(() => homeInfoData.value.product_count),
   {
     duration: 1000,
-    transition: [0.25, 0.1, 0.25, 1.0],
+    transition: [0.25, 0.1, 0.25, 1.0] as [number, number, number, number],
   }
 );
 

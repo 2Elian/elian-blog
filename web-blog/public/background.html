@@ -3,20 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Elian 星辰大海 · 行星环宇</title>
+    <title>Elian 星辰大海 · 五星环宇</title>
     <style>
-        /* 深邃太空底色 */
-        body, html {
+        /* 纯黑深邃太空底色 */
+        body,
+        html {
             width: 100%;
             height: 100%;
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background-color: #020210;
+            background-color: #000000;
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            cursor: crosshair;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
-        /* 粒子画布位于底层 */
         #particle-canvas {
             position: absolute;
             top: 0;
@@ -26,7 +30,6 @@
             z-index: 0;
         }
 
-        /* 主容器 */
         .hero-grid {
             position: absolute;
             inset: 0;
@@ -34,67 +37,73 @@
             pointer-events: none;
         }
 
-        /* ==============================================
-           星云光斑（柔和宇宙云气）
-           ============================================== */
+        /* 星云光斑（调暗以适配纯黑背景） */
         .nebula {
             position: absolute;
             border-radius: 50%;
             filter: blur(100px);
-            opacity: 0.45;
+            opacity: 0.28;
             will-change: transform;
-            animation: floatNebula 18s infinite alternate ease-in-out;
+            animation: floatNebula 20s infinite alternate ease-in-out;
             mix-blend-mode: screen;
         }
-
         .nebula-1 {
             width: 70vw;
             height: 70vw;
-            max-width: 900px;
-            max-height: 900px;
-            background: radial-gradient(circle, #1e3a5f 0%, transparent 70%);
-            top: -15%;
-            left: -10%;
-            animation-duration: 20s;
-        }
-
-        .nebula-2 {
-            width: 80vw;
-            height: 80vw;
-            max-width: 1000px;
-            max-height: 1000px;
-            background: radial-gradient(circle, #2a1a4a 0%, transparent 70%);
-            bottom: -20%;
-            right: -12%;
+            max-width: 850px;
+            max-height: 850px;
+            background: radial-gradient(circle, #1a1a35 0%, transparent 70%);
+            top: -12%;
+            left: -8%;
             animation-duration: 22s;
+        }
+        .nebula-2 {
+            width: 75vw;
+            height: 75vw;
+            max-width: 950px;
+            max-height: 950px;
+            background: radial-gradient(circle, #25183a 0%, transparent 70%);
+            bottom: -18%;
+            right: -10%;
+            animation-duration: 24s;
             animation-delay: -6s;
         }
-
         .nebula-3 {
-            width: 60vw;
-            height: 60vw;
-            max-width: 700px;
-            max-height: 700px;
-            background: radial-gradient(circle, #0f2b3d 0%, transparent 70%);
-            top: 45%;
-            left: 40%;
-            opacity: 0.35;
-            animation-duration: 25s;
+            width: 55vw;
+            height: 55vw;
+            max-width: 650px;
+            max-height: 650px;
+            background: radial-gradient(circle, #0e1a2a 0%, transparent 70%);
+            top: 48%;
+            left: 38%;
+            opacity: 0.22;
+            animation-duration: 28s;
             animation-delay: -10s;
         }
 
-        /* ==============================================
-           行星样式（木星、地球、月球）
-           ============================================== */
+        @keyframes floatNebula {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            33% {
+                transform: translate(20px, -35px) scale(1.05);
+            }
+            66% {
+                transform: translate(-15px, 22px) scale(0.95);
+            }
+            100% {
+                transform: translate(12px, -18px) scale(1.02);
+            }
+        }
+
+        /* 行星通用样式 */
         .planet {
             position: absolute;
             border-radius: 50%;
             will-change: transform;
             animation: floatPlanet 24s infinite alternate ease-in-out;
-            box-shadow: 0 0 30px rgba(100, 150, 255, 0.3), inset 0 -10px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 0 30px rgba(100, 150, 255, 0.25), inset 0 -10px 20px rgba(0, 0, 0, 0.5);
         }
-
-        /* 行星浮动动画（比星云稍慢，幅度更大） */
         @keyframes floatPlanet {
             0% {
                 transform: translate(0, 0) scale(1);
@@ -110,20 +119,73 @@
             }
         }
 
-        /* 木星 */
+        /* 星环通用伪元素 */
+        .planet::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotateX(75deg) rotateY(20deg);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.15), inset 0 0 8px rgba(255, 255, 255, 0.1);
+            animation: ringPulse 8s infinite alternate ease-in-out;
+            pointer-events: none;
+        }
+        @keyframes ringPulse {
+            0% {
+                opacity: 0.5;
+                transform: translate(-50%, -50%) rotateX(75deg) rotateY(20deg) scale(1);
+            }
+            100% {
+                opacity: 0.85;
+                transform: translate(-50%, -50%) rotateX(75deg) rotateY(20deg) scale(1.02);
+            }
+        }
+
+        /* ========== 木星 ========== */
         .jupiter {
             width: 130px;
             height: 130px;
-            top: 15%;
-            right: 20%;
+            top: 10%;
+            right: 12%;
             background: radial-gradient(circle at 30% 30%, #d4a373, #8b5a2b 50%, #4a2e15 80%),
             repeating-linear-gradient(0deg, rgba(210, 160, 100, 0.4) 0px, rgba(210, 160, 100, 0.4) 6px,
                     rgba(180, 120, 60, 0.3) 6px, rgba(180, 120, 60, 0.3) 12px);
             animation-duration: 28s;
             animation-delay: -3s;
         }
+        .jupiter::after {
+            width: 170px;
+            height: 170px;
+            border-width: 3px;
+            border-color: rgba(210, 180, 140, 0.4);
+            box-shadow: 0 0 20px rgba(210, 180, 140, 0.3);
+        }
 
-        /* 地球 */
+        /* ========== 土星（新增） ========== */
+        .saturn {
+            width: 105px;
+            height: 105px;
+            top: 16%;
+            left: 7%;
+            background: radial-gradient(circle at 30% 30%, #f0e0c0, #d4b870 40%, #b8943a 70%, #7a5c1e 100%),
+            repeating-linear-gradient(0deg, rgba(220, 190, 130, 0.35) 0px, rgba(220, 190, 130, 0.35) 5px,
+                    rgba(190, 160, 90, 0.25) 5px, rgba(190, 160, 90, 0.25) 10px);
+            animation-duration: 26s;
+            animation-delay: -5s;
+            box-shadow: 0 0 35px rgba(220, 190, 140, 0.3), inset 0 -10px 20px rgba(0, 0, 0, 0.5);
+        }
+        .saturn::after {
+            width: 155px;
+            height: 155px;
+            border-width: 4px;
+            border-color: rgba(230, 200, 150, 0.5);
+            box-shadow: 0 0 28px rgba(230, 200, 150, 0.4), inset 0 0 12px rgba(255, 220, 170, 0.2);
+            animation: ringPulse 6s infinite alternate ease-in-out;
+        }
+
+        /* ========== 地球 ========== */
         .earth {
             width: 85px;
             height: 85px;
@@ -137,73 +199,63 @@
             animation-duration: 22s;
             animation-delay: -8s;
         }
-
-        /* 月球 */
-        .moon {
-            width: 60px;
-            height: 60px;
-            top: 55%;
-            left: 28%;
-            background: radial-gradient(circle at 35% 35%, #e0e0e0, #888888 70%, #444444 100%),
-            radial-gradient(circle at 50% 50%, rgba(255,255,255,0.3) 2%, transparent 6%),
-            radial-gradient(circle at 20% 60%, rgba(0,0,0,0.4) 5%, transparent 10%),
-            radial-gradient(circle at 70% 30%, rgba(255,255,255,0.2) 3%, transparent 7%);
-            animation-duration: 20s;
-            animation-delay: -12s;
-            box-shadow: 0 0 25px rgba(200,200,200,0.4), inset 0 -6px 12px rgba(0,0,0,0.6);
-        }
-
-        /* 星环（所有行星共用，通过伪元素实现） */
-        .planet::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotateX(75deg) rotateY(20deg);
-            border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.25);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2), inset 0 0 8px rgba(255,255,255,0.15);
-            animation: ringPulse 8s infinite alternate ease-in-out;
-            pointer-events: none;
-        }
-
-        /* 木星环（薄而宽） */
-        .jupiter::after {
-            width: 170px;
-            height: 170px;
-            border-width: 3px;
-            border-color: rgba(210, 180, 140, 0.4);
-            box-shadow: 0 0 20px rgba(210, 180, 140, 0.3);
-        }
-
-        /* 地球环（纤细科技蓝） */
         .earth::after {
             width: 115px;
             height: 115px;
             border-width: 1.5px;
-            border-color: rgba(100, 180, 255, 0.5);
-            box-shadow: 0 0 18px rgba(0, 180, 255, 0.4);
+            border-color: rgba(100, 180, 255, 0.45);
+            box-shadow: 0 0 18px rgba(0, 180, 255, 0.35);
         }
 
-        /* 月球环（细碎冰晶感） */
-        .moon::after {
-            width: 85px;
-            height: 85px;
+        /* ========== 火星（新增） ========== */
+        .mars {
+            width: 52px;
+            height: 52px;
+            top: 48%;
+            right: 9%;
+            background: radial-gradient(circle at 35% 35%, #e87050, #c04028 55%, #7a1e0e 100%),
+            radial-gradient(circle at 50% 40%, rgba(0, 0, 0, 0.35) 3%, transparent 7%),
+            radial-gradient(circle at 25% 55%, rgba(0, 0, 0, 0.3) 4%, transparent 9%),
+            radial-gradient(circle at 60% 65%, rgba(255, 200, 150, 0.2) 2%, transparent 5%);
+            animation-duration: 20s;
+            animation-delay: -9s;
+            box-shadow: 0 0 22px rgba(220, 100, 60, 0.35), inset 0 -6px 14px rgba(0, 0, 0, 0.55);
+        }
+        .mars::after {
+            width: 78px;
+            height: 78px;
             border-width: 1px;
             border-style: dashed;
-            border-color: rgba(220, 220, 255, 0.5);
-            box-shadow: 0 0 12px rgba(200, 200, 255, 0.3);
+            border-color: rgba(220, 150, 120, 0.4);
+            box-shadow: 0 0 10px rgba(200, 120, 80, 0.25);
+            animation: ringPulse 7s infinite alternate ease-in-out;
+        }
+
+        /* ========== 月球 ========== */
+        .moon {
+            width: 58px;
+            height: 58px;
+            top: 56%;
+            left: 28%;
+            background: radial-gradient(circle at 35% 35%, #e0e0e0, #888888 70%, #444444 100%),
+            radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.3) 2%, transparent 6%),
+            radial-gradient(circle at 20% 60%, rgba(0, 0, 0, 0.4) 5%, transparent 10%),
+            radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.2) 3%, transparent 7%);
+            animation-duration: 20s;
+            animation-delay: -12s;
+            box-shadow: 0 0 25px rgba(200, 200, 200, 0.35), inset 0 -6px 12px rgba(0, 0, 0, 0.6);
+        }
+        .moon::after {
+            width: 82px;
+            height: 82px;
+            border-width: 1px;
+            border-style: dashed;
+            border-color: rgba(200, 200, 220, 0.4);
+            box-shadow: 0 0 10px rgba(180, 180, 210, 0.25);
             animation: ringPulse 5s infinite alternate ease-in-out;
         }
 
-        @keyframes ringPulse {
-            0% { opacity: 0.5; transform: translate(-50%, -50%) rotateX(75deg) rotateY(20deg) scale(1); }
-            100% { opacity: 0.9; transform: translate(-50%, -50%) rotateX(75deg) rotateY(20deg) scale(1.02); }
-        }
-
-        /* ==============================================
-           星光小点
-           ============================================== */
+        /* 星光小点 */
         .star-dot {
             position: absolute;
             border-radius: 50%;
@@ -211,7 +263,6 @@
             box-shadow: 0 0 12px #7bb3d9, 0 0 25px rgba(100, 150, 255, 0.5);
             animation: twinkle 10s infinite alternate ease-in-out;
         }
-
         .dot-1 {
             width: 8px;
             height: 8px;
@@ -219,25 +270,22 @@
             left: 18%;
             background: #c4d2ff;
             box-shadow: 0 0 18px #92a8d1, 0 0 30px rgba(146, 168, 209, 0.6);
-            animation-duration: 8s;
         }
-
         .dot-2 {
             width: 5px;
             height: 5px;
             top: 72%;
-            right: 18%;
+            right: 22%;
             background: #ffe0b0;
             box-shadow: 0 0 15px #d9b382, 0 0 25px rgba(217, 179, 130, 0.5);
             animation-duration: 12s;
             animation-delay: -3s;
         }
-
         .dot-3 {
             width: 6px;
             height: 6px;
-            bottom: 25%;
-            left: 55%;
+            bottom: 28%;
+            left: 52%;
             background: #c9e4ff;
             box-shadow: 0 0 14px #8ba9c4, 0 0 22px rgba(139, 169, 196, 0.6);
             animation-duration: 14s;
@@ -245,20 +293,24 @@
         }
 
         @keyframes twinkle {
-            0% { opacity: 0.6; transform: scale(1); }
-            100% { opacity: 1; transform: scale(1.6); }
+            0% {
+                opacity: 0.55;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1.6);
+            }
         }
 
-        /* ==============================================
-           鼠标跟随光晕
-           ============================================== */
+        /* 鼠标跟随光晕 */
         .cursor-glow {
             position: absolute;
-            width: 450px;
-            height: 450px;
+            width: 420px;
+            height: 420px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(173, 200, 255, 0.12) 0%, transparent 70%);
-            filter: blur(70px);
+            background: radial-gradient(circle, rgba(140, 160, 220, 0.1) 0%, transparent 70%);
+            filter: blur(65px);
             pointer-events: none;
             z-index: 2;
             transform: translate(-50%, -50%);
@@ -272,48 +324,91 @@
             left: 0;
             width: 100%;
             height: 2px;
-            background: linear-gradient(90deg, transparent, #4a6fa5, #b0c4de, transparent);
+            background: linear-gradient(90deg, transparent, #3a5a8a, #8098b8, transparent);
             animation: slideLine 8s linear infinite;
             filter: blur(2px);
-            opacity: 0.5;
+            opacity: 0.35;
         }
-
         .star-trail-2 {
             top: 0;
             bottom: auto;
             animation-duration: 12s;
-            background: linear-gradient(90deg, transparent, #5c4a7a, #9b8ec4, transparent);
+            background: linear-gradient(90deg, transparent, #4a3568, #7a6a9a, transparent);
             animation-delay: -4s;
         }
 
         @keyframes slideLine {
-            0% { transform: translateX(-105%); }
-            100% { transform: translateX(105%); }
+            0% {
+                transform: translateX(-105%);
+            }
+            100% {
+                transform: translateX(105%);
+            }
         }
 
         /* 响应式 */
         @media (max-width: 768px) {
-            .jupiter { width: 90px; height: 90px; }
-            .earth { width: 65px; height: 65px; }
-            .moon { width: 45px; height: 45px; }
-            .cursor-glow { width: 200px; height: 200px; }
+            .jupiter {
+                width: 85px;
+                height: 85px;
+            }
+            .saturn {
+                width: 70px;
+                height: 70px;
+            }
+            .earth {
+                width: 60px;
+                height: 60px;
+            }
+            .mars {
+                width: 38px;
+                height: 38px;
+            }
+            .moon {
+                width: 40px;
+                height: 40px;
+            }
+            .jupiter::after {
+                width: 115px;
+                height: 115px;
+            }
+            .saturn::after {
+                width: 105px;
+                height: 105px;
+            }
+            .earth::after {
+                width: 82px;
+                height: 82px;
+            }
+            .mars::after {
+                width: 55px;
+                height: 55px;
+            }
+            .moon::after {
+                width: 58px;
+                height: 58px;
+            }
+            .cursor-glow {
+                width: 180px;
+                height: 180px;
+            }
         }
     </style>
 </head>
 <body>
-<!-- 粒子画布：星辰大海 -->
 <canvas id="particle-canvas"></canvas>
 
-<!-- 动态 UI 层 -->
 <div class="hero-grid">
     <!-- 星云光斑 -->
     <div class="nebula nebula-1"></div>
     <div class="nebula nebula-2"></div>
     <div class="nebula nebula-3"></div>
 
-    <!-- 行星：木星、地球、月球 -->
+    <!-- 五星：木星、土星、地球、火星、月球 -->
     <div class="planet jupiter"></div>
+    <div class="planet saturn"></div>
     <div class="planet earth"></div>
+    <div class="planet mars"></div>
     <div class="planet moon"></div>
 
     <!-- 星光小点 -->
@@ -321,26 +416,31 @@
     <div class="star-dot dot-2"></div>
     <div class="star-dot dot-3"></div>
 
-    <!-- 滑动的星轨光线 -->
+    <!-- 星轨光线 -->
     <div class="star-trail"></div>
     <div class="star-trail star-trail-2"></div>
 
-    <!-- 鼠标跟随光晕 -->
+    <!-- 鼠标光晕 -->
     <div class="cursor-glow" id="cursorGlow"></div>
 </div>
 
 <script>
-    (function() {
-        // ==================== 宇宙粒子系统 ====================
+    (function () {
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
-        let particles = [];
-        let mouse = { x: -1000, y: -1000 };
+        let mouse = { x: -1000, y: -1000, clickX: null, clickY: null, clicked: false };
+        let time = 0;
 
-        const PARTICLE_COUNT = 200;
-        const CONNECTION_DISTANCE = 100;
-        const PARTICLE_SPEED = 0.4;
+        const PARTICLE_COUNT = 230;
+        let particles = [];
+        const CONNECTION_DISTANCE = 110;
+        let explosions = [];
+        // 几何结构闪烁
+        let constellationNodes = [];
+        let constellationConnections = [];
+        const CONSTELLATION_NODE_COUNT = 45;
+        const CONSTELLATION_CONNECT_DISTANCE = 190;
 
         function resizeCanvas() {
             width = window.innerWidth;
@@ -351,160 +451,410 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
+        // ==================== 粒子类 ====================
         class Particle {
             constructor() {
                 this.reset();
                 this.x = Math.random() * width;
                 this.y = Math.random() * height;
             }
-
             reset() {
                 this.x = Math.random() * width;
                 this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * PARTICLE_SPEED;
-                this.vy = (Math.random() - 0.5) * PARTICLE_SPEED;
-                this.radius = Math.random() * 1.8 + 0.3;
+                this.vx = (Math.random() - 0.5) * 0.45;
+                this.vy = (Math.random() - 0.5) * 0.45;
+                this.radius = Math.random() * 1.7 + 0.3;
                 const colors = [
-                    '200, 220, 255',
-                    '225, 210, 255',
-                    '255, 240, 220',
-                    '180, 200, 230',
-                    '210, 190, 220',
-                    '190, 210, 240'
+                    '200,220,255', '225,210,255', '255,240,220',
+                    '180,200,235', '210,190,225', '190,210,245',
+                    '240,225,210', '200,210,240'
                 ];
                 this.color = colors[Math.floor(Math.random() * colors.length)];
-                this.opacity = Math.random() * 0.8 + 0.2;
-                this.twinkleSpeed = Math.random() * 0.02 + 0.005;
+                this.opacity = Math.random() * 0.75 + 0.25;
+                this.twinkleSpeed = Math.random() * 0.025 + 0.004;
                 this.twinkleOffset = Math.random() * Math.PI * 2;
+                this.isConstellationNode = false;
+                this.constellationIndex = -1;
             }
-
-            update(time) {
+            update(t) {
                 this.x += this.vx;
                 this.y += this.vy;
-
                 let dx = this.x - mouse.x;
                 let dy = this.y - mouse.y;
                 let dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 130) {
+                if (dist < 140 && mouse.x > 0) {
                     let angle = Math.atan2(dy, dx);
-                    let force = (130 - dist) / 130;
-                    this.vx += Math.cos(angle) * force * 0.15;
-                    this.vy += Math.sin(angle) * force * 0.15;
+                    let force = (140 - dist) / 140;
+                    this.vx += Math.cos(angle) * force * 0.17;
+                    this.vy += Math.sin(angle) * force * 0.17;
                 }
-
                 let speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-                if (speed > PARTICLE_SPEED * 1.8) {
-                    this.vx = (this.vx / speed) * PARTICLE_SPEED * 1.8;
-                    this.vy = (this.vy / speed) * PARTICLE_SPEED * 1.8;
-                }
-
-                if (this.x < -30) this.x = width + 30;
-                if (this.x > width + 30) this.x = -30;
-                if (this.y < -30) this.y = height + 30;
-                if (this.y > height + 30) this.y = -30;
+                if (speed > 0.8) { this.vx = (this.vx / speed) * 0.8;
+                    this.vy = (this.vy / speed) * 0.8; }
+                if (this.x < -40) this.x = width + 40;
+                if (this.x > width + 40) this.x = -40;
+                if (this.y < -40) this.y = height + 40;
+                if (this.y > height + 40) this.y = -40;
             }
-
-            draw(time) {
-                let twinkle = Math.sin(time * this.twinkleSpeed + this.twinkleOffset) * 0.3 + 0.7;
+            draw(t) {
+                let twinkle = Math.sin(t * this.twinkleSpeed + this.twinkleOffset) * 0.3 + 0.7;
                 let currentOpacity = this.opacity * twinkle;
-
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(${this.color}, ${currentOpacity})`;
                 ctx.fill();
-
-                if (this.radius > 1.3) {
+                if (this.radius > 1.2) {
                     ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.radius * 2.2, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(${this.color}, ${currentOpacity * 0.12})`;
+                    ctx.arc(this.x, this.y, this.radius * 2.5, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${this.color}, ${currentOpacity * 0.1})`;
                     ctx.fill();
+                }
+                // 星座节点光晕
+                if (this.isConstellationNode) {
+                    let nodeGlow = Math.sin(t * 0.003 + this.constellationIndex) * 0.4 + 0.6;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius * 3.8, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255,255,255, ${nodeGlow * 0.22})`;
+                    ctx.fill();
+                    ctx.strokeStyle = `rgba(255,255,255, ${nodeGlow * 0.45})`;
+                    ctx.lineWidth = 0.5;
+                    const sl = this.radius * 5;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x - sl, this.y);
+                    ctx.lineTo(this.x + sl, this.y);
+                    ctx.moveTo(this.x, this.y - sl);
+                    ctx.lineTo(this.x, this.y + sl);
+                    ctx.stroke();
                 }
             }
         }
 
-        for (let i = 0; i < PARTICLE_COUNT; i++) {
-            particles.push(new Particle());
-        }
+        for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
 
-        function drawConnections() {
+        // ==================== 初始化几何结构 ====================
+        function initConstellationNodes() {
+            constellationNodes = [];
+            constellationConnections = [];
+            let indices = new Set();
+            while (indices.size < CONSTELLATION_NODE_COUNT) {
+                indices.add(Math.floor(Math.random() * PARTICLE_COUNT));
+            }
+            constellationNodes = Array.from(indices);
+            constellationNodes.forEach((idx, i) => {
+                particles[idx].isConstellationNode = true;
+                particles[idx].constellationIndex = i;
+            });
+            for (let i = 0; i < constellationNodes.length; i++) {
+                for (let j = i + 1; j < constellationNodes.length; j++) {
+                    let pi = particles[constellationNodes[i]];
+                    let pj = particles[constellationNodes[j]];
+                    let dx = pi.x - pj.x,
+                        dy = pi.y - pj.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < CONSTELLATION_CONNECT_DISTANCE && dist > 35) {
+                        constellationConnections.push({
+                            i: constellationNodes[i],
+                            j: constellationNodes[j],
+                            phase: Math.random() * Math.PI * 2,
+                            speed: 0.0015 + Math.random() * 0.0035
+                        });
+                    }
+                }
+            }
+        }
+        initConstellationNodes();
+
+        // ==================== 绘制连线 ====================
+        function drawConnections(t) {
+            // 普通连线
             for (let i = 0; i < particles.length; i++) {
                 for (let j = i + 1; j < particles.length; j++) {
                     let dx = particles[i].x - particles[j].x;
                     let dy = particles[i].y - particles[j].y;
                     let dist = Math.sqrt(dx * dx + dy * dy);
-
                     if (dist < CONNECTION_DISTANCE) {
-                        let opacity = 1 - dist / CONNECTION_DISTANCE;
+                        let opacity = (1 - dist / CONNECTION_DISTANCE) * 0.06;
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.07})`;
-                        ctx.lineWidth = 0.4;
+                        ctx.strokeStyle = `rgba(180,200,255,${opacity})`;
+                        ctx.lineWidth = 0.35;
                         ctx.stroke();
                     }
                 }
             }
+            // 几何结构脉冲连线
+            for (let conn of constellationConnections) {
+                let pi = particles[conn.i],
+                    pj = particles[conn.j];
+                let dx = pi.x - pj.x,
+                    dy = pi.y - pj.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < CONSTELLATION_CONNECT_DISTANCE * 1.3) {
+                    let pulse = Math.sin(time * conn.speed + conn.phase) * 0.5 + 0.5;
+                    let opacity = pulse * 0.5 + 0.07;
+                    let lineWidth = pulse * 1.8 + 0.4;
+                    ctx.beginPath();
+                    ctx.moveTo(pi.x, pi.y);
+                    ctx.lineTo(pj.x, pj.y);
+                    ctx.strokeStyle = `rgba(220,230,255,${opacity})`;
+                    ctx.lineWidth = lineWidth;
+                    ctx.shadowColor = `rgba(180,200,255,${opacity * 0.7})`;
+                    ctx.shadowBlur = lineWidth * 6;
+                    ctx.stroke();
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                }
+            }
         }
 
-        function animate(time) {
-            ctx.clearRect(0, 0, width, height);
-
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].update(time);
-                particles[i].draw(time);
+        // ==================== 爆炸特效 ====================
+        function createExplosion(x, y, planetType) {
+            let colors;
+            switch (planetType) {
+                case 'jupiter':
+                    colors = ['#f5e6d3', '#d4a373', '#e8875b', '#f0c080', '#ffd4a0', '#ffffff', '#ff9944'];
+                    break;
+                case 'saturn':
+                    colors = ['#f5ecd7', '#e8d5a3', '#d4b870', '#c4a35a', '#f0e0c0', '#ffffff', '#e0c890'];
+                    break;
+                case 'earth':
+                    colors = ['#5bb8f0', '#4a9e3f', '#ffffff', '#2d8fd4', '#7d9b3a', '#a0d8ff', '#6bae4e'];
+                    break;
+                case 'mars':
+                    colors = ['#e87050', '#d45a3a', '#f08060', '#c04028', '#ff9060', '#ffffff', '#ff7040'];
+                    break;
+                case 'moon':
+                    colors = ['#e8e8e8', '#c8c8c8', '#ffffff', '#9a9a9a', '#f0f0f0', '#d0d0d0', '#e0e0e0'];
+                    break;
+                default:
+                    colors = ['#ffffff', '#c8d8ff', '#ffd4a0'];
             }
+            let particleCount = 50 + Math.floor(Math.random() * 30);
+            let explosionParticles = [];
+            for (let i = 0; i < particleCount; i++) {
+                let angle = Math.random() * Math.PI * 2;
+                let speed = 2 + Math.random() * 11;
+                explosionParticles.push({
+                    x,
+                    y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    life: 1,
+                    decay: 0.007 + Math.random() * 0.026,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    size: 1 + Math.random() * 4.5,
+                });
+            }
+            explosions.push({
+                x,
+                y,
+                particles: explosionParticles,
+                shockwaveRadius: 8,
+                shockwaveMaxRadius: 130 + Math.random() * 70,
+                shockwaveLife: 1,
+                shockwaveDecay: 0.028,
+            });
+            if (explosions.length > 6) explosions.shift();
+        }
 
-            drawConnections();
+        function updateExplosions() {
+            for (let exp of explosions) {
+                exp.shockwaveLife -= exp.shockwaveDecay;
+                exp.shockwaveRadius += (exp.shockwaveMaxRadius - exp.shockwaveRadius) * 0.12 + 1.5;
+                for (let p of exp.particles) {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vx *= 0.984;
+                    p.vy *= 0.984;
+                    p.vy += 0.04;
+                    p.life -= p.decay;
+                    p.size *= 0.994;
+                }
+                exp.particles = exp.particles.filter(p => p.life > 0);
+            }
+            explosions = explosions.filter(exp => exp.particles.length > 0 && exp.shockwaveLife > 0);
+        }
+
+        function drawExplosions() {
+            for (let exp of explosions) {
+                if (exp.shockwaveLife > 0) {
+                    ctx.beginPath();
+                    ctx.arc(exp.x, exp.y, exp.shockwaveRadius, 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(255,255,255,${exp.shockwaveLife * 0.65})`;
+                    ctx.lineWidth = 4.5 * exp.shockwaveLife;
+                    ctx.shadowColor = `rgba(255,255,255,${exp.shockwaveLife})`;
+                    ctx.shadowBlur = 22 * exp.shockwaveLife;
+                    ctx.stroke();
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    // 内冲击波
+                    ctx.beginPath();
+                    ctx.arc(exp.x, exp.y, exp.shockwaveRadius * 0.55, 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(255,220,180,${exp.shockwaveLife * 0.45})`;
+                    ctx.lineWidth = 2 * exp.shockwaveLife;
+                    ctx.stroke();
+                }
+                for (let p of exp.particles) {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    let alphaHex = Math.floor(p.life * 255).toString(16).padStart(2, '0');
+                    ctx.fillStyle = p.color.startsWith('#') ? p.color + alphaHex : p.color.replace(')', `,${p.life})`).replace(
+                        'rgb', 'rgba');
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size * 2.5, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color.startsWith('#') ? p.color + '55' : p.color.replace(')', `,${p.life * 0.25})`).replace(
+                        'rgb', 'rgba');
+                    ctx.fill();
+                }
+            }
+        }
+
+        function drawClickFlash() {
+            if (mouse.clicked && mouse.clickX !== null) {
+                let flashGrad = ctx.createRadialGradient(mouse.clickX, mouse.clickY, 0, mouse.clickX, mouse.clickY, 90);
+                flashGrad.addColorStop(0, 'rgba(255,255,255,0.85)');
+                flashGrad.addColorStop(0.3, 'rgba(255,255,255,0.35)');
+                flashGrad.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.fillStyle = flashGrad;
+                ctx.beginPath();
+                ctx.arc(mouse.clickX, mouse.clickY, 90, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // ==================== 点击检测 ====================
+        const planetSelectors = [
+            { selector: '.jupiter', type: 'jupiter' },
+            { selector: '.saturn', type: 'saturn' },
+            { selector: '.earth', type: 'earth' },
+            { selector: '.mars', type: 'mars' },
+            { selector: '.moon', type: 'moon' },
+        ];
+
+        function getPlanetCenter(el) {
+            const rect = el.getBoundingClientRect();
+            return {
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2,
+                radius: Math.max(rect.width, rect.height) / 2,
+            };
+        }
+
+        document.addEventListener('click', (e) => {
+            const cx = e.clientX;
+            const cy = e.clientY;
+            for (let cfg of planetSelectors) {
+                const el = document.querySelector(cfg.selector);
+                if (!el) continue;
+                const pos = getPlanetCenter(el);
+                const dx = cx - pos.x;
+                const dy = cy - pos.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < pos.radius * 1.25) {
+                    createExplosion(pos.x, pos.y, cfg.type);
+                    mouse.clickX = pos.x;
+                    mouse.clickY = pos.y;
+                    mouse.clicked = true;
+                    setTimeout(() => { mouse.clicked = false; }, 300);
+                    break;
+                }
+            }
+        });
+
+        // 触摸事件
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                const cx = e.touches[0].clientX;
+                const cy = e.touches[0].clientY;
+                for (let cfg of planetSelectors) {
+                    const el = document.querySelector(cfg.selector);
+                    if (!el) continue;
+                    const pos = getPlanetCenter(el);
+                    const dx = cx - pos.x;
+                    const dy = cy - pos.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < pos.radius * 1.3) {
+                        createExplosion(pos.x, pos.y, cfg.type);
+                        mouse.clickX = pos.x;
+                        mouse.clickY = pos.y;
+                        mouse.clicked = true;
+                        setTimeout(() => { mouse.clicked = false; }, 300);
+                        break;
+                    }
+                }
+            }
+        }, { passive: true });
+
+        // ==================== 主循环 ====================
+        function animate(timestamp) {
+            time = timestamp;
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, width, height);
+
+            for (let p of particles) p.update(time);
+            drawConnections(time);
+            for (let p of particles) p.draw(time);
+
+            updateExplosions();
+            drawExplosions();
+            drawClickFlash();
+
             requestAnimationFrame(animate);
         }
-
         requestAnimationFrame(animate);
 
-        // ==================== 鼠标交互逻辑 ====================
+        // ==================== 鼠标移动 ====================
         const cursorGlow = document.getElementById('cursorGlow');
-
         document.addEventListener('mousemove', (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
-
             if (cursorGlow) {
                 cursorGlow.style.left = e.clientX + 'px';
                 cursorGlow.style.top = e.clientY + 'px';
                 cursorGlow.style.opacity = '1';
             }
-
-            // 视差效果：星云与行星随鼠标轻微移动
-            const nebulaElements = document.querySelectorAll('.nebula');
-            const planetElements = document.querySelectorAll('.planet');
+            // 视差
+            const nebulaEls = document.querySelectorAll('.nebula');
+            const planetEls = document.querySelectorAll('.planet');
             const starDots = document.querySelectorAll('.star-dot');
-
             const moveX = (e.clientX - window.innerWidth / 2) / window.innerWidth;
             const moveY = (e.clientY - window.innerHeight / 2) / window.innerHeight;
-
-            nebulaElements.forEach((el, index) => {
-                let depth = 12 + index * 3;
-                el.style.transform = `translate(${moveX * depth}px, ${moveY * depth}px)`;
+            nebulaEls.forEach((el, i) => {
+                el.style.transform = `translate(${moveX * (12 + i * 3)}px, ${moveY * (12 + i * 3)}px)`;
             });
-
-            planetElements.forEach((el, index) => {
-                let depth = 20 + index * 6;
-                el.style.transform = `translate(${moveX * depth}px, ${moveY * depth}px)`;
+            planetEls.forEach((el, i) => {
+                el.style.transform = `translate(${moveX * (20 + i * 6)}px, ${moveY * (20 + i * 6)}px)`;
             });
-
-            starDots.forEach((el, index) => {
-                let depth = 10 + index * 2;
-                el.style.transform = `translate(${moveX * depth}px, ${moveY * depth}px)`;
+            starDots.forEach((el, i) => {
+                el.style.transform = `translate(${moveX * (10 + i * 2)}px, ${moveY * (10 + i * 2)}px)`;
             });
+            // 光标样式切换
+            let hovering = false;
+            for (let cfg of planetSelectors) {
+                const el = document.querySelector(cfg.selector);
+                if (!el) continue;
+                const pos = getPlanetCenter(el);
+                const dx = e.clientX - pos.x;
+                const dy = e.clientY - pos.y;
+                if (Math.sqrt(dx * dx + dy * dy) < pos.radius * 1.2) {
+                    hovering = true;
+                    break;
+                }
+            }
+            document.body.style.cursor = hovering ? 'pointer' : 'crosshair';
         });
 
         document.addEventListener('mouseleave', () => {
             mouse.x = -1000;
             mouse.y = -1000;
             if (cursorGlow) cursorGlow.style.opacity = '0';
-
             document.querySelectorAll('.nebula, .planet, .star-dot').forEach(el => {
                 el.style.transform = 'translate(0px, 0px)';
             });
+            document.body.style.cursor = 'crosshair';
         });
 
         document.addEventListener('touchmove', (e) => {
@@ -525,6 +875,12 @@
             if (cursorGlow) cursorGlow.style.opacity = '0';
         });
 
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            particles.forEach(p => { p.isConstellationNode = false;
+                p.constellationIndex = -1; });
+            initConstellationNodes();
+        });
     })();
 </script>
 </body>

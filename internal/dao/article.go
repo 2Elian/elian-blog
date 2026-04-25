@@ -36,7 +36,7 @@ func (d *ArticleDao) List(page, pageSize, status int, categoryID, tagID uint, is
 	var articles []model.Article
 	var total int64
 
-	query := d.db.Model(&model.Article{})
+	query := d.db.Model(&model.Article{}) // 基础查询：select * from article
 	if isDelete == 1 {
 		query = query.Unscoped().Where("deleted_at IS NOT NULL")
 	} else if isDelete == -1 {
@@ -53,7 +53,8 @@ func (d *ArticleDao) List(page, pageSize, status int, categoryID, tagID uint, is
 			Where("article_tags.tag_id = ?", tagID)
 	}
 
-	query.Count(&total)
+	query.Count(&total) // select count(*)
+	// 分页 + 排序 + 关联预加载
 	err := query.Preload("Category").Preload("Tags").Preload("Author").
 		Order("CASE WHEN is_top = 1 THEN 0 ELSE 1 END, created_at DESC").
 		Offset((page - 1) * pageSize).Limit(pageSize).

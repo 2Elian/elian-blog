@@ -70,16 +70,13 @@
     </page-modal>
 
     <!-- Detail Content Editor Dialog -->
-    <el-dialog v-model="detailDialogVisible" title="编辑产品详情" width="900px" destroy-on-close>
-      <div style="margin-bottom: 12px; color: #999; font-size: 13px">
-        支持Markdown格式，前台将以Markdown渲染展示
-      </div>
-      <el-input
+    <el-dialog v-model="detailDialogVisible" title="编辑产品详情" width="1100px" destroy-on-close>
+      <MdEditor
         v-model="detailContent"
-        type="textarea"
-        :rows="20"
-        placeholder="请输入产品详情内容（支持Markdown）"
-        style="font-family: monospace"
+        :auto-detect-code="true"
+        placeholder="请输入产品详情内容（支持Markdown、Mermaid、图片上传）"
+        style="height: calc(100vh - 260px)"
+        @on-upload-img="uploadImg"
       />
       <template #footer>
         <el-button @click="detailDialogVisible = false">取消</el-button>
@@ -94,6 +91,7 @@ import { ref } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import type { UploadRawFile, UploadRequestOptions } from 'element-plus'
 import { ElMessage } from 'element-plus'
+import { MdEditor } from 'md-editor-v3'
 import usePage from '@/components/CURD/usePage'
 import addModalConfig from './config/add'
 import contentConfig from './config/content'
@@ -171,6 +169,19 @@ function beforeUpload(rawFile: UploadRawFile) {
 
 function onUpload(options: UploadRequestOptions) {
   return uploadFile(options.file, 'blog/product/')
+}
+
+async function uploadImg(files: Array<File>, callback: (urls: string[]) => void) {
+  const res = await Promise.all(
+    files.map((file) => {
+      return new Promise((rev, rej) => {
+        uploadFile(file, 'blog/product/')
+          .then((res) => rev(res))
+          .catch((error) => rej(error))
+      })
+    })
+  )
+  callback(res.map((item: any) => item.data.file_url))
 }
 </script>
 

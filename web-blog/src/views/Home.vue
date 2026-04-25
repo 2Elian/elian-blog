@@ -189,7 +189,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: #020210;
+  background: #000000;
   padding: 80px 32px;
 
   @media (max-width: 640px) {
@@ -202,6 +202,7 @@ onUnmounted(() => {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  z-index: 1;
 }
 
 .hero-content {
@@ -209,6 +210,7 @@ onUnmounted(() => {
   text-align: center;
   color: white;
   max-width: 640px;
+  z-index: 2;
 }
 
 .hero-badge {

@@ -1076,6 +1076,7 @@ func VeGetSystemStateHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 func VeUploadFileHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r.ParseMultipartForm(50 << 20) // 50MB
 		file, header, err := r.FormFile("file")
 		if err != nil {
 			veBadRequest(w, "请选择文件")
@@ -1620,6 +1621,7 @@ func VeAddProductHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		product := &model.Product{
 			Name:        req.Name,
 			Description: req.Description,
+			Content:     req.Content,
 			Price:       req.Price,
 			Cover:       req.Cover,
 			Status:      req.Status,
@@ -1666,6 +1668,12 @@ func VeUpdateProductHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		if req.Sort != 0 {
 			product.Sort = req.Sort
+		}
+		if req.Content != "" {
+			product.Content = req.Content
+		}
+		if req.Type != "" {
+			product.Type = req.Type
 		}
 		if err := svcCtx.ProductDao.Update(product); err != nil {
 			veInternalError(w, "更新产品失败")

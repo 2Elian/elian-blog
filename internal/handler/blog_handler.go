@@ -16,6 +16,7 @@ import (
 
 func ListArticlesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// 解析请求参数到结构体上
 		var req types.QueryArticleHomeReq
 		if err := httpx.Parse(r, &req); err != nil {
 			fail(w, 400, "参数错误")
@@ -27,6 +28,7 @@ func ListArticlesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		if req.PageSize <= 0 {
 			req.PageSize = 10
 		}
+		// 业务逻辑
 		list, total, err := blog.NewArticleLogic(svcCtx).ListArticles(r.Context(), &req)
 		if err != nil {
 			fail(w, 500, "获取文章失败")
