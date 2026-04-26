@@ -109,9 +109,9 @@ function formatDate(date: string) {
 
 .card-cover {
   position: relative;
-  height: var(--card-cover-height);
+  aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
 
   img {
     width: 100%;

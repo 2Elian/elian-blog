@@ -115,13 +115,11 @@ watch(() => route.params.id, (newId) => {
   border-radius: var(--radius-lg);
   overflow: hidden;
   margin-bottom: 30px;
-  min-height: 300px;
   background: linear-gradient(135deg, #0a0a0a 0%, #2a2a2a 100%);
 
   .header-cover img {
     width: 100%;
-    height: 300px;
-    object-fit: cover;
+    height: auto;
     display: block;
   }
 

@@ -34,12 +34,14 @@ let constellationConnections: { i: number; j: number; phase: number; speed: numb
 let explosions: Explosion[] = []
 let mouse = { x: -1000, y: -1000, clickX: -1, clickY: -1, clicked: false }
 let alive = false
+let parallaxDirty = false
+let cachedElements: { nebulas: HTMLElement[]; planets: HTMLElement[]; starDots: HTMLElement[] } | null = null
 
-const PARTICLE_COUNT = 230
-const CONNECTION_DISTANCE = 110
+const PARTICLE_COUNT = 160
+const CONNECTION_DISTANCE = 95
 const PARTICLE_SPEED = 0.45
-const CONSTELLATION_NODE_COUNT = 45
-const CONSTELLATION_CONNECT_DISTANCE = 190
+const CONSTELLATION_NODE_COUNT = 35
+const CONSTELLATION_CONNECT_DISTANCE = 170
 
 // Planet click targets (relative to canvas)
 const planetSelectors = ['jupiter', 'saturn', 'earth', 'mars', 'moon']
@@ -146,19 +148,24 @@ function drawConnections(ctx: CanvasRenderingContext2D, time: number) {
   }
   ctx.stroke()
 
-  // Constellation connections
+  // Constellation connections — no shadowBlur, use layered lines instead
   for (const conn of constellationConnections) {
     const pi = particles[conn.i], pj = particles[conn.j]
     const dx = pi.x - pj.x, dy = pi.y - pj.y
-    const dist = Math.sqrt(dx * dx + dy * dy)
-    if (dist < CONSTELLATION_CONNECT_DISTANCE * 1.3) {
+    const dist2 = dx * dx + dy * dy
+    const maxDist2 = CONSTELLATION_CONNECT_DISTANCE * CONSTELLATION_CONNECT_DISTANCE * 1.69
+    if (dist2 < maxDist2) {
       const pulse = Math.sin(time * conn.speed + conn.phase) * 0.5 + 0.5
       const opacity = pulse * 0.5 + 0.07
       const lw = pulse * 1.8 + 0.4
+      // Outer glow layer (wider, dimmer)
+      ctx.beginPath(); ctx.moveTo(pi.x, pi.y); ctx.lineTo(pj.x, pj.y)
+      ctx.strokeStyle = `rgba(180,200,255,${opacity * 0.25})`; ctx.lineWidth = lw * 3.5
+      ctx.stroke()
+      // Core line
       ctx.beginPath(); ctx.moveTo(pi.x, pi.y); ctx.lineTo(pj.x, pj.y)
       ctx.strokeStyle = `rgba(220,230,255,${opacity})`; ctx.lineWidth = lw
-      ctx.shadowColor = `rgba(180,200,255,${opacity * 0.7})`; ctx.shadowBlur = lw * 6
-      ctx.stroke(); ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0
+      ctx.stroke()
     }
   }
 }
@@ -280,23 +287,40 @@ function onTouchStart(e: TouchEvent) {
   }
 }
 
+function cacheElements() {
+  if (!containerRef.value) return
+  cachedElements = {
+    nebulas: Array.from(containerRef.value.querySelectorAll('.nebula')) as HTMLElement[],
+    planets: Array.from(containerRef.value.querySelectorAll('.planet')) as HTMLElement[],
+    starDots: Array.from(containerRef.value.querySelectorAll('.star-dot')) as HTMLElement[],
+  }
+}
+
 function onMouseMove(e: MouseEvent) {
   mouse.x = e.clientX; mouse.y = e.clientY
   if (glowRef.value) { glowRef.value.style.left = e.clientX + 'px'; glowRef.value.style.top = e.clientY + 'px'; glowRef.value.style.opacity = '1' }
-  const moveX = (e.clientX - window.innerWidth / 2) / window.innerWidth
-  const moveY = (e.clientY - window.innerHeight / 2) / window.innerHeight
-  if (containerRef.value) {
-    containerRef.value.querySelectorAll('.nebula').forEach((el, i) => { (el as HTMLElement).style.transform = `translate(${moveX * (12 + i * 3)}px, ${moveY * (12 + i * 3)}px)` })
-    containerRef.value.querySelectorAll('.planet').forEach((el, i) => { (el as HTMLElement).style.transform = `translate(${moveX * (20 + i * 6)}px, ${moveY * (20 + i * 6)}px)` })
-    containerRef.value.querySelectorAll('.star-dot').forEach((el, i) => { (el as HTMLElement).style.transform = `translate(${moveX * (10 + i * 2)}px, ${moveY * (10 + i * 2)}px)` })
+  if (!parallaxDirty) {
+    parallaxDirty = true
+    requestAnimationFrame(() => {
+      parallaxDirty = false
+      const mx = (mouse.x - window.innerWidth / 2) / window.innerWidth
+      const my = (mouse.y - window.innerHeight / 2) / window.innerHeight
+      if (cachedElements) {
+        cachedElements.nebulas.forEach((el, i) => { el.style.transform = `translate(${mx * (12 + i * 3)}px, ${my * (12 + i * 3)}px)` })
+        cachedElements.planets.forEach((el, i) => { el.style.transform = `translate(${mx * (20 + i * 6)}px, ${my * (20 + i * 6)}px)` })
+        cachedElements.starDots.forEach((el, i) => { el.style.transform = `translate(${mx * (10 + i * 2)}px, ${my * (10 + i * 2)}px)` })
+      }
+    })
   }
 }
 
 function onMouseLeave() {
   mouse.x = -1000; mouse.y = -1000
   if (glowRef.value) glowRef.value.style.opacity = '0'
-  if (containerRef.value) {
-    containerRef.value.querySelectorAll('.nebula, .planet, .star-dot').forEach(el => { (el as HTMLElement).style.transform = 'translate(0px, 0px)' })
+  if (cachedElements) {
+    cachedElements.nebulas.forEach(el => { el.style.transform = 'translate(0px, 0px)' })
+    cachedElements.planets.forEach(el => { el.style.transform = 'translate(0px, 0px)' })
+    cachedElements.starDots.forEach(el => { el.style.transform = 'translate(0px, 0px)' })
   }
 }
 
@@ -326,6 +350,7 @@ onMounted(() => {
 
   particles = Array.from({ length: PARTICLE_COUNT }, () => new Particle(canvas.width, canvas.height))
   initConstellationNodes()
+  cacheElements()
 
   function animate(time: number) {
     if (!alive) return
@@ -346,6 +371,7 @@ onMounted(() => {
 onUnmounted(() => {
   alive = false
   cancelAnimationFrame(animId)
+  cachedElements = null
   window.removeEventListener('resize', onResize)
   document.removeEventListener('mousemove', onMouseMove)
   document.removeEventListener('mouseleave', onMouseLeave)

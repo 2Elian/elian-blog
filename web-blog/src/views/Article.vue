@@ -240,12 +240,10 @@ watch(() => route.params.id, (newId) => {
   margin-bottom: 30px;
   color: white;
   position: relative;
-  overflow: hidden;
 
   .cover-image {
     width: 100%;
-    height: 300px;
-    object-fit: cover;
+    height: auto;
     display: block;
   }
 
@@ -282,7 +280,8 @@ watch(() => route.params.id, (newId) => {
       padding: 30px 20px 40px;
     }
     .cover-image {
-      height: 180px;
+      max-height: 260px;
+      object-fit: cover;
     }
   }
 }
