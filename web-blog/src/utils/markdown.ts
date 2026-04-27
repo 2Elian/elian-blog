@@ -59,7 +59,12 @@ marked.use({
           html: `<div class="admonition admonition-${type}" style="background:${colors.bg};border-left:4px solid ${colors.border};padding:12px 16px;border-radius:6px;margin:1em 0;"><div class="admonition-title" style="font-weight:600;margin-bottom:6px;color:${colors.border};">${icon} ${title}</div><div class="admonition-content">${renderedBody}</div></div>`,
         }
       },
-      renderer({ html }: { html: string }) {
+      renderer(token: any) {
+        const html = token.html;
+        // 或者
+        // renderer(token: { html: string }) {
+        //   const { html } = token;
+        // }
         return html
       },
     },
