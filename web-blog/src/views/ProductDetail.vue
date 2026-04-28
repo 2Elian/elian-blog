@@ -71,7 +71,7 @@ const renderedContent = computed(() => {
 function getImageUrl(path: string): string {
   if (!path) return ''
   if (path.startsWith('http')) return path
-  return `http://localhost:8080${path.startsWith('/') ? '' : '/'}${path}`
+  return `${window.location.origin}${path.startsWith('/') ? '' : '/'}${path}`
 }
 
 async function loadProduct(id: number) {

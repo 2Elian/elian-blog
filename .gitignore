@@ -24,6 +24,8 @@ Thumbs.db
 
 # Upload directory
 uploads/
+release/
+release.zip
 
 # Debug / temp files
 _debug_*
