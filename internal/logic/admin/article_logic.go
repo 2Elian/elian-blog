@@ -64,7 +64,7 @@ func (l *ArticleLogic) Create(ctx context.Context, req *types.CreateArticleReq, 
 	if err != nil {
 		return nil, err
 	}
-	return toArticleBackVO(loaded), nil
+	return l.toArticleBackVO(loaded), nil
 }
 
 func (l *ArticleLogic) Update(ctx context.Context, req *types.UpdateArticleReq) error {
@@ -155,7 +155,7 @@ func (l *ArticleLogic) List(ctx context.Context, req *types.QueryArticleHomeReq)
 	// Convert to ArticleBackVO
 	voList := make([]types.ArticleBackVO, 0, len(articles))
 	for _, a := range articles {
-		voList = append(voList, toArticleBackVO(&a))
+		voList = append(voList, l.toArticleBackVO(&a))
 	}
 
 	return voList, total, nil
@@ -166,7 +166,7 @@ func (l *ArticleLogic) Get(ctx context.Context, id uint) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return toArticleBackVO(article), nil
+	return l.toArticleBackVO(article), nil
 }
 
 // findOrCreateTags resolves tag names to Tag models, creating them if necessary.
@@ -182,13 +182,13 @@ func (l *ArticleLogic) findOrCreateTags(names []string) ([]model.Tag, error) {
 	return tags, nil
 }
 
-func toArticleBackVO(a *model.Article) types.ArticleBackVO {
+func (l *ArticleLogic) toArticleBackVO(a *model.Article) types.ArticleBackVO {
 	cover := a.Cover
 	if cover != "" && !strings.HasPrefix(cover, "http") {
 		if !strings.HasPrefix(cover, "/") {
 			cover = "/" + cover
 		}
-		cover = "http://localhost:8080" + cover
+		cover = l.svcCtx.Config.Upload.BaseURL + cover
 	}
 
 	vo := types.ArticleBackVO{

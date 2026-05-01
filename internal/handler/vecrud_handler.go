@@ -1592,7 +1592,7 @@ func VeFindProductListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 				if !strings.HasPrefix(cover, "/") {
 					cover = "/" + cover
 				}
-				cover = "http://localhost:8080" + cover
+				cover = svcCtx.Config.Upload.BaseURL + cover
 			}
 			voList = append(voList, types.ProductVO{
 				ID:          p.ID,

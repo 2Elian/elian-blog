@@ -2,7 +2,7 @@
   <header class="app-header" :class="{ dark: isDark }">
     <div class="header-container">
       <router-link to="/" class="logo">
-        <img :src="logo" class="logo-img" alt="logo" />
+        <img :src="siteAvatar || logo" class="logo-img" alt="logo" />
         <span class="logo-text">{{ siteName }}</span>
       </router-link>
 

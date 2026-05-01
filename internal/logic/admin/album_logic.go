@@ -9,19 +9,18 @@ import (
 	"elian-blog/internal/types"
 )
 
-const albumCoverBaseURL = "http://localhost:8080"
-
-func fixAlbumCoverURL(cover string) string {
+func (l *AlbumLogic) fixAlbumCoverURL(cover string) string {
 	if cover == "" {
 		return ""
 	}
 	if strings.HasPrefix(cover, "http") {
 		return cover
 	}
+	baseURL := l.svcCtx.Config.Upload.BaseURL
 	if strings.HasPrefix(cover, "/") {
-		return albumCoverBaseURL + cover
+		return baseURL + cover
 	}
-	return albumCoverBaseURL + "/" + cover
+	return baseURL + "/" + cover
 }
 
 type AlbumLogic struct {
@@ -54,7 +53,7 @@ func (l *AlbumLogic) List(ctx context.Context, req *types.QueryAlbumReq) (interf
 			ID:         album.ID,
 			AlbumName:  album.AlbumName,
 			AlbumDesc:  album.AlbumDesc,
-			AlbumCover: fixAlbumCoverURL(album.AlbumCover),
+			AlbumCover: l.fixAlbumCoverURL(album.AlbumCover),
 			Status:     album.Status,
 			CreatedAt:  formatTime(album.CreatedAt),
 			UpdatedAt:  formatTime(album.UpdatedAt),
@@ -75,7 +74,7 @@ func (l *AlbumLogic) Get(ctx context.Context, id uint) (interface{}, error) {
 		ID:         album.ID,
 		AlbumName:  album.AlbumName,
 		AlbumDesc:  album.AlbumDesc,
-		AlbumCover: fixAlbumCoverURL(album.AlbumCover),
+		AlbumCover: l.fixAlbumCoverURL(album.AlbumCover),
 		Status:     album.Status,
 		CreatedAt:  formatTime(album.CreatedAt),
 		UpdatedAt:  formatTime(album.UpdatedAt),
@@ -100,7 +99,7 @@ func (l *AlbumLogic) Create(ctx context.Context, req *types.NewAlbumReq) (interf
 		ID:         album.ID,
 		AlbumName:  album.AlbumName,
 		AlbumDesc:  album.AlbumDesc,
-		AlbumCover: fixAlbumCoverURL(album.AlbumCover),
+		AlbumCover: l.fixAlbumCoverURL(album.AlbumCover),
 		Status:     album.Status,
 		CreatedAt:  formatTime(album.CreatedAt),
 	}, nil

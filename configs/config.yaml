@@ -30,3 +30,4 @@ AppLog:
 Upload:
   Path: "./uploads"
   MaxSize: 10485760
+  BaseURL: "http://localhost:8080"

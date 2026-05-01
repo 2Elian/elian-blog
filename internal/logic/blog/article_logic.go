@@ -97,7 +97,7 @@ func (l *ArticleLogic) articleToHome(article *model.Article) types.ArticleHome {
 		if !strings.HasPrefix(cover, "/") {
 			cover = "/" + cover
 		}
-		cover = "http://localhost:8080" + cover
+		cover = l.svcCtx.Config.Upload.BaseURL + cover
 	}
 
 	tags := make([]types.TagInfo, 0, len(article.Tags))

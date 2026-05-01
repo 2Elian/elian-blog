@@ -43,4 +43,5 @@ type LogConfig struct {
 type UploadConfig struct {
 	Path    string
 	MaxSize int64
+	BaseURL string
 }

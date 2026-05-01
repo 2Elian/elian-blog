@@ -40,3 +40,7 @@ _ve-admin-ref/
 /cmd/fixpw/
 /cmd/create-admin/
 /cmd/learn/
+
+# config
+configs/config-prod-create-admin.yaml
+configs/config-prod.yaml
